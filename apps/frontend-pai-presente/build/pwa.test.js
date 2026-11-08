@@ -74,7 +74,7 @@ describe('service worker', () => {
   test('as paginas publicas e os arquivos dos robos nunca caem no shell', () => {
     const denied = (path) => PWA_WORKBOX.navigateFallbackDenylist.some((pattern) => pattern.test(path));
 
-    for (const path of ['/sobre', '/privacidade', '/ads.txt', '/robots.txt', '/sitemap.xml']) {
+    for (const path of ['/sobre', '/privacidade', '/dicas', '/dicas/birra', '/ads.txt', '/robots.txt', '/sitemap.xml']) {
       expect(denied(path)).toBe(true);
     }
     expect(denied('/Perfil')).toBe(false);
