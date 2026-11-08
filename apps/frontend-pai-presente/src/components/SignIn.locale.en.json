@@ -27,7 +27,8 @@
     "emailTaken": "This email already has an account. Go back to Sign in.",
     "failed": "Email or password don't match. Check them and try again.",
     "registerFailed": "We couldn't create the account right now. Try again in a moment.",
-    "server": "We couldn't reach the server right now. Try again in a moment."
+    "server": "We couldn't reach the server right now. Try again in a moment.",
+    "blocked": "This account is blocked. Please contact Entrelaços support."
   },
   "links": {
     "about": "About Paternar",

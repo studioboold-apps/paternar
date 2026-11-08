@@ -18,6 +18,7 @@ export const PANEL_TEXT = Object.freeze({
   signInFailed: 'E-mail ou senha não conferem.',
   signOut: 'Sair',
   loading: 'Carregando…',
+  copyright: { company: 'Ada Technology', rights: 'Todos os direitos reservados' },
   tabs: {
     overview: 'Visão geral',
     users: 'Pais cadastrados',
@@ -47,6 +48,16 @@ export const PANEL_TEXT = Object.freeze({
     previous: 'Anterior',
     next: 'Próxima',
     privacy: 'Por privacidade, o painel não mostra foto, idade, estado civil nem dados dos filhos.',
+    status: 'Situação',
+    active: 'Ativo',
+    blocked: 'Bloqueado',
+    block: 'Bloquear',
+    unblock: 'Desbloquear',
+    saving: 'Salvando…',
+    onlyAdmins: 'Só administradores podem bloquear pais.',
+    confirmBlock: (name) =>
+      `Bloquear ${name}? Ele sai do app na hora e não consegue entrar de novo até ser desbloqueado.`,
+    confirmUnblock: (name) => `Desbloquear ${name}? Ele volta a poder entrar no app.`,
   },
   advertisers: {
     new: 'Novo anunciante',

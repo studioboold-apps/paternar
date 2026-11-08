@@ -15,6 +15,7 @@ import {
   createFakeSessionRepository,
   createFakeVerifierRegistry,
   VALID_GOOGLE_TOKEN,
+  type FakeAccountRepository,
   type FakeSessionRepository,
 } from '../../testing/auth-fakes';
 import {
@@ -42,6 +43,7 @@ const JWT_SECRET = 'segredo_de_teste_com_mais_de_32_caracteres';
 type Harness = {
   readonly client: TestClient;
   readonly sessions: FakeSessionRepository;
+  readonly accounts: FakeAccountRepository;
 };
 
 type HarnessOptions = {
@@ -50,9 +52,10 @@ type HarnessOptions = {
 
 function createHarness({ isPasswordSignInEnabled = true }: HarnessOptions = {}): Harness {
   const sessions = createFakeSessionRepository();
+  const accounts = createFakeAccountRepository();
   const useCases = createAuthUseCases({
     verifiers: createFakeVerifierRegistry(),
-    accounts: createFakeAccountRepository(),
+    accounts,
     passwordAccounts: createFakePasswordAccountRepository(),
     passwordHasher: createFakePasswordHasher(),
     isPasswordSignInEnabled,
@@ -70,7 +73,7 @@ function createHarness({ isPasswordSignInEnabled = true }: HarnessOptions = {}):
     }),
     user: undefined,
   });
-  return { client, sessions };
+  return { client, sessions, accounts };
 }
 
 const EMAIL = 'pai.senha@example.com';
@@ -423,5 +426,38 @@ describe('cadastro e entrada por e-mail e senha', () => {
 
     expect(response.status).toBe(HTTP_STATUS.SERVICE_UNAVAILABLE);
     expect(readErrorCode(response)).toBe(ERROR_CODES.auth.PROVIDER_NOT_CONFIGURED);
+  });
+});
+
+describe('pai bloqueado pelo painel', () => {
+  async function signInAndBlock(): Promise<{ harness: Harness; login: TestResponse }> {
+    const harness = createHarness();
+    const login = await signIn(harness.client);
+    const userId = String((readDataRecord(login)['user'] as { id: string }).id);
+    harness.accounts.block(userId);
+    return { harness, login };
+  }
+
+  test('nao entra de novo, e a recusa diz que a conta esta bloqueada', async () => {
+    const { harness } = await signInAndBlock();
+
+    const again = await signIn(harness.client);
+
+    expect(again.status).toBe(HTTP_STATUS.FORBIDDEN);
+    expect(readErrorCode(again)).toBe(ERROR_CODES.auth.USER_BLOCKED);
+  });
+
+  test('nao renova a sessao que ja tinha, e todas as sessoes dele caem', async () => {
+    const { harness, login } = await signInAndBlock();
+
+    const renewed = await harness.client.send({
+      method: HTTP_METHODS.PUT,
+      path: SESSIONS_PATH,
+      headers: withRefreshCookie(login),
+    });
+
+    expect(renewed.status).toBe(HTTP_STATUS.FORBIDDEN);
+    expect(readErrorCode(renewed)).toBe(ERROR_CODES.auth.USER_BLOCKED);
+    expect(harness.sessions.countLiveSessions()).toBe(0);
   });
 });

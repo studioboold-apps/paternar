@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 
+import AdaFooter from '@/components/AdaFooter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -27,7 +28,7 @@ export default function PanelLogin({ client }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-zinc-950 px-4">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl bg-white p-6 shadow-sm">
         <div>
           <h1 className="text-xl font-bold text-zinc-100">{PANEL_TEXT.title}</h1>
@@ -52,6 +53,7 @@ export default function PanelLogin({ client }) {
           {busy ? PANEL_TEXT.signingIn : PANEL_TEXT.signIn}
         </Button>
       </form>
+      <AdaFooter className="absolute inset-x-0 bottom-0" />
     </div>
   );
 }

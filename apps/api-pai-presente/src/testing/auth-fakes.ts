@@ -44,7 +44,13 @@ export function createFakeVerifierRegistry(): IdentityVerifierRegistry {
   };
 }
 
-export function createFakeAccountRepository(): AuthAccountRepository {
+export type FakeAccountRepository = AuthAccountRepository & {
+  /** Faz o papel do bloqueio pelo painel (`users.blocked_at`). */
+  readonly block: (userId: string) => void;
+};
+
+export function createFakeAccountRepository(): FakeAccountRepository {
+  const blockedUserIds = new Set<string>();
   const usersByEmail = new Map<string, AuthenticatedUser>();
   const usersById = new Map<string, AuthenticatedUser>();
   const identities = new Map<string, string>();
@@ -68,6 +74,12 @@ export function createFakeAccountRepository(): AuthAccountRepository {
       const user = usersById.get(userId);
       if (user === undefined) throw new Error('usuario inexistente');
       return user;
+    },
+    async isBlocked(userId: string) {
+      return blockedUserIds.has(userId);
+    },
+    block(userId: string) {
+      blockedUserIds.add(userId);
     },
   };
 }

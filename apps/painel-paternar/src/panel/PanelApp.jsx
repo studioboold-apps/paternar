@@ -10,6 +10,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
+import AdaFooter from '@/components/AdaFooter';
 import { Button } from '@/components/ui/button';
 
 import { createPanelClient } from './panel-client';
@@ -78,6 +79,7 @@ export default function PanelApp() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Current client={client} />
       </main>
+      <AdaFooter />
     </div>
   );
 }

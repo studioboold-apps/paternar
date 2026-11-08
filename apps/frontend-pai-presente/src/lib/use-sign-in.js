@@ -45,7 +45,11 @@ const FAILURE_KEYS = Object.freeze({
   signInKey: 'signIn.errors.failed',
   registerKey: 'signIn.errors.registerFailed',
   emailTakenKey: 'signIn.errors.emailTaken',
+  blockedKey: 'signIn.errors.blocked',
 });
+
+/** Conta bloqueada pela equipe: a API so diz isso depois da senha certa. */
+const USER_BLOCKED = 'AUTH_USER_BLOCKED';
 
 const EMAIL_ALREADY_REGISTERED = 'AUTH_EMAIL_ALREADY_REGISTERED';
 
@@ -70,8 +74,8 @@ export function useSignIn() {
       setError(null);
       try {
         await signIn({ provider, idToken });
-      } catch {
-        setError(FAILURE_KEYS.signInKey);
+      } catch (failure) {
+        setError(failure?.code === USER_BLOCKED ? FAILURE_KEYS.blockedKey : FAILURE_KEYS.signInKey);
       } finally {
         setIsSubmitting(false);
       }
@@ -165,7 +169,8 @@ export function useSignIn() {
          * coisa para senha errada e e-mail que nao existe, e detalhar aqui
          * desfaria isso do lado do cliente.
          */
-        if (isRegistering && failure?.code === EMAIL_ALREADY_REGISTERED) {
+        if (failure?.code === USER_BLOCKED) setError(FAILURE_KEYS.blockedKey);
+        else if (isRegistering && failure?.code === EMAIL_ALREADY_REGISTERED) {
           setProblems(Object.freeze({ email: FAILURE_KEYS.emailTakenKey }));
         } else setError(isRegistering ? FAILURE_KEYS.registerKey : FAILURE_KEYS.signInKey);
       } finally {
