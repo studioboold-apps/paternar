@@ -46,6 +46,15 @@ export const AUDIT_ACTIONS = {
    */
   FAMILY_VALUES_SAVED: 'family_values_saved',
   FAMILY_VALUES_DELETED: 'family_values_deleted',
+  /**
+   * O que a EQUIPE faz no painel tambem deixa trilha (LGPD art. 37): quem abriu
+   * a ficha de um pai, quem tirou um post do ar, quem arquivou uma denuncia.
+   * O `actor_id` destas linhas e' o acesso da equipe (schema `user`), nao um pai;
+   * o prefixo `panel_` e' o que separa as duas trilhas na consulta.
+   */
+  PANEL_USER_VIEWED: 'panel_user_viewed',
+  PANEL_CONTENT_REMOVED: 'panel_content_removed',
+  PANEL_REPORT_DISMISSED: 'panel_report_dismissed',
 } as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS];
 
@@ -54,5 +63,6 @@ export const AUDIT_TARGET_TYPES = {
   CHILD_FILE: 'child_file',
   CHILD_CONSENT: 'child_consent',
   FAMILY_VALUES: 'family_values',
+  COMMUNITY_REPORT: 'community_report',
 } as const;
 export type AuditTargetType = (typeof AUDIT_TARGET_TYPES)[keyof typeof AUDIT_TARGET_TYPES];

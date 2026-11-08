@@ -2,19 +2,22 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Heart, MessageCircle, Send } from 'lucide-react';
+import { Flag, Heart, MessageCircle, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
 import { findCommunityCategory } from '@/lib/community-categories';
 import { useTranslation } from '@/lib/i18n';
+import ReportContentDialog from '@/components/ReportContentDialog';
 
 export default function CommunityPostCard({ post, delay = 0 }) {
   const { t, dateLocale } = useTranslation();
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
+  /** O que esta sendo denunciado agora: o post ou um comentario dele. */
+  const [reportTarget, setReportTarget] = useState(null);
 
   const { data: comments = [] } = useQuery({
     queryKey: ['comments', post.id],
@@ -103,7 +106,16 @@ export default function CommunityPostCard({ post, delay = 0 }) {
           <MessageCircle className="w-4 h-4" />
           <span>{t('community.post.comment')}</span>
         </button>
+        <button
+          onClick={() => setReportTarget({ type: 'post', id: post.id })}
+          aria-label={t('community.report.titlePost')}
+          className="ml-auto flex items-center gap-1.5 text-xs text-zinc-500 hover:text-red-600 transition-colors"
+        >
+          <Flag className="w-3.5 h-3.5" />
+          <span>{t('community.report.report')}</span>
+        </button>
       </div>
+      <ReportContentDialog target={reportTarget} onClose={() => setReportTarget(null)} />
 
       <AnimatePresence>
         {showComments && (
@@ -120,7 +132,16 @@ export default function CommunityPostCard({ post, delay = 0 }) {
                     {comment.author_name?.[0] || t('community.post.fallbackInitial')}
                   </div>
                   <div className="bg-zinc-800/50 rounded-xl px-3 py-2 flex-1">
-                    <p className="text-xs font-medium text-zinc-300">{comment.author_name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-medium text-zinc-300">{comment.author_name}</p>
+                      <button
+                        onClick={() => setReportTarget({ type: 'comment', id: comment.id })}
+                        aria-label={t('community.report.titleComment')}
+                        className="text-zinc-600 hover:text-red-600 transition-colors"
+                      >
+                        <Flag className="w-3 h-3" />
+                      </button>
+                    </div>
                     <p className="text-sm text-zinc-400">{comment.content}</p>
                   </div>
                 </div>

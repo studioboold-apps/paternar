@@ -31,6 +31,11 @@ import {
   SCOPES_BY_ROLE,
   type PanelRole,
 } from './panel.constant';
+import { createPanelAiUsageRepository } from './panel-ai-usage.repository';
+import { createPanelEngagementRepository } from './panel-engagement.repository';
+import { createPanelHistoryRepository } from './panel-history.repository';
+import { buildPanelInsightRoutes } from './panel-insights.routes';
+import { createPanelModerationRepository } from './panel-moderation.repository';
 import { createPanelRepository } from './panel.repository';
 import { buildPanelRoutes } from './panel.routes';
 
@@ -183,6 +188,12 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
     ...createCustomerRoutes({ module: customers }),
     ...createRecommendationRoutes({ module: recommendations, features: { feed: false, admin: true } }),
     ...buildPanelRoutes(createPanelRepository(params.database)),
+    ...buildPanelInsightRoutes({
+      history: createPanelHistoryRepository(params.database),
+      engagement: createPanelEngagementRepository(params.database),
+      aiUsage: createPanelAiUsageRepository(params.database),
+      moderation: createPanelModerationRepository(params.database),
+    }),
   ];
 
   const router = createModuleFetchRouter({
