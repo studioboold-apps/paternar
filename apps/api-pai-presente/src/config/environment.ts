@@ -151,11 +151,12 @@ const panelShape = {
    * senha atual de `PANEL_ADMIN_EMAIL` (e reativa a conta como admin). Serve
    * para quando ninguem mais entra no painel; depois do login, volte para `0`.
    */
-  // Tolerante de proposito: valor errado aqui nao pode derrubar a API inteira.
-  // Aceita 1/true/sim, com ou sem aspas coladas no painel do provedor.
+  // Ligado por padrao: a senha de `PANEL_ADMIN_PASSWORD` vale para os e-mails de
+  // `PANEL_ADMIN_EMAIL` a cada boot. `0` desliga (senha passa a ser so do painel).
+  // Tolerante: aceita 1/true/sim, com ou sem aspas; valor errado nao derruba a API.
   PANEL_ADMIN_RESET: z
     .string()
-    .default('0')
+    .default('1')
     .transform((value) => ['1', 'true', 'sim', 'yes'].includes(value.trim().replace(/^["']|["']$/g, '').toLowerCase())),
 } as const;
 

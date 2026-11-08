@@ -76,7 +76,7 @@ describe('recuperacao do admin do painel', () => {
     expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: '"1"' }).PANEL_ADMIN_RESET).toBe(true);
     expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: 'true' }).PANEL_ADMIN_RESET).toBe(true);
     expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: '0' }).PANEL_ADMIN_RESET).toBe(false);
-    expect(readEnvironment(BOOT_WITHOUT_AI_KEY).PANEL_ADMIN_RESET).toBe(false);
+    expect(readEnvironment(BOOT_WITHOUT_AI_KEY).PANEL_ADMIN_RESET).toBe(true);
   });
 
   test('senha de admin curta nao impede a API de subir', () => {
