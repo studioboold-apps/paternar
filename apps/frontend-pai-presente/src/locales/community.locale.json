@@ -19,5 +19,25 @@
     "photoAlt": "Foto do post",
     "photoUnreadable": "Não deu para ler essa foto. Tente outra.",
     "changePhoto": "Trocar foto"
+  },
+  "report": {
+    "report": "Denunciar",
+    "titlePost": "Denunciar post",
+    "titleComment": "Denunciar comentário",
+    "description": "A equipe do Paternar vai analisar. Quem escreveu não fica sabendo quem denunciou.",
+    "reasonLabel": "Motivo",
+    "reasons": {
+      "ofensivo": "Ofensivo ou desrespeitoso",
+      "spam": "Spam ou propaganda",
+      "golpe": "Golpe ou fraude",
+      "inadequado": "Conteúdo inadequado",
+      "outro": "Outro motivo"
+    },
+    "detailsPlaceholder": "Quer contar mais? (opcional)",
+    "send": "Enviar denúncia",
+    "cancel": "Cancelar",
+    "sentTitle": "Denúncia enviada",
+    "sentBody": "Obrigado por cuidar da comunidade.",
+    "failed": "Não deu para enviar a denúncia. Tente de novo."
   }
 }

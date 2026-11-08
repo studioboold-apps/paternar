@@ -11,6 +11,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { RecommendationAdmin, RecommendationsProvider } from '@adatechnology/recommendations-ui';
 
 import { createPanelRecommendationsApi, listSponsorOptions } from './panel-apis';
+import { PANEL_TEXT } from './panel-text';
+import { PageHeader } from './panel-ui';
 
 export default function PanelRecommendations({ client }) {
   const api = useMemo(() => createPanelRecommendationsApi(client), [client]);
@@ -29,6 +31,7 @@ export default function PanelRecommendations({ client }) {
 
   return (
     <RecommendationsProvider api={api}>
+      <PageHeader title={PANEL_TEXT.tabs.recommendations} description={PANEL_TEXT.recommendations.description} />
       <RecommendationAdmin sponsors={sponsors} />
     </RecommendationsProvider>
   );

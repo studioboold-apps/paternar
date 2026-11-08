@@ -124,6 +124,7 @@ export function createAiUseCases({
     readonly children: readonly ChildContext[];
     readonly month: string;
     readonly city: string | undefined;
+    readonly userId: string;
   }): Promise<string | undefined> {
     if (params.city === undefined || params.city.trim() === '' || provider.searchWeb === undefined) return undefined;
     try {
@@ -131,6 +132,7 @@ export function createAiUseCases({
         systemPrompt: LOCAL_SEARCH_SYSTEM_PROMPT,
         userPrompt: buildLocalSearchPrompt(params),
         city: params.city,
+        userId: params.userId,
       });
       return /nada encontrado/i.test(found) ? undefined : found;
     } catch {
@@ -174,6 +176,7 @@ export function createAiUseCases({
       ]);
       const raw = await provider.generateStructured({
         task: 'insights',
+        userId,
         systemPrompt: withLanguage(await withValuesOf(userId, INSIGHTS_SYSTEM_PROMPT), values.locale),
         userPrompt: buildInsightsPrompt({
           children: registered,
@@ -196,9 +199,10 @@ export function createAiUseCases({
       ]);
       const month = values.month ?? formatMonth(new Date());
       const chosen = pickChildren(registered, values.childId);
-      const localFindings = await searchLocalPrograms({ children: chosen, month, city });
+      const localFindings = await searchLocalPrograms({ children: chosen, month, city, userId });
       const raw = await provider.generateStructured({
         task: 'suggestions',
+        userId,
         systemPrompt: withLanguage(await withValuesOf(userId, SUGGESTIONS_SYSTEM_PROMPT), values.locale),
         userPrompt: buildSuggestionsPrompt({ children: chosen, month, city, localFindings, recentActivities }),
         schemaName: 'suggestions',
@@ -221,6 +225,7 @@ export function createAiUseCases({
         previousRows.length === 0 ? undefined : computeReportGrade(summarizeActivities(previousRows));
       const raw = await provider.generateStructured({
         task: 'report',
+        userId,
         systemPrompt: withLanguage(await withValuesOf(userId, REPORT_SYSTEM_PROMPT), values.locale),
         userPrompt: buildReportPrompt({
           children: registered,
@@ -253,6 +258,7 @@ export function createAiUseCases({
       }
       const reply = await provider.generateText({
         task: 'chat',
+        userId,
         systemPrompt: withLanguage(await withValuesOf(userId, MENTOR_SYSTEM_PROMPT), values.locale),
         userPrompt: buildChatPrompt({
           children: registered,

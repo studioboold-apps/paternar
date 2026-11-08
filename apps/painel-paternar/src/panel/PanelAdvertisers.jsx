@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 
 import { createCustomersApi } from './panel-apis';
 import { PANEL_TEXT } from './panel-text';
+import { PageHeader } from './panel-ui';
 
 const CATEGORY_FIELD = 'categoria';
 const text = PANEL_TEXT.advertisers;
@@ -89,6 +90,7 @@ export default function PanelAdvertisers({ client }) {
   return (
     <CustomersProvider api={api}>
       <div className="space-y-4">
+        <PageHeader title={PANEL_TEXT.tabs.advertisers} description={text.description} />
         <div className="flex flex-wrap gap-2">
           {view.mode === 'list' ? (
             <Button variant="outline" size="sm" onClick={() => setView({ mode: 'settings' })}>

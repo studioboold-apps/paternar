@@ -26,3 +26,5 @@ export {
   familyValueOptionsTable,
   userFamilyValuesTable,
 } from '../modules/FamilyValues/family-values.table';
+export { aiUsageTable } from '../modules/AiUsage/ai-usage.table';
+export { communityReportsTable } from '../modules/CommunityReport/community-report.table';
