@@ -30,12 +30,16 @@ import { buildCommunityPostRoutes } from './modules/CommunityPost/community-post
 import { createCommunityPostRepository } from './modules/CommunityPost/community-post.repository';
 import { createCommunityPostUseCases } from './modules/CommunityPost/community-post.use-case';
 import type { CommunityPostRepository } from './modules/CommunityPost/types/community-post.types';
+import { buildCommunityReportRoutes } from './modules/CommunityReport/community-report.controller';
+import { createCommunityReportRepository } from './modules/CommunityReport/community-report.repository';
+import { createCommunityReportUseCases } from './modules/CommunityReport/community-report.use-case';
 import { buildFamilyValuesRoutes } from './modules/FamilyValues/family-values.controller';
 import { createFamilyValuesRepository } from './modules/FamilyValues/family-values.repository';
 import { createFamilyValuesUseCases } from './modules/FamilyValues/family-values.use-case';
 import { buildInsightRatingRoutes } from './modules/InsightRating/insight-rating.controller';
 import { createInsightRatingRepository } from './modules/InsightRating/insight-rating.repository';
 import { createInsightRatingUseCases } from './modules/InsightRating/insight-rating.use-case';
+import { createDatabaseAiUsageRecorder } from './modules/AiUsage/ai-usage.repository';
 import { recordAuditEntry } from './modules/Audit/audit.repository';
 import { createMediaStorage, type CreateMediaStorageParams } from './modules/Media/media-storage.factory';
 import type { PostExistencePort } from './modules/CommunityComment/types/community-comment.types';
@@ -148,6 +152,7 @@ export function buildApplicationRoutes({
         postExistence: adaptPostExistence(communityPostRepository),
       }),
     ),
+    ...buildCommunityReportRoutes(createCommunityReportUseCases(createCommunityReportRepository(database))),
     ...buildChatMessageRoutes(createChatMessageUseCases(chatMessageRepository)),
     ...buildFamilyValuesRoutes(familyValuesUseCases),
     ...buildAiModule({
@@ -157,6 +162,7 @@ export function buildApplicationRoutes({
       insights: insightRatingRepository,
       chatMessages: chatMessageRepository,
       users: userRepository,
+      recordUsage: createDatabaseAiUsageRecorder(database),
       ...llm,
     }),
   ];

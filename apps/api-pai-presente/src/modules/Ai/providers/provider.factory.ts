@@ -6,7 +6,7 @@
 
 import { DEFAULT_MODELS, type LlmProviderName, type LlmTier } from '../ai.constant';
 import { LlmNotConfiguredError } from '../ai.error';
-import type { LlmProvider } from '../types/ai.types';
+import type { LlmProvider, LlmUsageSink } from '../types/ai.types';
 import { createAnthropicProvider } from './anthropic.provider';
 import { createOpenAiProvider } from './openai.provider';
 
@@ -17,6 +17,8 @@ export type CreateLlmProviderParams = {
   readonly model: string;
   /** Faixa barata (insights e sugestoes). Vazio cai no padrao do provedor. */
   readonly modelFast?: string;
+  /** Recebe os tokens de cada chamada (painel: uso e custo de IA). */
+  readonly onUsage?: LlmUsageSink | undefined;
 };
 
 const BUILDERS = {
@@ -24,7 +26,11 @@ const BUILDERS = {
   openai: createOpenAiProvider,
 } as const satisfies Record<
   LlmProviderName,
-  (params: { apiKey: string; models: Readonly<Record<LlmTier, string>> }) => LlmProvider
+  (params: {
+    apiKey: string;
+    models: Readonly<Record<LlmTier, string>>;
+    onUsage?: LlmUsageSink | undefined;
+  }) => LlmProvider
 >;
 
 /**
@@ -46,6 +52,7 @@ export function createLlmProvider({
   apiKey,
   model,
   modelFast = '',
+  onUsage,
 }: CreateLlmProviderParams): LlmProvider {
   if (apiKey.length === 0) return createUnconfiguredProvider(providerName);
 
@@ -56,5 +63,6 @@ export function createLlmProvider({
       main: model.length > 0 ? model : defaults.main,
       fast: modelFast.length > 0 ? modelFast : defaults.fast,
     },
+    onUsage,
   });
 }
