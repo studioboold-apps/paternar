@@ -13,8 +13,11 @@ Três variáveis no serviço `web` do Railway (`.railway/railway.ts`):
 | `ADSENSE_CLIENT_ID` | `ca-pub-1234567890123456` | AdSense → Conta → Informações da conta (ID de editor, com `ca-` na frente) |
 | `ADSENSE_SLOT_ID` | `9876543210` | AdSense → Anúncios → Por bloco de anúncios → criar bloco "Display" → `data-ad-slot` |
 
-Com `ADS_ENABLED` diferente de `1`, nada muda, mesmo com os ids preenchidos:
-nenhum bloco, CSP fechada, `/ads.txt` em 404. Isso deixa cadastrar os ids e
+Com `ADS_ENABLED` diferente de `1`, nenhum anúncio aparece, mesmo com os ids
+preenchidos: nenhum bloco e CSP fechada. Só o `ADSENSE_CLIENT_ID` já basta para
+o site publicar a metatag `google-adsense-account` e o `/ads.txt`: é assim que o
+Google verifica e aprova o domínio antes de ligar os anúncios (método
+"Metatag" no AdSense). Isso deixa cadastrar os ids e
 validar antes de ligar. `ADS_ENABLED=1` sem `ADSENSE_CLIENT_ID` derruba o boot.
 
 Ligado e com os ids:

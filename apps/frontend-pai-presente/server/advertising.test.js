@@ -101,6 +101,7 @@ describe('o servidor serve ads.txt e a CSP conforme o id', () => {
   let distDirectory = '';
   let withAds;
   let withoutAds;
+  let verifyingOnly;
 
   beforeAll(() => {
     distDirectory = mkdtempSync(join(tmpdir(), 'pp-ads-'));
@@ -108,11 +109,13 @@ describe('o servidor serve ads.txt e a CSP conforme o id', () => {
     const base = { port: 0, distDirectory, apiOrigin: 'http://127.0.0.1:9' };
     withAds = createWebServer({ ...base, adsenseClientId: CLIENT_ID });
     withoutAds = createWebServer(base);
+    verifyingOnly = createWebServer({ ...base, adsensePublisherId: CLIENT_ID });
   });
 
   afterAll(() => {
     withAds?.stop(true);
     withoutAds?.stop(true);
+    verifyingOnly?.stop(true);
   });
 
   test('ligado: /ads.txt em texto, e a tela com a CSP aberta para o Google', async () => {
@@ -125,7 +128,23 @@ describe('o servidor serve ads.txt e a CSP conforme o id', () => {
     expect(shell.headers.get('Content-Security-Policy')).toContain('googlesyndication');
   });
 
-  test('desligado: /ads.txt e 404, nao o shell, e a CSP segue fechada', async () => {
+  /** E' o que deixa o Google verificar o site antes de ligar anuncio nenhum. */
+  test('id cadastrado e ADS_ENABLED desligado: /ads.txt sai, a CSP segue fechada', async () => {
+    const adsTxt = await fetch(new URL('/ads.txt', verifyingOnly.url));
+    expect(adsTxt.status).toBe(200);
+    expect(await adsTxt.text()).toContain('pub-1234567890123456');
+
+    const shell = await fetch(new URL('/', verifyingOnly.url));
+    expect(shell.headers.get('Content-Security-Policy')).toBe(CONTENT_SECURITY_POLICY);
+  });
+
+  test('o ambiente separa o id cadastrado do anuncio ligado', () => {
+    const environment = readServerEnvironment({ API_ORIGIN: 'http://api', ADSENSE_CLIENT_ID: CLIENT_ID });
+    expect(environment.adsenseClientId).toBe('');
+    expect(environment.adsensePublisherId).toBe(CLIENT_ID);
+  });
+
+  test('sem id: /ads.txt e 404, nao o shell, e a CSP segue fechada', async () => {
     const adsTxt = await fetch(new URL('/ads.txt', withoutAds.url));
     expect(adsTxt.status).toBe(404);
 

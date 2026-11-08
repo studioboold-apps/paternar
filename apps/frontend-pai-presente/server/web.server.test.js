@@ -167,6 +167,7 @@ describe('o ambiente e conferido no boot', () => {
       port: 8080,
       distDirectory: 'dist',
       adsenseClientId: '',
+      adsensePublisherId: '',
     });
   });
 });
