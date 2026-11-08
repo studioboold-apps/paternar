@@ -84,14 +84,28 @@ async function forwardToApi({ request, apiOrigin }) {
   });
 }
 
+/**
+ * Paginas publicas em HTML puro (`/sobre`, `/privacidade`): o pai deslogado e o
+ * robo do AdSense precisam le-las sem passar pelo login da SPA. O endereco
+ * limpo vale pelo arquivo `.html` do mesmo nome — so quando ele existe; o resto
+ * segue para o shell, e o roteador do navegador decide.
+ */
+const PUBLIC_PAGE_PATTERN = /^\/[a-z-]+$/;
+
 async function serveStatic({ distDirectory, pathname }) {
-  const filePath = resolveStaticPath({ distDirectory, pathname });
-  if (filePath === undefined) return undefined;
+  const candidates = PUBLIC_PAGE_PATTERN.test(pathname) ? [pathname, `${pathname}.html`] : [pathname];
 
-  const file = Bun.file(filePath);
-  if (!(await file.exists())) return undefined;
+  for (const candidate of candidates) {
+    const filePath = resolveStaticPath({ distDirectory, pathname: candidate });
+    if (filePath === undefined) continue;
 
-  return new Response(file, { headers: { 'Cache-Control': chooseCacheControl(pathname) } });
+    const file = Bun.file(filePath);
+    if (!(await file.exists())) continue;
+
+    return new Response(file, { headers: { 'Cache-Control': chooseCacheControl(candidate) } });
+  }
+
+  return undefined;
 }
 
 /**

@@ -29,5 +29,9 @@
     "registerFailed": "No pudimos crear la cuenta ahora. Inténtalo de nuevo en unos instantes.",
     "server": "No pudimos comunicarnos con el servidor ahora. Inténtalo de nuevo en unos instantes.",
     "blocked": "Esta cuenta está bloqueada. Comunícate con el soporte de Entrelaços."
+  },
+  "links": {
+    "about": "Sobre Paternar",
+    "privacy": "Política de privacidad"
   }
 }

@@ -14,6 +14,7 @@ import { chooseCacheControl, createWebServer, isApiPath, resolveStaticPath } fro
 
 const SHELL_MARK = '<!doctype html><title>pai presente</title>';
 const ASSET_MARK = 'console.log("asset")';
+const PUBLIC_PAGE_MARK = '<!doctype html><title>politica de privacidade</title>';
 
 let distDirectory = '';
 let api;
@@ -25,6 +26,7 @@ beforeAll(() => {
   mkdirSync(join(distDirectory, 'assets'));
   writeFileSync(join(distDirectory, 'index.html'), SHELL_MARK);
   writeFileSync(join(distDirectory, 'assets', 'app-abc123.js'), ASSET_MARK);
+  writeFileSync(join(distDirectory, 'privacidade.html'), PUBLIC_PAGE_MARK);
   writeFileSync(join(distDirectory, '..', 'fora-do-dist.txt'), 'segredo');
 
   api = Bun.serve({
@@ -98,6 +100,23 @@ describe('a pagina unica sobrevive a recarregar fora da raiz', () => {
     const response = await fetch(`${origin}/`);
 
     expect(response.headers.get('cache-control')).toBe('no-cache');
+  });
+});
+
+/**
+ * O pai deslogado e o robo do AdSense leem `/privacidade` sem passar pelo login
+ * da SPA: o endereco limpo serve o `.html` do mesmo nome.
+ */
+describe('as paginas publicas saem em HTML puro pelo endereco limpo', () => {
+  test('/privacidade serve privacidade.html', async () => {
+    const response = await fetch(`${origin}/privacidade`);
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe(PUBLIC_PAGE_MARK);
+  });
+
+  test('pagina sem arquivo continua no shell da SPA', async () => {
+    expect(await (await fetch(`${origin}/inexistente`)).text()).toBe(SHELL_MARK);
   });
 });
 

@@ -43,7 +43,12 @@ export const PWA_WORKBOX = Object.freeze({
    * esperava JSON quebra o cliente com um erro que nao diz "voce esta offline".
    */
   navigateFallback: '/index.html',
-  navigateFallbackDenylist: [/\/v1\//],
+  /**
+   * As paginas publicas em HTML puro e os arquivos dos robos nao sao rota da
+   * SPA: com o fallback, o pai com o app instalado abriria `/privacidade` e
+   * cairia no login.
+   */
+  navigateFallbackDenylist: [/\/v1\//, /^\/(sobre|privacidade)(\.html)?$/, /^\/(ads|robots)\.txt$/, /^\/sitemap\.xml$/],
   cleanupOutdatedCaches: true,
   runtimeCaching: [
     {

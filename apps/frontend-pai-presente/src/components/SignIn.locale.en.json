@@ -29,5 +29,9 @@
     "registerFailed": "We couldn't create the account right now. Try again in a moment.",
     "server": "We couldn't reach the server right now. Try again in a moment.",
     "blocked": "This account is blocked. Please contact Entrelaços support."
+  },
+  "links": {
+    "about": "About Paternar",
+    "privacy": "Privacy policy"
   }
 }
