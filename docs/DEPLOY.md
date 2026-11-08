@@ -117,7 +117,7 @@ Nenhum valor mora neste arquivo nem no repositório (`security.md` §4).
 | `PANEL_JWT_SECRET` | não | mínimo 32 caracteres, **diferente** do `AUTH_JWT_SECRET`. Liga o painel da equipe (app `apps/painel-paternar`, serviço `painel` em `painel.paternar.com.br`, rotas `/v1/panel`); vazia, o painel não sobe e o resto da API segue igual |
 | `PANEL_ADMIN_EMAIL` | não | e-mail do primeiro admin do painel, criado no boot se ainda não existir; aceita vários separados por vírgula (todos admin, mesma senha inicial) |
 | `PANEL_ADMIN_PASSWORD` | não | senha desse primeiro admin, mínimo 8 caracteres; troque depois do primeiro acesso |
-| `PANEL_ADMIN_RESET` | não | `1` regrava a senha de `PANEL_ADMIN_EMAIL` com `PANEL_ADMIN_PASSWORD` a cada boot (recuperação quando ninguém entra no painel). Depois do login, volte para `0` ou apague |
+| `PANEL_ADMIN_RESET` | não | padrão `1`: a cada boot, `PANEL_ADMIN_PASSWORD` vira a senha dos e-mails de `PANEL_ADMIN_EMAIL`. Use `0` para a senha passar a ser só a trocada no painel |
 
 As três entram de uma vez, sem o segredo passar pelo terminal:
 `make painel-railway EMAIL=voce@exemplo.com` (ou `GERAR=1` para gerar a senha num arquivo só seu).
