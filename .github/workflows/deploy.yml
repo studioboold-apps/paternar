@@ -112,6 +112,9 @@ jobs:
       - name: painel
         if: steps.garante.outputs.painel == '1'
         run: railway up --service painel --ci
+      - name: login do painel funciona?
+        if: steps.garante.outputs.painel == '1'
+        run: sleep 15; timeout 60 node scripts/testar-login-painel.mjs || true
       - name: fumaca na URL publica
         if: env.PUBLIC_URL != ''
         run: |
