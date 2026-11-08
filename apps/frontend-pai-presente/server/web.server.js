@@ -124,9 +124,18 @@ async function serveApplicationShell(distDirectory) {
 }
 
 /**
- * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string }} params
+ * `adsenseClientId` so vem com `ADS_ENABLED` ligado e abre a CSP;
+ * `adsensePublisherId` e' o id cadastrado, e basta para o `ads.txt`.
+ *
+ * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string, adsensePublisherId?: string }} params
  */
-export function createWebServer({ port, distDirectory, apiOrigin, adsenseClientId = '' }) {
+export function createWebServer({
+  port,
+  distDirectory,
+  apiOrigin,
+  adsenseClientId = '',
+  adsensePublisherId = adsenseClientId,
+}) {
   const advertising = adsenseClientId.length > 0;
   const securityHeaders = buildSecurityHeaders({ advertising });
   const decorate = (response) => decorateWithSecurityHeaders(response, securityHeaders);
@@ -159,11 +168,11 @@ export function createWebServer({ port, distDirectory, apiOrigin, adsenseClientI
         return decorate(Response.json({ data: { status: 'ok' } }));
       }
 
-      /** Desligado, 404 de verdade — e nao o shell da SPA fingindo ser texto. */
+      /** Sem id cadastrado, 404 de verdade — e nao o shell da SPA fingindo ser texto. */
       if (pathname === ADS_TXT_PATH) {
-        if (!advertising) return decorate(new Response('', { status: HTTP_NOT_FOUND }));
+        if (adsensePublisherId.length === 0) return decorate(new Response('', { status: HTTP_NOT_FOUND }));
         return decorate(
-          new Response(buildAdsTxt(adsenseClientId), {
+          new Response(buildAdsTxt(adsensePublisherId), {
             headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': REVALIDATE_CACHE },
           }),
         );

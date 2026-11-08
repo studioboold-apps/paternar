@@ -302,7 +302,13 @@ export default defineRailway(() => {
        * mudar qualquer um pede deploy novo, nao so restart.
        */
       ADS_ENABLED: '0',
-      ADSENSE_CLIENT_ID: '',
+      /**
+       * ID de editor da conta AdSense (08/11/2026). Com ele, mesmo com
+       * `ADS_ENABLED=0`, o site ja publica a metatag `google-adsense-account`
+       * e o `/ads.txt` — e' o que o Google confere para aprovar o dominio —, e
+       * nenhum anuncio aparece.
+       */
+      ADSENSE_CLIENT_ID: 'ca-pub-3420826522507538',
       ADSENSE_SLOT_ID: '',
     },
   });
