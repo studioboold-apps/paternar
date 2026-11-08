@@ -28,5 +28,9 @@
     "failed": "E-mail ou senha não conferem. Confira e tente de novo.",
     "registerFailed": "Não conseguimos criar a conta agora. Tente de novo em instantes.",
     "server": "Não conseguimos falar com o servidor agora. Tente de novo em instantes."
+  },
+  "links": {
+    "about": "Sobre o Paternar",
+    "privacy": "Política de privacidade"
   }
 }

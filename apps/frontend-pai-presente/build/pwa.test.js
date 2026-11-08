@@ -70,6 +70,16 @@ describe('service worker', () => {
     expect(PWA_WORKBOX.navigateFallbackDenylist.some((pattern) => pattern.test('/v1/children'))).toBe(true);
   });
 
+  /** Com o app instalado, a politica de privacidade nao pode cair no login. */
+  test('as paginas publicas e os arquivos dos robos nunca caem no shell', () => {
+    const denied = (path) => PWA_WORKBOX.navigateFallbackDenylist.some((pattern) => pattern.test(path));
+
+    for (const path of ['/sobre', '/privacidade', '/ads.txt', '/robots.txt', '/sitemap.xml']) {
+      expect(denied(path)).toBe(true);
+    }
+    expect(denied('/Perfil')).toBe(false);
+  });
+
   test('o asset estatico fica em cache antes da rede', () => {
     const assetRule = PWA_WORKBOX.runtimeCaching.find((rule) => rule.urlPattern.test('/icons/icon-192.png'));
 

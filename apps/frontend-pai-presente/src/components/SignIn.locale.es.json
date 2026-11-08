@@ -28,5 +28,9 @@
     "failed": "El correo o la contraseña no coinciden. Revísalos e inténtalo de nuevo.",
     "registerFailed": "No pudimos crear la cuenta ahora. Inténtalo de nuevo en unos instantes.",
     "server": "No pudimos comunicarnos con el servidor ahora. Inténtalo de nuevo en unos instantes."
+  },
+  "links": {
+    "about": "Sobre Paternar",
+    "privacy": "Política de privacidad"
   }
 }
