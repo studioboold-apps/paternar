@@ -60,7 +60,7 @@ export type PanelModule = {
 
 const BEARER_PREFIX = 'bearer ';
 const EMAIL_ALREADY_EXISTS_CODE = USER_ERROR_CODE.EMAIL_ALREADY_EXISTS;
-const MIN_ADMIN_PASSWORD_LENGTH = 12;
+const MIN_ADMIN_PASSWORD_LENGTH = 8;
 
 function isPanelRole(role: string): role is PanelRole {
   return Object.values(PANEL_ROLES).includes(role as PanelRole);
@@ -110,7 +110,7 @@ export async function ensureFirstAdmin(params: {
     .filter((email) => email.length > 0);
   const password = unquote(firstAdmin.password);
   if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
-    params.logger?.error('painel: PANEL_ADMIN_PASSWORD precisa de 12+ caracteres; acesso de admin nao preparado', {
+    params.logger?.error('painel: PANEL_ADMIN_PASSWORD precisa de 8+ caracteres; acesso de admin nao preparado', {
       length: password.length,
     });
     return;

@@ -100,6 +100,11 @@ jobs:
       - name: log da api quando o deploy falha
         if: failure()
         run: timeout 60 node scripts/railway-log-api.mjs api || true
+      # Depois de um deploy bom, o que o boot disse sobre o acesso de admin do
+      # painel (criado, senha redefinida, recusado). So linhas do painel.
+      - name: log do painel no boot da api
+        if: success()
+        run: sleep 20; timeout 60 node scripts/railway-log-api.mjs api 'painel:' || true
       - name: web
         run: railway up --service web --ci
       # O painel da equipe e' um servico proprio: falhar aqui nao derruba o app

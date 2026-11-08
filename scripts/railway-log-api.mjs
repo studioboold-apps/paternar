@@ -12,6 +12,8 @@
 
 const ENDPOINT = 'https://backboard.railway.com/graphql/v2';
 const SERVICE = process.argv[2] ?? 'api';
+/** Opcional: so as linhas que contem este texto (ex.: 'painel'). */
+const FILTER = process.argv[3] ?? '';
 const token = process.env.RAILWAY_TOKEN;
 
 async function gql(query, variables = {}) {
@@ -55,7 +57,7 @@ async function main() {
     { id: latest.id },
   );
   console.log(`--- log de execucao do deploy ${latest.id} ---`);
-  for (const line of deploymentLogs) console.log(`${line.timestamp} [${line.severity ?? ''}] ${line.message}`);
+  for (const line of deploymentLogs.filter((l) => !FILTER || l.message.includes(FILTER))) console.log(`${line.timestamp} [${line.severity ?? ''}] ${line.message}`);
 }
 
 main().catch((err) => {
