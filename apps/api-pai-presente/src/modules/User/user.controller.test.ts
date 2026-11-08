@@ -47,6 +47,7 @@ function buildUserRow(): UserRow {
     age: 34,
     maritalStatus: null,
     onboardingCompleted: false,
+    blockedAt: null,
   };
 }
 

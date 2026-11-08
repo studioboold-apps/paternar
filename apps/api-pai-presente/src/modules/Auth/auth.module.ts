@@ -45,13 +45,14 @@ export function buildAuthModule({
   isSecureCookie,
 }: BuildAuthModuleParams): AuthModule {
   const tokenService = createTokenService(jwtSecret);
+  const accounts = createAuthAccountRepository(database);
   const useCases = createAuthUseCases({
     verifiers: createIdentityVerifierRegistry({
       clientIds,
       developmentSignIn,
       isPasswordSignInEnabled,
     }),
-    accounts: createAuthAccountRepository(database),
+    accounts,
     passwordAccounts: createPasswordAccountRepository(database),
     passwordHasher: createPasswordHasher(),
     isPasswordSignInEnabled,
@@ -65,6 +66,6 @@ export function buildAuthModule({
       isSecureCookie,
       signInRateLimiter: createRateLimiter(PASSWORD_SIGN_IN_RATE_LIMIT),
     }),
-    authenticatedUserResolver: createCookieSessionResolver(tokenService),
+    authenticatedUserResolver: createCookieSessionResolver(tokenService, accounts),
   };
 }

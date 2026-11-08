@@ -48,6 +48,20 @@ export class EmailAlreadyRegisteredError extends DomainError {
   }
 }
 
+/**
+ * Conta bloqueada pela equipe. So aparece DEPOIS da prova de identidade (senha
+ * certa ou token do Google valido), entao nao serve para sondar quem tem conta.
+ */
+export class UserBlockedError extends DomainError {
+  constructor() {
+    super({
+      code: ERROR_CODES.auth.USER_BLOCKED,
+      message: 'Esta conta esta bloqueada. Fale com o suporte do Entrelacos.',
+      statusCode: 403,
+    });
+  }
+}
+
 /** Falha de configuracao do servidor, nao erro de quem chamou. */
 export class ProviderNotConfiguredError extends DomainError {
   constructor(provider: string) {
