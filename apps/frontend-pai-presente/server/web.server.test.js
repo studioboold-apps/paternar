@@ -14,6 +14,8 @@ import { chooseCacheControl, createWebServer, isApiPath, resolveStaticPath } fro
 
 const SHELL_MARK = '<!doctype html><title>pai presente</title>';
 const ASSET_MARK = 'console.log("asset")';
+const TIPS_MARK = '<!doctype html><title>dicas</title>';
+const ARTICLE_MARK = '<!doctype html><title>birra</title>';
 const PUBLIC_PAGE_MARK = '<!doctype html><title>politica de privacidade</title>';
 
 let distDirectory = '';
@@ -27,6 +29,9 @@ beforeAll(() => {
   writeFileSync(join(distDirectory, 'index.html'), SHELL_MARK);
   writeFileSync(join(distDirectory, 'assets', 'app-abc123.js'), ASSET_MARK);
   writeFileSync(join(distDirectory, 'privacidade.html'), PUBLIC_PAGE_MARK);
+  writeFileSync(join(distDirectory, 'dicas.html'), TIPS_MARK);
+  mkdirSync(join(distDirectory, 'dicas'));
+  writeFileSync(join(distDirectory, 'dicas', 'birra.html'), ARTICLE_MARK);
   writeFileSync(join(distDirectory, '..', 'fora-do-dist.txt'), 'segredo');
 
   api = Bun.serve({
@@ -113,6 +118,12 @@ describe('as paginas publicas saem em HTML puro pelo endereco limpo', () => {
 
     expect(response.status).toBe(200);
     expect(await response.text()).toBe(PUBLIC_PAGE_MARK);
+  });
+
+  /** `/dicas` e' pasta E arquivo: o endereco limpo serve o indice, nao a pasta. */
+  test('/dicas serve o indice e /dicas/birra serve o artigo', async () => {
+    expect(await (await fetch(`${origin}/dicas`)).text()).toBe(TIPS_MARK);
+    expect(await (await fetch(`${origin}/dicas/birra`)).text()).toBe(ARTICLE_MARK);
   });
 
   test('pagina sem arquivo continua no shell da SPA', async () => {

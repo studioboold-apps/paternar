@@ -85,12 +85,12 @@ async function forwardToApi({ request, apiOrigin }) {
 }
 
 /**
- * Paginas publicas em HTML puro (`/sobre`, `/privacidade`): o pai deslogado e o
+ * Paginas publicas em HTML puro (`/sobre`, `/privacidade`, `/dicas/<artigo>`): o pai deslogado e o
  * robo do AdSense precisam le-las sem passar pelo login da SPA. O endereco
  * limpo vale pelo arquivo `.html` do mesmo nome — so quando ele existe; o resto
  * segue para o shell, e o roteador do navegador decide.
  */
-const PUBLIC_PAGE_PATTERN = /^\/[a-z-]+$/;
+const PUBLIC_PAGE_PATTERN = /^\/[a-z-]+(\/[a-z-]+)?$/;
 
 async function serveStatic({ distDirectory, pathname }) {
   const candidates = PUBLIC_PAGE_PATTERN.test(pathname) ? [pathname, `${pathname}.html`] : [pathname];
