@@ -18,5 +18,9 @@
     "home": "Ir para o início"
   },
   "aiBadge": "Feito com IA",
-  "advertising": "Publicidade"
+  "advertising": "Publicidade",
+  "copyright": {
+    "company": "Ada Technology",
+    "rights": "Todos os direitos reservados"
+  }
 }

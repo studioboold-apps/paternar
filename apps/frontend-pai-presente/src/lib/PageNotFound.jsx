@@ -7,6 +7,7 @@
 import React from 'react';
 import { Home } from 'lucide-react';
 
+import AdaFooter from '@/components/AdaFooter';
 import BrandMark from '@/components/BrandMark';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n';
@@ -20,7 +21,7 @@ export default function PageNotFound() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-background p-6">
       <div className="max-w-sm w-full text-center">
         <BrandMark motion="loop" className="mx-auto h-20 w-20" />
         <h1 className="mt-8 text-2xl font-bold text-foreground">{t('common.notFound.title')}</h1>
@@ -33,6 +34,7 @@ export default function PageNotFound() {
           {t('common.notFound.home')}
         </Button>
       </div>
+      <AdaFooter className="absolute bottom-0 inset-x-0" />
     </div>
   );
 }

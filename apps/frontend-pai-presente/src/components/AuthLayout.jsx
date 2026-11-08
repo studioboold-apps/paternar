@@ -1,6 +1,7 @@
 import React from "react";
 
 import BrandMark from "@/components/BrandMark";
+import AdaFooter from "@/components/AdaFooter";
 import BrandWordmark from "@/components/BrandWordmark";
 
 /**
@@ -26,6 +27,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
         )}
       </div>
+      <AdaFooter className="pt-0" />
     </div>
   );
 }

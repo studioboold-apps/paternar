@@ -18,6 +18,7 @@ export const PANEL_TEXT = Object.freeze({
   signInFailed: 'E-mail ou senha não conferem.',
   signOut: 'Sair',
   loading: 'Carregando…',
+  copyright: { company: 'Ada Technology', rights: 'Todos os direitos reservados' },
   tabs: {
     overview: 'Visão geral',
     users: 'Pais cadastrados',
