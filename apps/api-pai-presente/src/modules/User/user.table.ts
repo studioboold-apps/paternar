@@ -4,7 +4,7 @@
  * Licenca: proprietaria.
  */
 
-import { boolean, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 import { buildIdentityColumns } from '../shared/columns.constant';
 import { DOMAIN_VALUE_LENGTH, MEDIUM_TEXT_LENGTH, SHORT_TEXT_LENGTH } from '../shared/shared.constant';
@@ -21,6 +21,11 @@ export const usersTable = pgTable('users', {
   /** Data URL da foto de perfil (ver `avatarDataUrlSchema`). */
   avatarUrl: text('avatar_url'),
   city: varchar('city', { length: SHORT_TEXT_LENGTH }),
+  /**
+   * Bloqueio feito pela equipe no painel. Preenchido, o pai nao entra, nao
+   * renova sessao e o cookie que ainda tiver para de valer. Nulo e' liberado.
+   */
+  blockedAt: timestamp('blocked_at', { withTimezone: true }),
 });
 
 export type UserRow = typeof usersTable.$inferSelect;

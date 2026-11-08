@@ -6,18 +6,22 @@
 
 import { describe, expect, test } from 'bun:test';
 
+import { createModuleFetchRouter } from '@adatechnology/module-http/fetch';
 import { USER_ERROR_CODE } from '@adatechnology/user-contracts';
 
 import { listSdkMigrations } from '../../database/sdk-migrations';
 import { withTrackRateLimit } from '../Recommendation/recommendation.module';
 import { createRateLimiter } from '../shared/http/rate-limit';
-import { PANEL_SCOPES } from './panel.constant';
+import { PANEL_BASE_PATH, PANEL_SCOPES } from './panel.constant';
 import { createPanelAuthResolver, ensureFirstAdmin, scopesForRole } from './panel.module';
+import { buildPanelRoutes } from './panel.routes';
 
 describe('papeis da equipe', () => {
   test('admin cria acessos; editor nao; viewer so le', () => {
     expect(scopesForRole('admin')).toContain(PANEL_SCOPES.USERS_ADMIN);
     expect(scopesForRole('editor')).not.toContain(PANEL_SCOPES.USERS_ADMIN);
+    expect(scopesForRole('admin')).toContain(PANEL_SCOPES.APP_USERS_BLOCK);
+    expect(scopesForRole('editor')).not.toContain(PANEL_SCOPES.APP_USERS_BLOCK);
     expect(scopesForRole('editor')).toContain(PANEL_SCOPES.RECOMMENDATIONS_ADMIN);
     expect(scopesForRole('viewer')).toEqual([PANEL_SCOPES.READ, PANEL_SCOPES.CUSTOMERS_READ]);
   });
@@ -165,5 +169,66 @@ describe('primeiro acesso e recuperacao do admin', () => {
       { email: 'a@x.dev', password: ADMIN.password },
       { email: 'b@x.dev', password: ADMIN.password },
     ]);
+  });
+});
+
+describe('bloqueio de pais pelo painel', () => {
+  const PARENT_ID = '7d3f5f7e-9a51-4d8e-9f0c-1f2a3b4c5d6e';
+
+  function buildRouter(role: string) {
+    const calls: { userId: string; blocked: boolean }[] = [];
+    const repository = {
+      overview: async () => ({}) as never,
+      listUsers: async () => ({ rows: [], total: 0 }),
+      async setUserBlocked(input: { userId: string; blocked: boolean }) {
+        calls.push(input);
+        if (input.userId !== PARENT_ID) return undefined;
+        return { id: input.userId, blockedAt: input.blocked ? new Date('2026-11-08T12:00:00Z') : null };
+      },
+    };
+    const router = createModuleFetchRouter({
+      routes: buildPanelRoutes(repository),
+      basePath: PANEL_BASE_PATH,
+      authResolver: { resolve: async () => ({ companyId: 'entrelacos', userId: 'equipe', scopes: scopesForRole(role) }) },
+    });
+    const put = (userId: string, body: unknown) =>
+      router.handle(
+        new Request(`http://local${PANEL_BASE_PATH}/app-users/${userId}/blocked`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+      );
+    return { calls, put };
+  }
+
+  test('admin bloqueia e libera', async () => {
+    const { calls, put } = buildRouter('admin');
+
+    const blocked = await put(PARENT_ID, { blocked: true });
+    expect(blocked.status).toBe(200);
+    expect(((await blocked.json()) as { data: { blockedAt: string } }).data.blockedAt).toBeTruthy();
+
+    const released = await put(PARENT_ID, { blocked: false });
+    expect(((await released.json()) as { data: { blockedAt: unknown } }).data.blockedAt).toBeNull();
+    expect(calls).toEqual([
+      { userId: PARENT_ID, blocked: true },
+      { userId: PARENT_ID, blocked: false },
+    ]);
+  });
+
+  test('editor e viewer nao bloqueiam ninguem', async () => {
+    for (const role of ['editor', 'viewer']) {
+      const { calls, put } = buildRouter(role);
+      expect((await put(PARENT_ID, { blocked: true })).status).toBe(403);
+      expect(calls).toEqual([]);
+    }
+  });
+
+  test('pai inexistente da 404; pedido torto da 400', async () => {
+    const { put } = buildRouter('admin');
+    expect((await put('2b1c0d9e-8f7a-4b6c-9d5e-4f3a2b1c0d9e', { blocked: true })).status).toBe(404);
+    expect((await put('nao-e-uuid', { blocked: true })).status).toBe(400);
+    expect((await put(PARENT_ID, { blocked: 'sim' })).status).toBe(400);
   });
 });

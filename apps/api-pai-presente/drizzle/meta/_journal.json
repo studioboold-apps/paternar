@@ -64,6 +64,13 @@
       "when": 1793557950640,
       "tag": "0008_valores_familia",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794145840678,
+      "tag": "0009_bloqueio_usuario",
+      "breakpoints": true
     }
   ]
 }

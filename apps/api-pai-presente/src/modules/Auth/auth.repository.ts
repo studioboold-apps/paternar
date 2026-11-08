@@ -78,6 +78,15 @@ export function createAuthAccountRepository(database: Database): AuthAccountRepo
       if (row === undefined) throw new Error('sessao viva apontando para usuario inexistente');
       return toAuthenticatedUser(row);
     },
+
+    async isBlocked(userId: string): Promise<boolean> {
+      const rows = await database
+        .select({ blockedAt: usersTable.blockedAt })
+        .from(usersTable)
+        .where(eq(usersTable.id, userId))
+        .limit(1);
+      return rows[0]?.blockedAt != null;
+    },
   };
 }
 

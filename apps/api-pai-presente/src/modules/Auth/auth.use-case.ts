@@ -9,6 +9,7 @@ import {
   IdentityTokenInvalidError,
   ProviderNotConfiguredError,
   RefreshTokenInvalidError,
+  UserBlockedError,
 } from './auth.error';
 import { PASSWORD_AUTH_PROVIDER, REFRESH_TOKEN_TTL_SECONDS } from './auth.constant';
 import type {
@@ -49,7 +50,13 @@ export function createAuthUseCases({
   sessions,
   tokenService,
 }: CreateAuthUseCasesParams): AuthUseCases {
+  // Todo caminho que abre sessao passa aqui: login por senha, por Google/Apple e
+  // renovacao. Barrar num lugar so e' o que garante que nenhum deles escapa.
   async function issueSession(user: AuthenticatedUser): Promise<IssuedSession> {
+    if (await accounts.isBlocked(user.userId)) {
+      await sessions.revokeAllForUser(user.userId);
+      throw new UserBlockedError();
+    }
     const refreshToken = tokenService.issueRefreshToken();
     await sessions.insert({
       userId: user.userId,

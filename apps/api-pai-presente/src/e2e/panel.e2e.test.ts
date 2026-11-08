@@ -101,8 +101,21 @@ describe.skipIf(!IS_ENABLED)('painel e recomendacoes (e2e em processo)', () => {
     expect(users.body?.['data'][0]).toMatchObject({ fullName: 'Pai de Teste', city: 'Ribeirão Preto', childrenCount: 0 });
     // O painel nao devolve foto, idade nem estado civil.
     expect(Object.keys(users.body?.['data'][0]).sort()).toEqual(
-      ['childrenCount', 'city', 'createdAt', 'email', 'fullName', 'id', 'onboardingCompleted'].sort(),
+      ['blockedAt', 'childrenCount', 'city', 'createdAt', 'email', 'fullName', 'id', 'onboardingCompleted'].sort(),
     );
+  });
+
+  test('admin bloqueia o pai, e libera depois', async () => {
+    const blocked = await panelCall('PUT', `/app-users/${PARENT_ID}/blocked`, { blocked: true });
+    expect(blocked.status).toBe(200);
+    const [row] = await database.select({ blockedAt: usersTable.blockedAt }).from(usersTable).where(sql`${usersTable.id} = ${PARENT_ID}`);
+    expect(row?.blockedAt).toBeInstanceOf(Date);
+
+    const listed = await panelCall('GET', `/app-users?search=pai-${RUN_ID}`);
+    expect(listed.body?.['data'][0]['blockedAt']).toBeTruthy();
+
+    const released = await panelCall('PUT', `/app-users/${PARENT_ID}/blocked`, { blocked: false });
+    expect(released.body?.['data']['blockedAt']).toBeNull();
   });
 
   test('anunciante com categoria vira recomendacao patrocinada que aparece no feed do pai', async () => {

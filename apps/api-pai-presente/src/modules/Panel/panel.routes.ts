@@ -21,12 +21,36 @@ const listUsersQuerySchema = z.object({
   search: z.string().trim().min(1).max(120).optional(),
 });
 
+const userIdSchema = z.string().uuid();
+const blockBodySchema = z.object({ blocked: z.boolean() });
+
 class PanelQueryError extends Error {
   readonly statusCode = 400;
   readonly code = 'VALIDATION_ERROR';
 }
 
-export function buildPanelRoutes(repository: PanelRepository): ModuleRoute[] {
+class PanelUserNotFoundError extends Error {
+  readonly statusCode = 404;
+  readonly code = 'NOT_FOUND';
+}
+
+/** So o que as rotas usam: o teste troca o banco por um falso. */
+/**
+ * Sem `bodySchema` (pelo mesmo motivo do zod 3), o `module-http` nao le o
+ * corpo: le-se aqui dos bytes crus. JSON quebrado vira `undefined` e cai no 400.
+ */
+function readJsonBody(rawBody: Uint8Array | undefined): unknown {
+  if (!rawBody || rawBody.length === 0) return undefined;
+  try {
+    return JSON.parse(new TextDecoder().decode(rawBody));
+  } catch {
+    return undefined;
+  }
+}
+
+type PanelRoutesRepository = Pick<PanelRepository, 'overview' | 'listUsers' | 'setUserBlocked'>;
+
+export function buildPanelRoutes(repository: PanelRoutesRepository): ModuleRoute[] {
   return [
     {
       method: 'GET',
@@ -59,6 +83,22 @@ export function buildPanelRoutes(repository: PanelRepository): ModuleRoute[] {
           status: 200,
           body: { data: rows, pagination: { total, page: parsed.data.page, perPage: parsed.data.perPage } },
         };
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/app-users/:id/blocked',
+      scope: ROUTE_SCOPE.USER,
+      requiredScopes: [PANEL_SCOPES.APP_USERS_BLOCK],
+      operationId: 'setPanelAppUserBlocked',
+      summary: 'Bloqueia ou libera um pai: bloqueado nao entra nem usa o app',
+      async handler(context) {
+        const userId = userIdSchema.safeParse(context.params['id']);
+        const body = blockBodySchema.safeParse(readJsonBody(context.rawBody));
+        if (!userId.success || !body.success) throw new PanelQueryError('Informe o pai e se ele fica bloqueado.');
+        const updated = await repository.setUserBlocked({ userId: userId.data, blocked: body.data.blocked });
+        if (!updated) throw new PanelUserNotFoundError('Pai nao encontrado.');
+        return { kind: 'json', status: 200, body: { data: updated } };
       },
     },
   ];
