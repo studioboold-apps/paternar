@@ -187,6 +187,15 @@ const FamilyValues = Object.freeze({
   options: (kind) => request(HTTP_METHODS.GET, PATHS.familyValueOptions, { query: { kind } }),
 });
 
+/**
+ * Denuncia vai para a fila da equipe. Denunciar de novo o mesmo conteudo nao
+ * duplica: a API devolve a denuncia que ja estava aberta.
+ */
+const CommunityReport = Object.freeze({
+  report: ({ type, id }, values) =>
+    request(HTTP_METHODS.POST, `${type === 'comment' ? PATHS.comments : PATHS.posts}/${id}/reports`, { body: values }),
+});
+
 const CommunityComment = Object.freeze({
   listByPost: (postId) => listAll(PATHS.comments, { query: { postId } }),
   create: (values) => request(HTTP_METHODS.POST, PATHS.comments, { body: values }),
@@ -236,6 +245,7 @@ export const api = Object.freeze({
     CommunityPost,
     FamilyValues,
     CommunityComment,
+    CommunityReport,
     ChatMessage,
   }),
 });

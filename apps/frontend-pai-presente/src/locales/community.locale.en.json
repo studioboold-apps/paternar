@@ -19,5 +19,25 @@
     "photoAlt": "Post photo",
     "photoUnreadable": "Couldn't read that photo. Try another one.",
     "changePhoto": "Change photo"
+  },
+  "report": {
+    "report": "Report",
+    "titlePost": "Report post",
+    "titleComment": "Report comment",
+    "description": "The Paternar team will review it. The author won't know who reported.",
+    "reasonLabel": "Reason",
+    "reasons": {
+      "ofensivo": "Offensive or disrespectful",
+      "spam": "Spam or advertising",
+      "golpe": "Scam or fraud",
+      "inadequado": "Inappropriate content",
+      "outro": "Something else"
+    },
+    "detailsPlaceholder": "Want to tell us more? (optional)",
+    "send": "Send report",
+    "cancel": "Cancel",
+    "sentTitle": "Report sent",
+    "sentBody": "Thanks for looking after the community.",
+    "failed": "Couldn't send the report. Try again."
   }
 }
