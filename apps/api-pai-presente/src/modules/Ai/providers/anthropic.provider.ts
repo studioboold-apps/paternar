@@ -18,16 +18,32 @@ import {
   WEB_SEARCH_TIMEOUT_MS,
 } from '../ai.constant';
 import { LlmResponseInvalidError } from '../ai.error';
-import type { LlmProvider, LlmStructuredRequest, LlmTextRequest, LlmWebSearchRequest } from '../types/ai.types';
+import type {
+  LlmProvider,
+  LlmStructuredRequest,
+  LlmTextRequest,
+  LlmUsageSink,
+  LlmWebSearchRequest,
+} from '../types/ai.types';
 import { parseProviderPayload, postJson, toAlternatingTurns } from './provider.util';
 
 const textBlockSchema = z.object({ type: z.literal('text'), text: z.string() });
 const toolUseBlockSchema = z.object({ type: z.literal('tool_use'), input: z.unknown() });
 const otherBlockSchema = z.object({ type: z.string() });
 
+const usageSchema = z.object({
+  input_tokens: z.number().nullish(),
+  output_tokens: z.number().nullish(),
+  cache_read_input_tokens: z.number().nullish(),
+  cache_creation_input_tokens: z.number().nullish(),
+  server_tool_use: z.object({ web_search_requests: z.number().nullish() }).nullish(),
+});
+
 const messageSchema = z.object({
+  model: z.string().nullish(),
   content: z.array(z.union([textBlockSchema, toolUseBlockSchema, otherBlockSchema])),
   stop_reason: z.string().nullish(),
+  usage: usageSchema.nullish(),
 });
 type AnthropicMessage = z.infer<typeof messageSchema>;
 
@@ -74,9 +90,14 @@ export function toAnthropicJsonSchema(schema: unknown): unknown {
 export type AnthropicProviderParams = {
   readonly apiKey: string;
   readonly models: Readonly<Record<LlmTier, string>>;
+  /** Recebe os tokens de cada chamada; ausente, ninguem conta. */
+  readonly onUsage?: LlmUsageSink | undefined;
 };
 
-export function createAnthropicProvider({ apiKey, models }: AnthropicProviderParams): LlmProvider {
+/** Quem pediu e para que: vai para a conta de uso, nunca para o corpo da chamada. */
+type CallMeta = { readonly task: string; readonly userId?: string | undefined };
+
+export function createAnthropicProvider({ apiKey, models, onUsage }: AnthropicProviderParams): LlmProvider {
   function buildRequest({
     task,
     systemPrompt,
@@ -115,7 +136,27 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
     };
   }
 
-  async function send(body: Record<string, unknown>, timeoutMs?: number): Promise<AnthropicMessage> {
+  function reportUsage(message: AnthropicMessage, body: Record<string, unknown>, meta: CallMeta): void {
+    if (onUsage === undefined) return;
+    const usage = message.usage ?? {};
+    try {
+      onUsage({
+        provider: 'anthropic',
+        model: message.model ?? String(body.model),
+        task: meta.task,
+        userId: meta.userId,
+        inputTokens: usage.input_tokens ?? 0,
+        outputTokens: usage.output_tokens ?? 0,
+        cacheReadTokens: usage.cache_read_input_tokens ?? 0,
+        cacheWriteTokens: usage.cache_creation_input_tokens ?? 0,
+        webSearches: usage.server_tool_use?.web_search_requests ?? 0,
+      });
+    } catch {
+      // A conta nunca derruba a resposta.
+    }
+  }
+
+  async function send(body: Record<string, unknown>, meta: CallMeta, timeoutMs?: number): Promise<AnthropicMessage> {
     const usesFallback = 'fallbacks' in body;
     const payload = await postJson({
       url: ANTHROPIC_BASE_URL,
@@ -128,12 +169,18 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
       ...(timeoutMs === undefined ? {} : { timeoutMs }),
     });
     const message = parseProviderPayload(messageSchema, payload);
+    // Antes da checagem de recusa: chamada recusada ou cortada tambem e' cobrada.
+    reportUsage(message, body, meta);
     // Recusa ou corte no teto: o texto que veio nao e' resposta inteira, e
     // mostrar meia resposta (ou meio JSON) ao pai e' pior que o erro legivel.
     if (message.stop_reason === 'refusal' || message.stop_reason === 'max_tokens') {
       throw new LlmResponseInvalidError();
     }
     return message;
+  }
+
+  function metaOf(request: LlmTextRequest): CallMeta {
+    return { task: request.task, userId: request.userId };
   }
 
   function readText(message: AnthropicMessage): string {
@@ -147,7 +194,7 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
     name: 'anthropic',
 
     async generateText(request: LlmTextRequest): Promise<string> {
-      const text = readText(await send(buildRequest(request)));
+      const text = readText(await send(buildRequest(request), metaOf(request)));
       if (text.length === 0) throw new LlmResponseInvalidError();
       return text;
     },
@@ -157,7 +204,7 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
      * ferramenta de servidor da Anthropic (quem busca e le as paginas e' ela);
      * aqui so' sai o texto final, com o que foi achado.
      */
-    async searchWeb({ systemPrompt, userPrompt, city }: LlmWebSearchRequest): Promise<string> {
+    async searchWeb({ systemPrompt, userPrompt, city, userId }: LlmWebSearchRequest): Promise<string> {
       const message = await send(
         {
           ...buildRequest({ task: 'suggestions', systemPrompt, userPrompt }),
@@ -179,6 +226,7 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
             },
           ],
         },
+        { task: 'suggestions-web', userId },
         WEB_SEARCH_TIMEOUT_MS,
       );
       return readText(message);
@@ -193,13 +241,16 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
       const base = buildRequest(request);
       if (MODERN_MODEL.test(String(base.model))) {
         const outputConfig = (base.output_config ?? {}) as Record<string, unknown>;
-        const message = await send({
-          ...base,
-          output_config: {
-            ...outputConfig,
-            format: { type: 'json_schema', schema: toAnthropicJsonSchema(request.jsonSchema) },
+        const message = await send(
+          {
+            ...base,
+            output_config: {
+              ...outputConfig,
+              format: { type: 'json_schema', schema: toAnthropicJsonSchema(request.jsonSchema) },
+            },
           },
-        });
+          metaOf(request),
+        );
         try {
           return JSON.parse(readText(message));
         } catch {
@@ -217,7 +268,7 @@ export function createAnthropicProvider({ apiKey, models }: AnthropicProviderPar
           },
         ],
         tool_choice: { type: 'tool', name: request.schemaName },
-      });
+      }, metaOf(request));
 
       const used = message.content.find((block) => block.type === 'tool_use');
       if (used === undefined || !('input' in used)) throw new LlmResponseInvalidError();
