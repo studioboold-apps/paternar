@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { buildAdsTxt, readAdsEnabled, readAdsenseClientId, readAdvertisingClientId } from './advertising.js';
 import { readServerEnvironment } from './environment.js';
 import { buildContentSecurityPolicy, CONTENT_SECURITY_POLICY, readPolicyDirective } from './security-headers.js';
-import { createWebServer } from './web.server.js';
+import { createWebServer, withAdsenseAccountMeta } from './web.server.js';
 
 const CLIENT_ID = 'ca-pub-1234567890123456';
 
@@ -105,7 +105,7 @@ describe('o servidor serve ads.txt e a CSP conforme o id', () => {
 
   beforeAll(() => {
     distDirectory = mkdtempSync(join(tmpdir(), 'pp-ads-'));
-    writeFileSync(join(distDirectory, 'index.html'), '<!doctype html>');
+    writeFileSync(join(distDirectory, 'index.html'), '<!doctype html><html><head><title>x</title></head></html>');
     const base = { port: 0, distDirectory, apiOrigin: 'http://127.0.0.1:9' };
     withAds = createWebServer({ ...base, adsenseClientId: CLIENT_ID });
     withoutAds = createWebServer(base);
@@ -136,6 +136,23 @@ describe('o servidor serve ads.txt e a CSP conforme o id', () => {
 
     const shell = await fetch(new URL('/', verifyingOnly.url));
     expect(shell.headers.get('Content-Security-Policy')).toBe(CONTENT_SECURITY_POLICY);
+  });
+
+  /** O robo do AdSense le o HTML do servidor: a metatag nao pode depender do build arg. */
+  test('id cadastrado: a tela sai com a metatag do AdSense, mesmo sem ela no build', async () => {
+    const shell = await (await fetch(new URL('/', verifyingOnly.url))).text();
+    expect(shell).toContain('<meta name="google-adsense-account" content="ca-pub-1234567890123456" />');
+    expect(shell.indexOf('google-adsense-account')).toBeLessThan(shell.indexOf('</head>'));
+
+    const route = await (await fetch(new URL('/Perfil', verifyingOnly.url))).text();
+    expect(route).toContain('google-adsense-account');
+  });
+
+  test('sem id, a tela sai sem metatag; com ela ja no build, nao duplica', async () => {
+    expect(await (await fetch(new URL('/', withoutAds.url))).text()).not.toContain('google-adsense-account');
+
+    const built = '<head><meta name="google-adsense-account" content="ca-pub-1" /></head>';
+    expect(withAdsenseAccountMeta(built, CLIENT_ID)).toBe(built);
   });
 
   test('o ambiente separa o id cadastrado do anuncio ligado', () => {

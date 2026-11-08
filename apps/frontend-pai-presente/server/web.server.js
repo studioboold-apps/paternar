@@ -114,11 +114,25 @@ async function serveStatic({ distDirectory, pathname }) {
  * raiz. Caminho desconhecido devolve o `index.html`, e o roteador do navegador
  * decide.
  */
-async function serveApplicationShell(distDirectory) {
+const ADSENSE_ACCOUNT_META = 'google-adsense-account';
+
+/**
+ * A metatag do AdSense tambem entra AQUI, no boot, e nao so no build: o build
+ * so a grava se o id chegar como build arg, e o robo do Google le o HTML que o
+ * servidor entrega. Com o id no ambiente do container, um restart ja basta.
+ */
+export function withAdsenseAccountMeta(html, publisherId) {
+  if (!publisherId || html.includes(ADSENSE_ACCOUNT_META)) return html;
+  return html.replace('</head>', `<meta name="${ADSENSE_ACCOUNT_META}" content="${publisherId}" /></head>`);
+}
+
+async function serveApplicationShell(distDirectory, adsensePublisherId = '') {
   const shell = Bun.file(join(resolve(distDirectory), INDEX_FILE));
   if (!(await shell.exists())) return new Response('dist ausente', { status: HTTP_NOT_FOUND });
 
-  return new Response(shell, {
+  const body = adsensePublisherId ? withAdsenseAccountMeta(await shell.text(), adsensePublisherId) : shell;
+
+  return new Response(body, {
     headers: { 'Cache-Control': REVALIDATE_CACHE, 'Content-Type': 'text/html; charset=utf-8' },
   });
 }
@@ -180,7 +194,7 @@ export function createWebServer({
 
       const response =
         (await serveStatic({ distDirectory, pathname })) ??
-        (await serveApplicationShell(distDirectory));
+        (await serveApplicationShell(distDirectory, adsensePublisherId));
 
       return decorate(response);
     },

@@ -11,7 +11,10 @@
 //   4. cria no Cloudflare os registros DNS que o Railway pede para esse dominio,
 //      se houver CLOUDFLARE_API_TOKEN (permissao Zone > DNS > Edit na zona);
 //      sem o token, so imprime o que falta;
-//   5. acrescenta em WEB_ORIGINS da `api` as origens que faltam, sem tirar nenhuma.
+//   5. acrescenta em WEB_ORIGINS da `api` as origens que faltam, sem tirar nenhuma;
+//   6. grava na `web` o ADSENSE_CLIENT_ID da conta (publico: sai no HTML de todo
+//      site com anuncio). Ele so publica a metatag e o /ads.txt; quem liga os
+//      anuncios e' ADS_ENABLED, que este script nao toca.
 //
 // As variaveis sao gravadas com `skipDeploys`: quem publica e' o `railway up`
 // dos passos seguintes, que ja leva o valor novo.
@@ -31,6 +34,9 @@ const PORT = 8080;
 const API_PORT = Number(process.env.API_PORT || 3000);
 const PUBLIC_DOMAIN = 'paternar.com.br';
 const PANEL_DOMAIN = `painel.${PUBLIC_DOMAIN}`;
+const WEB = 'web';
+/** ID de editor da conta AdSense (08/11/2026) — o mesmo de `.railway/railway.ts`. */
+const ADSENSE_CLIENT_ID = 'ca-pub-3420826522507538';
 const FIXED_ORIGINS = [
   `https://${PUBLIC_DOMAIN}`,
   `https://${PANEL_DOMAIN}`,
@@ -256,6 +262,33 @@ async function main() {
     console.log(`-> WEB_ORIGINS da api ganhou: ${missing.join(', ')}`);
   } else {
     console.log('-> WEB_ORIGINS da api ja tem todas as origens');
+  }
+
+  await ensureAdsenseAccount(ids, services);
+}
+
+/** Falhar aqui nao derruba o deploy: sem o id, so a verificacao do AdSense espera. */
+async function ensureAdsenseAccount(ids, services) {
+  const web = services.find((s) => s.name === WEB);
+  if (!web) {
+    console.log(`::warning::servico '${WEB}' nao encontrado; ADSENSE_CLIENT_ID nao gravado`);
+    return;
+  }
+  try {
+    const vars = await gql(
+      `query ($p: String!, $e: String!, $s: String!) { variables(projectId: $p, environmentId: $e, serviceId: $s) }`,
+      { p: ids.projectId, e: ids.environmentId, s: web.id },
+    );
+    const current = (vars.variables.ADSENSE_CLIENT_ID ?? '').trim();
+    if (current === ADSENSE_CLIENT_ID) {
+      console.log('-> ADSENSE_CLIENT_ID da web ja esta certo');
+    } else {
+      await upsert(ids, web.id, 'ADSENSE_CLIENT_ID', ADSENSE_CLIENT_ID);
+      console.log(`-> ADSENSE_CLIENT_ID da web gravado (antes: ${current ? 'outro valor' : 'ausente'})`);
+    }
+    console.log(`-> ADS_ENABLED da web: ${JSON.stringify(vars.variables.ADS_ENABLED ?? '(ausente)')}`);
+  } catch (err) {
+    console.log(`::warning::ADSENSE_CLIENT_ID nao gravado na web: ${err.message}`);
   }
 }
 
