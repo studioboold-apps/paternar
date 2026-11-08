@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Flag, LayoutDashboard, LogOut, ShieldCheck, Sparkles, Star, Store, Users } from 'lucide-react';
 
 import AdaFooter from '@/components/AdaFooter';
+import { BrandSymbol, BrandWordmark } from '@/components/PanelBrand';
 import { cn } from '@/lib/utils';
 
 import { createPanelClient } from './panel-client';
@@ -105,7 +106,7 @@ function PanelShell({ client }) {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 lg:flex">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <aside className="sticky top-0 z-10 border-b border-zinc-800 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-60 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between gap-3 px-4 py-3 lg:py-5">
           <Brand />
@@ -130,10 +131,13 @@ function PanelShell({ client }) {
           {PANEL_TEXT.signOut}
         </button>
       </aside>
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 lg:ml-60 lg:px-8 lg:py-8">
-        <View key={`${current.section}/${route.id}`} {...session} />
-      </main>
-      <AdaFooter className="lg:ml-60" />
+      {/* Conteudo e rodape numa coluna so, a direita do menu fixo: o rodape fica sempre embaixo. */}
+      <div className="flex min-h-[calc(100vh-7rem)] flex-col lg:min-h-screen lg:pl-60">
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          <View key={`${current.section}/${route.id}`} {...session} />
+        </main>
+        <AdaFooter className="border-t border-zinc-800" />
+      </div>
     </div>
   );
 }
@@ -141,10 +145,11 @@ function PanelShell({ client }) {
 export function Brand() {
   return (
     <div className="flex items-center gap-2.5">
-      <img src="/favicon.png" alt="" className="h-8 w-8 rounded-lg" />
+      <BrandSymbol className="h-9 w-9" />
       <div className="leading-tight">
-        <p className="text-sm font-bold text-zinc-100">{PANEL_TEXT.title}</p>
-        <p className="text-[11px] text-zinc-400">{PANEL_TEXT.subtitle}</p>
+        <BrandWordmark className="h-8 w-[99px]" />
+        <p className="sr-only">{PANEL_TEXT.title}</p>
+        <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-blue-700">{PANEL_TEXT.subtitle}</p>
       </div>
     </div>
   );

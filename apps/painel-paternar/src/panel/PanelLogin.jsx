@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 
 import AdaFooter from '@/components/AdaFooter';
+import { BrandSymbol, BrandWordmark } from '@/components/PanelBrand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -31,9 +32,10 @@ export default function PanelLogin({ client }) {
     <div className="relative flex min-h-screen items-center justify-center bg-zinc-950 bg-[radial-gradient(circle_at_top,_#FFE8C7_0,_transparent_55%)] px-4">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl border border-zinc-800 bg-white p-6 shadow-lg shadow-zinc-800/40">
         <div className="flex flex-col items-center gap-2 pb-2 text-center">
-          <img src="/favicon.png" alt="" className="h-14 w-14 rounded-2xl" />
-          <h1 className="text-xl font-bold text-zinc-100">{PANEL_TEXT.title}</h1>
-          <p className="text-sm text-zinc-400">{PANEL_TEXT.subtitle}</p>
+          <BrandSymbol className="h-14 w-14" />
+          <BrandWordmark className="h-12 w-[148px]" />
+          <h1 className="sr-only">{PANEL_TEXT.title}</h1>
+          <p className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold text-blue-700">{PANEL_TEXT.subtitle}</p>
         </div>
         <label className="block space-y-1 text-sm text-zinc-300">
           <span>{PANEL_TEXT.email}</span>
