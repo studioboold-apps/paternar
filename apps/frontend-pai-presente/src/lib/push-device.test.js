@@ -7,6 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 import {
+  getLastPushFailure,
   isPushOptedOut,
   PUSH_STORAGE_KEYS,
   registerPushDevice,
@@ -132,5 +133,42 @@ describe('registerPushDevice', () => {
     installBrowser();
     globalThis.localStorage.setItem(PUSH_STORAGE_KEYS.OPTED_OUT, '1');
     expect(await registerPushDevice(fakeApi(KEY))).toBe(true);
+  });
+
+  it('diz em que passo parou quando nao consegue ativar', async () => {
+    installBrowser();
+    expect(await registerPushDevice(fakeApi(undefined))).toBe(false);
+    expect(getLastPushFailure()).toBe('servidor-sem-chave-vapid');
+  });
+
+  it('recusa chave VAPID que nao e' + "'" + ' um ponto P-256 (ex.: chave privada no lugar da publica)', async () => {
+    const log = installBrowser();
+    expect(await registerPushDevice(fakeApi('Zm9vYmFyYmF6cXV4Zm9vYmFyYmF6cXV4Zm9vYmFyYmE'))).toBe(false);
+    expect(getLastPushFailure()).toContain('chave-vapid-invalida');
+    expect(log).toEqual([]);
+  });
+
+  it('erro do navegador ao inscrever aparece com o nome do erro', async () => {
+    installBrowser();
+    globalThis.navigator.serviceWorker.ready.then((registration) => {
+      registration.pushManager.subscribe = async () => {
+        throw Object.assign(new Error('push service error'), { name: 'AbortError' });
+      };
+    });
+    await globalThis.navigator.serviceWorker.ready;
+    expect(await registerPushDevice(fakeApi(KEY))).toBe(false);
+    expect(getLastPushFailure()).toBe('inscricao-do-navegador-falhou (AbortError: push service error)');
+  });
+
+  it('API que recusa o aparelho aparece como falha da API', async () => {
+    installBrowser();
+    const api = fakeApi(KEY);
+    const original = api.request;
+    api.request = async (method, path, options) => {
+      if (path === '/v1/notification-devices') throw new Error('HTTP 400');
+      return original(method, path, options);
+    };
+    expect(await registerPushDevice(api)).toBe(false);
+    expect(getLastPushFailure()).toContain('api-recusou-o-aparelho');
   });
 });

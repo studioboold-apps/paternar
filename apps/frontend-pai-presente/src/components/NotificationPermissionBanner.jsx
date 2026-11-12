@@ -19,6 +19,7 @@ import {
   isPushSupported,
   subscribeToPush,
   unsubscribeFromPush,
+  getLastPushFailure,
 } from '@/lib/push-notifications';
 
 export default function NotificationPermissionBanner({
@@ -33,6 +34,7 @@ export default function NotificationPermissionBanner({
   const [isSubscribed, setIsSubscribed] = useState(null);
   const [isDismissed, setIsDismissed] = useState(() => isPushDismissed());
   const [isBusy, setIsBusy] = useState(false);
+  const [failure, setFailure] = useState(null);
 
   useEffect(() => {
     setPermission(getNotificationPermission());
@@ -63,6 +65,7 @@ export default function NotificationPermissionBanner({
       const success = await subscribeToPush();
       setPermission(getNotificationPermission());
       setIsSubscribed(success);
+      setFailure(success ? null : getLastPushFailure());
       if (success) setIsDismissed(false);
     } finally {
       setIsBusy(false);
@@ -170,6 +173,11 @@ export default function NotificationPermissionBanner({
               {isBusy && <Loader2 aria-hidden="true" className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
               {t('notificationBanner.enableHere')}
             </Button>
+            {failure && (
+              <p role="alert" className="text-xs text-red-400 mt-2 break-words">
+                {t('notificationBanner.enableFailed', { reason: failure })}
+              </p>
+            )}
           </div>
         </div>
       </aside>

@@ -123,6 +123,38 @@ export async function isPushSubscribed() {
   }
 }
 
+/** Quanto esperar o service worker ficar pronto antes de desistir. */
+const SERVICE_WORKER_READY_TIMEOUT_MS = 10_000;
+
+/**
+ * Motivo da ultima falha ao cadastrar o aparelho, para a tela mostrar. Sem ele
+ * o botao so voltava ao mesmo estado e ninguem sabia em que passo parou.
+ */
+let lastPushFailure = null;
+
+export function getLastPushFailure() {
+  return lastPushFailure;
+}
+
+function fail(reason, error) {
+  const detail = error?.name || error?.message ? `${error.name ?? 'Error'}: ${error.message ?? ''}`.trim() : '';
+  lastPushFailure = detail ? `${reason} (${detail})` : reason;
+  return false;
+}
+
+/**
+ * `navigator.serviceWorker.ready` nunca resolve se o service worker nao
+ * registrar: o botao ficava girando para sempre.
+ */
+function serviceWorkerReady(timeoutMs = SERVICE_WORKER_READY_TIMEOUT_MS) {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('service worker nao ficou pronto')), timeoutMs);
+    }),
+  ]);
+}
+
 function sameKey(current, expected) {
   if (!current) return true;
   const a = new Uint8Array(current);
@@ -140,21 +172,45 @@ function sameKey(current, expected) {
  * existir no servidor, ou cuja inscricao o navegador trocou.
  */
 export async function registerPushDevice(deps = { request }, { automatic = false } = {}) {
-  if (!isPushSupported() || Notification.permission !== 'granted') return false;
+  lastPushFailure = null;
+  if (!isPushSupported()) return fail('navegador-sem-push');
+  if (Notification.permission !== 'granted') return fail('permissao-negada');
   if (automatic && isPushOptedOut()) return false;
 
+  let vapidPublicKey;
   try {
     const vapidResponse = await deps.request('GET', '/v1/push/vapid-public-key');
     // `request` devolve as chaves em snake_case (`toPagePayload`): `publicKey`
     // chega como `public_key`. Ler so `publicKey` dava "sem chave" sempre, e
     // nenhum aparelho era cadastrado.
-    const vapidPublicKey = vapidResponse?.public_key ?? vapidResponse?.publicKey;
-    // Sem chave no servidor nao ha push: dizer "ativo" aqui era mentir para o pai.
-    if (!vapidPublicKey) return false;
+    vapidPublicKey = vapidResponse?.public_key ?? vapidResponse?.publicKey;
+  } catch (error) {
+    return fail('chave-vapid-indisponivel', error);
+  }
+  // Sem chave no servidor nao ha push: dizer "ativo" aqui era mentir para o pai.
+  if (!vapidPublicKey) return fail('servidor-sem-chave-vapid');
 
-    const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-    const registration = await navigator.serviceWorker.ready;
-    let subscription = await registration.pushManager.getSubscription();
+  let applicationServerKey;
+  try {
+    applicationServerKey = urlBase64ToUint8Array(String(vapidPublicKey).trim());
+  } catch (error) {
+    return fail('chave-vapid-invalida', error);
+  }
+  // Chave publica VAPID e um ponto P-256 sem compressao: 65 bytes, comecando em 4.
+  if (applicationServerKey.length !== 65 || applicationServerKey[0] !== 4) {
+    return fail(`chave-vapid-invalida (${applicationServerKey.length} bytes)`);
+  }
+
+  let registration;
+  try {
+    registration = await serviceWorkerReady();
+  } catch (error) {
+    return fail('service-worker-indisponivel', error);
+  }
+
+  let subscription;
+  try {
+    subscription = await registration.pushManager.getSubscription();
     // Inscricao feita com outra chave nunca recebe: refaz com a atual.
     if (subscription && !sameKey(subscription.options?.applicationServerKey, applicationServerKey)) {
       await subscription.unsubscribe();
@@ -163,36 +219,40 @@ export async function registerPushDevice(deps = { request }, { automatic = false
     if (!subscription) {
       subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
     }
+  } catch (error) {
+    return fail('inscricao-do-navegador-falhou', error);
+  }
 
-    const subscriptionPayload = {
-      endpoint: subscription.endpoint,
-      keys: {
-        p256dh: arrayBufferToBase64Url(subscription.getKey('p256dh')),
-        auth: arrayBufferToBase64Url(subscription.getKey('auth')),
-      },
-      expirationTime: subscription.expirationTime,
-    };
+  const subscriptionPayload = {
+    endpoint: subscription.endpoint,
+    keys: {
+      p256dh: arrayBufferToBase64Url(subscription.getKey('p256dh')),
+      auth: arrayBufferToBase64Url(subscription.getKey('auth')),
+    },
+    expirationTime: subscription.expirationTime,
+  };
 
-    const device = await deps.request('POST', '/v1/notification-devices', {
+  let device;
+  try {
+    device = await deps.request('POST', '/v1/notification-devices', {
       body: { platform: 'web', driver: 'webpush', token: JSON.stringify(subscriptionPayload) },
     });
-    if (!device?.id) return false;
-
-    if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(PUSH_STORAGE_KEYS.DEVICE_ID, device.id);
-    }
-    resetDismissedPush();
-    return true;
-  } catch {
-    return false;
+  } catch (error) {
+    return fail('api-recusou-o-aparelho', error);
   }
+  if (!device?.id) return fail('api-nao-devolveu-o-aparelho');
+
+  writeStorage(PUSH_STORAGE_KEYS.DEVICE_ID, device.id);
+  resetDismissedPush();
+  return true;
 }
 
 /** Pede a permissao (se ainda nao houver) e cadastra o aparelho. */
 export async function subscribeToPush(deps = { request }) {
-  if (!isPushSupported()) return false;
+  lastPushFailure = null;
+  if (!isPushSupported()) return fail('navegador-sem-push');
   const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return false;
+  if (permission !== 'granted') return fail('permissao-negada');
   writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, null);
   return registerPushDevice(deps);
 }
@@ -207,7 +267,7 @@ export async function unsubscribeFromPush() {
   writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, '1');
 
   try {
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await serviceWorkerReady();
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) {
       await subscription.unsubscribe();
