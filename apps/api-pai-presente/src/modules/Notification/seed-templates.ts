@@ -57,34 +57,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Olá! Você marcou a atividade *{{title}}* para {{activityDate}}{{activityTime}} no Paternar. Bom momento com seus filhos!',
   },
   // Alias atividade_agendada
-  {
-    key: 'atividade_agendada',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Atividade agendada!',
-    body: 'Você marcou a atividade "{{title}}" para {{activityDate}}{{activityTime}}.',
-  },
-  {
-    key: 'atividade_agendada',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Momento agendado!',
-    body: 'Você marcou: "{{title}}" para {{activityDate}}{{activityTime}}.',
-  },
-  {
-    key: 'atividade_agendada',
-    channel: 'email',
-    locale: 'pt-BR',
-    subject: 'Atividade agendada no Paternar: {{title}}',
-    body: 'Você agendou a atividade "{{title}}" para {{activityDate}}{{activityTime}}.',
-  },
-  {
-    key: 'atividade_agendada',
-    channel: 'whatsapp',
-    locale: 'pt-BR',
-    subject: 'Atividade agendada',
-    body: 'Você marcou a atividade *{{title}}* para {{activityDate}}{{activityTime}}.',
-  },
 
   // atividades.lembrete
   {
@@ -116,34 +88,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Lembrete: sua atividade *{{title}}* acontece em breve! Abra o app do Paternar para ver os detalhes.',
   },
   // Alias atividade_lembrete
-  {
-    key: 'atividade_lembrete',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Lembrete de momento especial',
-    body: 'Daqui a pouco tem atividade: "{{title}}". Prepare-se para esse momento especial!',
-  },
-  {
-    key: 'atividade_lembrete',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Lembrete de atividade',
-    body: 'Daqui a pouco tem: "{{title}}". Prepare-se!',
-  },
-  {
-    key: 'atividade_lembrete',
-    channel: 'email',
-    locale: 'pt-BR',
-    subject: 'Lembrete de atividade: {{title}}',
-    body: 'Lembrete da atividade "{{title}}". Bom proveito!',
-  },
-  {
-    key: 'atividade_lembrete',
-    channel: 'whatsapp',
-    locale: 'pt-BR',
-    subject: 'Lembrete de atividade',
-    body: 'Lembrete: *{{title}}* acontece em breve!',
-  },
 
   // atividades.concluida
   {
@@ -175,20 +119,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Parabéns por concluir a atividade *{{title}}* com seus filhos! Continue presente nessa jornada.',
   },
   // Alias atividade_concluida
-  {
-    key: 'atividade_concluida',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Momento concluído!',
-    body: 'Parabéns por dedicar tempo de qualidade na atividade "{{title}}"! Veja seu progresso no Boletim.',
-  },
-  {
-    key: 'atividade_concluida',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Parabéns pelo momento especial!',
-    body: 'Você concluiu "{{title}}"! O tempo de qualidade faz a diferença.',
-  },
 
   // atividades.incentivo
   {
@@ -220,20 +150,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Que tal planejar uma atividade com seus filhos hoje? Dê uma olhada nas sugestões no Paternar.',
   },
   // Alias atividade_incentivo
-  {
-    key: 'atividade_incentivo',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Que tal planejar um momento juntos?',
-    body: 'Reserve um tempo na sua agenda esta semana para uma atividade especial com as crianças.',
-  },
-  {
-    key: 'atividade_incentivo',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Momento com os filhos',
-    body: 'Que tal reservar um momento especial com as crianças esta semana? Abra a Agenda e planeje!',
-  },
 
   // --------------------------------------------------------------------------
   // 2. Categoria Comunidade
@@ -268,20 +184,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Outro pai comentou no seu post na Comunidade do Paternar: "{{commentText}}". Venha interagir!',
   },
   // Alias comunidade_comentario
-  {
-    key: 'comunidade_comentario',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Novo comentário no seu relato',
-    body: 'Outro pai comentou no seu post na Comunidade: "{{commentText}}".',
-  },
-  {
-    key: 'comunidade_comentario',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Comentário na Comunidade',
-    body: 'Responderam ao seu post na Comunidade de pais. Toque para ver!',
-  },
 
   // comunidade.resposta
   {
@@ -346,20 +248,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Parabéns! Nova conquista de *{{childName}}* registrada no Boletim: "{{title}}".',
   },
   // Alias boletim_conquista
-  {
-    key: 'boletim_conquista',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Nova conquista registrada!',
-    body: 'Você registrou uma nova conquista para {{childName}}: "{{title}}".',
-  },
-  {
-    key: 'boletim_conquista',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Nova conquista!',
-    body: 'Parabéns! Nova conquista registrada para {{childName}} no Boletim.',
-  },
 
   // boletim.insight_semanal
   {
@@ -391,20 +279,6 @@ export const DEFAULT_NOTIFICATION_TEMPLATES: readonly SeedTemplateItem[] = [
     body: 'Dica da semana no Paternar para você e seus filhos: *{{title}}*. {{summary}}',
   },
   // Alias insight_semanal
-  {
-    key: 'insight_semanal',
-    channel: 'inbox',
-    locale: 'pt-BR',
-    subject: 'Dica da semana para você e seus filhos',
-    body: '{{title}}: {{summary}}',
-  },
-  {
-    key: 'insight_semanal',
-    channel: 'push',
-    locale: 'pt-BR',
-    subject: 'Dica da semana do Paternar',
-    body: '{{title}}. Toque para conferir a dica para a faixa etária dos seus filhos!',
-  },
 
   // --------------------------------------------------------------------------
   // 4. Categoria Avisos da Plataforma
@@ -500,6 +374,21 @@ export const DEFAULT_CATEGORY_POLICIES: readonly {
   { category: 'avisos', channel: 'whatsapp', enabled: true },
 ];
 
+/**
+ * Chaves da primeira versao, antes de padronizar em `categoria.evento`. A
+ * semente gravou as duas e o painel mostrava cada modelo em dobro; as antigas
+ * sao desativadas no boot, como o "Remover" do painel faz (da para reativar).
+ */
+export const LEGACY_TEMPLATE_KEYS: readonly string[] = [
+  'atividade_agendada',
+  'atividade_lembrete',
+  'atividade_concluida',
+  'atividade_incentivo',
+  'boletim_conquista',
+  'comunidade_comentario',
+  'insight_semanal',
+];
+
 export async function bootstrapNotificationTemplates(
   db: Database,
   companyId: string = NOTIFICATION_COMPANY_ID,
@@ -522,6 +411,19 @@ export async function bootstrapNotificationTemplates(
     } catch {
       // Ignora se tabela notification.templates ainda nao tiver sido criada por migration
     }
+  }
+
+  // 1b. Desativa as chaves antigas que ainda estiverem ativas
+  try {
+    await db.execute(sql`
+      UPDATE notification.templates
+         SET active = false, updated_at = now()
+       WHERE company_id = ${companyId}::uuid
+         AND active = true
+         AND key IN (${sql.join(LEGACY_TEMPLATE_KEYS.map((key) => sql`${key}`), sql`, `)});
+    `);
+  } catch {
+    // Tabela ainda nao criada pela migration: nada a desativar
   }
 
   // 2. Semeia politicas de roteamento padrao em notification.category_policies

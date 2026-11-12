@@ -197,7 +197,9 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
           sendTemplateTest: createSendTemplateTest({
             notification: params.notifications,
             findAppUserIdForStaff: createPanelRepository(params.database).findAppUserIdForStaff,
+            isActiveAppUser: createPanelRepository(params.database).isActiveAppUser,
           }),
+          logger: params.logger,
         })
       : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),

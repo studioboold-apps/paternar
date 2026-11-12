@@ -42,6 +42,8 @@ export const PANEL_SCOPES = {
   COMMUNITY_MODERATE: 'community:moderate',
   /** Editar modelos e politicas de notificacao e enviar teste para si. */
   NOTIFICATIONS_ADMIN: 'notifications:admin',
+  /** Enviar o teste de um modelo para um pai escolhido. So admin: fala com o pai em nome da marca. */
+  NOTIFICATIONS_SEND_ANY: 'notifications:send-any',
 } as const;
 
 const EDITOR_SCOPES = [
@@ -59,6 +61,7 @@ export const SCOPES_BY_ROLE: Readonly<Record<PanelRole, readonly string[]>> = {
     PANEL_SCOPES.USERS_ADMIN,
     PANEL_SCOPES.CUSTOMERS_ADMIN,
     PANEL_SCOPES.APP_USERS_BLOCK,
+    PANEL_SCOPES.NOTIFICATIONS_SEND_ANY,
   ],
   [PANEL_ROLES.EDITOR]: EDITOR_SCOPES,
   [PANEL_ROLES.VIEWER]: [PANEL_SCOPES.READ, PANEL_SCOPES.CUSTOMERS_READ],
