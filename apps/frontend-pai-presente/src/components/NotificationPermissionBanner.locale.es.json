@@ -11,5 +11,6 @@
   "deniedDescription": "Las notificaciones están bloqueadas en tu navegador. Para recibir recordatorios, permítelas en la configuración del sitio.",
   "inactiveTitle": "Notificaciones desactivadas en este dispositivo",
   "inactiveDescription": "Tu navegador permite notificaciones, pero este dispositivo aún no está registrado para recibirlas. En iPhone, agrega la app a la pantalla de inicio antes de activar.",
-  "enableHere": "Activar en este dispositivo"
+  "enableHere": "Activar en este dispositivo",
+  "enableFailed": "No se pudo activar: {{reason}}"
 }
