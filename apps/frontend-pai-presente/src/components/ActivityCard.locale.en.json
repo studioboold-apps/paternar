@@ -1,5 +1,6 @@
 {
   "suggested": "Suggestion",
   "completed": "Done",
-  "markCompleted": "Mark as done"
+  "markCompleted": "Mark as done",
+  "addToCalendar": "Add to Calendar"
 }

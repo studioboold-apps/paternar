@@ -5,6 +5,7 @@
  */
 
 import type { Database } from './database/client';
+import type { NotificationModule } from '@adatechnology/notification-module';
 import { buildActivityRoutes } from './modules/Activity/activity.controller';
 import { buildAiModule } from './modules/Ai/ai.module';
 import type { LlmProviderName } from './modules/Ai/ai.constant';
@@ -80,12 +81,14 @@ export type BuildApplicationRoutesParams = {
     /** Voz para texto (microfone do chat). Chave vazia so' desliga o microfone. */
     readonly transcription: { readonly apiKey: string; readonly model: string };
   };
+  readonly notifications?: NotificationModule | undefined;
 };
 
 export function buildApplicationRoutes({
   database,
   llm,
   media,
+  notifications,
 }: BuildApplicationRoutesParams): readonly RouteDefinition[] {
   const childRepository = createChildRepository(database);
   /**
@@ -140,6 +143,7 @@ export function buildApplicationRoutes({
       createActivityUseCases({
         repository: activityRepository,
         childOwnership: adaptChildOwnership(childRepository),
+        notifications,
       }),
     ),
     ...buildChildFileRoutes(childFileUseCases),

@@ -10,6 +10,7 @@ import { Calendar, Clock, User, CheckCircle, Tent, BookOpen, Dumbbell, Palette, 
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toLocalDate } from '@/lib/calendar-date';
+import { buildGoogleCalendarUrl } from '@/lib/calendar-link';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import RatingButton from '@/components/ui/RatingButton';
@@ -119,6 +120,22 @@ export default function ActivityCard({
             <CheckCircle aria-hidden="true" className="w-4 h-4 mr-1" />
             {t('activityCard.markCompleted')}
           </Button>
+        ) : !activity.completed ? (
+          <a
+            href={buildGoogleCalendarUrl({
+              title: activity.title,
+              description: activity.description,
+              date: activity.date,
+              time: activity.time,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-medium px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 transition-colors"
+            title={t('activityCard.addToCalendar')}
+          >
+            <Calendar aria-hidden="true" className="w-3.5 h-3.5" />
+            <span>{t('activityCard.addToCalendar')}</span>
+          </a>
         ) : (
           <div />
         )}

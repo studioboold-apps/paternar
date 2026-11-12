@@ -26,6 +26,7 @@ import {
   buildNotificationModule,
   buildNotificationRouter,
 } from './modules/Notification/notification.module';
+import { bootstrapNotificationTemplates } from './modules/Notification/seed-templates';
 
 const environment = readEnvironment();
 const logger = createLogger({ traceId: 'boot', source: 'main' });
@@ -43,9 +44,37 @@ const auth = buildAuthModule({
   isSecureCookie: isProduction,
 });
 
+const notificationModule = buildNotificationModule({
+  database,
+  logger: logger.withScope('notification'),
+  suppressionHmacKey: environment.NOTIFICATION_SUPPRESSION_HMAC_KEY,
+  vapidKeys:
+    environment.VAPID_PUBLIC_KEY && environment.VAPID_PRIVATE_KEY
+      ? {
+          publicKey: environment.VAPID_PUBLIC_KEY,
+          privateKey: environment.VAPID_PRIVATE_KEY,
+          subject: environment.VAPID_SUBJECT,
+        }
+      : undefined,
+});
+await bootstrapNotificationTemplates(database);
+
+const DISPATCH_INTERVAL_MS = 60_000;
+const dispatchTimer = setInterval(async () => {
+  try {
+    await notificationModule.useCases.dispatchDueNotifications.execute();
+  } catch (error) {
+    logger.withScope('notification-dispatch').warn('falha ao despachar notificacoes agendadas', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+}, DISPATCH_INTERVAL_MS);
+dispatchTimer.unref?.();
+
 const router = createRouter({
   routes: buildApplicationRoutes({
     database,
+    notifications: notificationModule,
     llm: {
       providerName: environment.LLM_PROVIDER,
       apiKey: environment.LLM_API_KEY,
@@ -75,19 +104,6 @@ const recommendationFeed = buildRecommendationFeedRouter({
   authenticatedUserResolver: auth.authenticatedUserResolver,
 });
 
-const notificationModule = buildNotificationModule({
-  database,
-  logger: logger.withScope('notification'),
-  suppressionHmacKey: environment.NOTIFICATION_SUPPRESSION_HMAC_KEY,
-  vapidKeys:
-    environment.VAPID_PUBLIC_KEY && environment.VAPID_PRIVATE_KEY
-      ? {
-          publicKey: environment.VAPID_PUBLIC_KEY,
-          privateKey: environment.VAPID_PRIVATE_KEY,
-          subject: environment.VAPID_SUBJECT,
-        }
-      : undefined,
-});
 const notificationRouter = buildNotificationRouter({
   notification: notificationModule,
   authenticatedUserResolver: auth.authenticatedUserResolver,
