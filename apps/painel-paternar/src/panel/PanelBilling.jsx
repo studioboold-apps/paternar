@@ -197,9 +197,9 @@ function Events({ client }) {
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-zinc-800">
                   <td className={`${TABLE_CELL} whitespace-nowrap`}>{formatDateTime(row.occurredAt)}</td>
-                  <td className={TABLE_CELL}>
-                    <p>{PANEL_TEXT.billingEvents[row.type] ?? row.type}</p>
-                    <p className="font-mono text-[11px] text-zinc-500">{row.providerEventType}</p>
+                  {/* O nome cru da Hotmart (em ingles) fica so no "title", para quem precisar conferir no painel dela. */}
+                  <td className={TABLE_CELL} title={`Hotmart: ${row.providerEventType}`}>
+                    {PANEL_TEXT.billingEvents[row.type] ?? row.type}
                   </td>
                   <td className={`${TABLE_CELL} truncate`}>{row.customerEmail ?? '—'}</td>
                   <td className={`${TABLE_CELL} text-right`}>
