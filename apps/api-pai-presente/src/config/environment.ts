@@ -160,6 +160,13 @@ const panelShape = {
     .transform((value) => ['1', 'true', 'sim', 'yes'].includes(value.trim().replace(/^["']|["']$/g, '').toLowerCase())),
 } as const;
 
+const notificationShape = {
+  NOTIFICATION_SUPPRESSION_HMAC_KEY: z.string().default('dev-notification-suppression-hmac-key'),
+  VAPID_PUBLIC_KEY: z.string().default(''),
+  VAPID_PRIVATE_KEY: z.string().default(''),
+  VAPID_SUBJECT: z.string().default('mailto:admin@entrelacos.com.br'),
+} as const;
+
 const databaseEnvironmentSchema = z.object({ ...runtimeShape, ...databaseShape });
 const backupEnvironmentSchema = z.object({
   ...runtimeShape,
@@ -180,6 +187,7 @@ const environmentSchema = z.object({
   ...aiShape,
   ...mediaShape,
   ...panelShape,
+  ...notificationShape,
 });
 
 export type DatabaseEnvironment = z.infer<typeof databaseEnvironmentSchema>;

@@ -49,14 +49,15 @@ describe('sessao da equipe', () => {
 });
 
 describe('migrations do SDK', () => {
-  test('usuarios, depois anunciantes, depois recomendacoes, cada um com journal proprio', () => {
+  test('usuarios, depois anunciantes, depois recomendacoes, depois notificacoes, cada um com journal proprio', () => {
     const migrations = listSdkMigrations('/pasta-que-nao-existe');
     expect(migrations.map((migration) => migration.name)).toEqual([
       'user-module',
       'customer-module',
       'recommendation-module',
+      'notification-module',
     ]);
-    expect(new Set(migrations.map((migration) => migration.table)).size).toBe(3);
+    expect(new Set(migrations.map((migration) => migration.table)).size).toBe(4);
   });
 });
 

@@ -22,6 +22,10 @@ import { checkHealth, respondWithHealth } from './modules/shared/health/health.u
 import { createLogger } from './modules/shared/logger/logger';
 import { buildPanelModule } from './modules/Panel/panel.module';
 import { buildRecommendationFeedRouter, buildSdkModules } from './modules/Recommendation/recommendation.module';
+import {
+  buildNotificationModule,
+  buildNotificationRouter,
+} from './modules/Notification/notification.module';
 
 const environment = readEnvironment();
 const logger = createLogger({ traceId: 'boot', source: 'main' });
@@ -71,6 +75,25 @@ const recommendationFeed = buildRecommendationFeedRouter({
   authenticatedUserResolver: auth.authenticatedUserResolver,
 });
 
+const notificationModule = buildNotificationModule({
+  database,
+  logger: logger.withScope('notification'),
+  suppressionHmacKey: environment.NOTIFICATION_SUPPRESSION_HMAC_KEY,
+  vapidKeys:
+    environment.VAPID_PUBLIC_KEY && environment.VAPID_PRIVATE_KEY
+      ? {
+          publicKey: environment.VAPID_PUBLIC_KEY,
+          privateKey: environment.VAPID_PRIVATE_KEY,
+          subject: environment.VAPID_SUBJECT,
+        }
+      : undefined,
+});
+const notificationRouter = buildNotificationRouter({
+  notification: notificationModule,
+  authenticatedUserResolver: auth.authenticatedUserResolver,
+  vapidPublicKey: environment.VAPID_PUBLIC_KEY || undefined,
+});
+
 /**
  * Sem `PANEL_JWT_SECRET` o painel nao existe: `/v1/panel/*` cai no 404 do
  * roteador do app, como qualquer rota desconhecida.
@@ -114,6 +137,7 @@ const server = Bun.serve({
     }
     if (panel?.router.match(request)) return cors.decorate(request, await panel.router.handle(request));
     if (recommendationFeed.match(request)) return cors.decorate(request, await recommendationFeed.handle(request));
+    if (notificationRouter.match(request)) return cors.decorate(request, await notificationRouter.handle(request));
     return cors.decorate(request, await router.handle(request));
   },
 });
