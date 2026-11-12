@@ -11,7 +11,31 @@ import { request } from '@/api/http';
 export const PUSH_STORAGE_KEYS = Object.freeze({
   DISMISSED: 'paternar:push:dismissed',
   DEVICE_ID: 'paternar:push:device-id',
+  /** O pai desligou neste aparelho: o cadastro automatico na abertura nao religa. */
+  OPTED_OUT: 'paternar:push:opted-out',
 });
+
+function readStorage(key) {
+  try {
+    return typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem(key) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key, value) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    if (value === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, value);
+  } catch {
+    // Armazenamento indisponivel (aba anonima, cota): segue sem lembrar.
+  }
+}
+
+export function isPushOptedOut() {
+  return readStorage(PUSH_STORAGE_KEYS.OPTED_OUT) === '1';
+}
 
 const DEFAULT_DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
@@ -99,57 +123,61 @@ export async function isPushSubscribed() {
   }
 }
 
-/**
- * Solicita permissao de notificacao e registra o dispositivo para receber Web Push.
- */
-export async function subscribeToPush() {
-  if (!isPushSupported()) return false;
+function sameKey(current, expected) {
+  if (!current) return true;
+  const a = new Uint8Array(current);
+  if (a.length !== expected.length) return false;
+  return a.every((byte, index) => byte === expected[index]);
+}
 
-  const permission = await Notification.requestPermission();
-  if (permission !== 'granted') return false;
+/**
+ * Cadastra ESTE aparelho na API para receber push. Nao pede permissao: so roda
+ * com ela ja concedida. Devolve `true` apenas quando a API confirmou o aparelho;
+ * permissao do navegador sozinha nao faz push chegar.
+ *
+ * Idempotente (a API "registra ou reativa"): roda de novo a cada abertura do
+ * app, e assim conserta o aparelho que deu permissao antes de a chave VAPID
+ * existir no servidor, ou cuja inscricao o navegador trocou.
+ */
+export async function registerPushDevice(deps = { request }, { automatic = false } = {}) {
+  if (!isPushSupported() || Notification.permission !== 'granted') return false;
+  if (automatic && isPushOptedOut()) return false;
 
   try {
-    // 1. Busca a chave publica VAPID na API
-    const vapidResponse = await request('GET', '/v1/push/vapid-public-key');
+    const vapidResponse = await deps.request('GET', '/v1/push/vapid-public-key');
     const vapidPublicKey = vapidResponse?.publicKey;
-    if (!vapidPublicKey) {
-      // Sem chave VAPID configurada no servidor, segue com permissao do navegador
-      return true;
-    }
+    // Sem chave no servidor nao ha push: dizer "ativo" aqui era mentir para o pai.
+    if (!vapidPublicKey) return false;
 
-    // 2. Inscreve o navegador no pushManager
+    const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
     const registration = await navigator.serviceWorker.ready;
     let subscription = await registration.pushManager.getSubscription();
-    if (!subscription) {
-      const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey,
-      });
+    // Inscricao feita com outra chave nunca recebe: refaz com a atual.
+    if (subscription && !sameKey(subscription.options?.applicationServerKey, applicationServerKey)) {
+      await subscription.unsubscribe();
+      subscription = null;
     }
-
-    const p256dh = arrayBufferToBase64Url(subscription.getKey('p256dh'));
-    const auth = arrayBufferToBase64Url(subscription.getKey('auth'));
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
+    }
 
     const subscriptionPayload = {
       endpoint: subscription.endpoint,
-      keys: { p256dh, auth },
+      keys: {
+        p256dh: arrayBufferToBase64Url(subscription.getKey('p256dh')),
+        auth: arrayBufferToBase64Url(subscription.getKey('auth')),
+      },
       expirationTime: subscription.expirationTime,
     };
 
-    // 3. Cadastra o dispositivo na API
-    const device = await request('POST', '/v1/notification-devices', {
-      body: {
-        platform: 'web',
-        driver: 'webpush',
-        token: JSON.stringify(subscriptionPayload),
-      },
+    const device = await deps.request('POST', '/v1/notification-devices', {
+      body: { platform: 'web', driver: 'webpush', token: JSON.stringify(subscriptionPayload) },
     });
+    if (!device?.id) return false;
 
-    if (device?.id && typeof window !== 'undefined' && window.localStorage) {
+    if (typeof window !== 'undefined' && window.localStorage) {
       window.localStorage.setItem(PUSH_STORAGE_KEYS.DEVICE_ID, device.id);
     }
-
     resetDismissedPush();
     return true;
   } catch {
@@ -157,11 +185,23 @@ export async function subscribeToPush() {
   }
 }
 
+/** Pede a permissao (se ainda nao houver) e cadastra o aparelho. */
+export async function subscribeToPush(deps = { request }) {
+  if (!isPushSupported()) return false;
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') return false;
+  writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, null);
+  return registerPushDevice(deps);
+}
+
 /**
  * Remove a inscricao ativa de Web Push e desvincula o aparelho na API.
  */
 export async function unsubscribeFromPush() {
   if (!isPushSupported()) return true;
+  // A permissao do navegador continua "granted" (o site nao consegue revoga-la):
+  // sem esta marca, a proxima abertura do app cadastraria o aparelho de novo.
+  writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, '1');
 
   try {
     const registration = await navigator.serviceWorker.ready;
