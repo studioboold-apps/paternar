@@ -50,6 +50,22 @@ const GOOGLE_CLIENT_ID = '863649157799-3q8k5a26st7258jfmpse48to75vsr79r.apps.goo
 const WEB_DOMAIN = 'entrelacos.up.railway.app';
 
 /**
+ * Dominio proprio do app (Registro.br, DNS no Cloudflare), ligado em 06/11/2026.
+ * O plano do Railway aceita UM dominio personalizado: o `www` e' so um
+ * redirecionamento no Cloudflare para este. O de `.up.railway.app` continua
+ * valendo, para quem ja salvou o app com o endereco antigo.
+ */
+const PUBLIC_DOMAIN = 'paternar.com.br';
+
+/**
+ * O painel da equipe e' um app proprio (`apps/painel-paternar`), num servico
+ * proprio e com subdominio proprio, como o Transportada separa `app.` e
+ * `cliente.`. O deploy do painel nao mexe no app dos pais, e o pai nunca baixa
+ * codigo da equipe.
+ */
+const PANEL_DOMAIN = `painel.${PUBLIC_DOMAIN}`;
+
+/**
  * A midia do historico (foto e exame) mora em DISCO, e o disco do container
  * morre com ele. Medido em 07/09/2026: sem volume, `MEDIA_DIRECTORY` valia o
  * padrao relativo `.media`, a API tentava `mkdir '/app/.media'` — pasta da
@@ -197,7 +213,7 @@ export default defineRailway(() => {
        * cabecalho intacto, e a API recusa (403 FORBIDDEN_ORIGIN) o que nao esta
        * na lista. Vazia, recusou TODO login em 31/10/2026 — Google e senha.
        */
-      WEB_ORIGINS: `https://${WEB_DOMAIN}`,
+      WEB_ORIGINS: `https://${PUBLIC_DOMAIN},https://${PANEL_DOMAIN},https://${WEB_DOMAIN}`,
       /**
        * `D7` FECHOU em 31/10/2026 (ver `GOOGLE_CLIENT_ID` no topo). Historico:
        * `D7` estava aberta: nao existia client_id do Google, e VAZIO e' a unica
@@ -226,13 +242,14 @@ export default defineRailway(() => {
        */
       MEDIA_ENCRYPTION_KEY: preserve(),
       /**
-       * O painel da equipe (`/painel`). Os tres entram por
+       * O painel da equipe (servico `painel`). Os tres entram por
        * `scripts/configurar-painel-railway.sh`, que gera o segredo e manda tudo
        * por `--stdin`. Sem `PANEL_JWT_SECRET` o painel simplesmente nao sobe.
        */
       PANEL_JWT_SECRET: preserve(),
       PANEL_ADMIN_EMAIL: preserve(),
       PANEL_ADMIN_PASSWORD: preserve(),
+      PANEL_ADMIN_RESET: preserve(),
     },
   });
 
@@ -247,7 +264,10 @@ export default defineRailway(() => {
      * diferenca. A porta 8080 nao e' decoracao — sem ela o dominio aponta para
      * porta nenhuma e o navegador recebe "application failed to respond".
      */
-    networking: { serviceDomains: { [WEB_DOMAIN]: { port: WEB_PORT } } },
+    networking: {
+      serviceDomains: { [WEB_DOMAIN]: { port: WEB_PORT } },
+      customDomains: { [PUBLIC_DOMAIN]: { port: WEB_PORT } },
+    },
     deploy: { region: REGION, restartPolicyType: 'ON_FAILURE' },
     env: {
       /**
@@ -282,10 +302,33 @@ export default defineRailway(() => {
        * mudar qualquer um pede deploy novo, nao so restart.
        */
       ADS_ENABLED: '0',
-      ADSENSE_CLIENT_ID: '',
+      /**
+       * ID de editor da conta AdSense (08/11/2026). Com ele, mesmo com
+       * `ADS_ENABLED=0`, o site ja publica a metatag `google-adsense-account`
+       * e o `/ads.txt` — e' o que o Google confere para aprovar o dominio —, e
+       * nenhum anuncio aparece.
+       */
+      ADSENSE_CLIENT_ID: 'ca-pub-3420826522507538',
       ADSENSE_SLOT_ID: '',
     },
   });
 
-  return project('pai-presente', { resources: [database, media, api, web] });
+  /**
+   * Mesma imagem de servidor da web (estaticos + repasse de `/v1` pela rede
+   * privada), com o `dist` do painel. Sem anuncio, sem PWA, sem login de pai.
+   */
+  const painel = service('painel', {
+    source: empty(),
+    build: { builder: 'DOCKERFILE', dockerfilePath: 'apps/painel-paternar/Dockerfile' },
+    healthcheck: '/health',
+    networking: { customDomains: { [PANEL_DOMAIN]: { port: WEB_PORT } } },
+    deploy: { region: REGION, restartPolicyType: 'ON_FAILURE' },
+    env: {
+      API_ORIGIN: 'http://${{api.RAILWAY_PRIVATE_DOMAIN}}:' + String(API_PORT),
+      WEB_PORT: String(WEB_PORT),
+      PORT: String(WEB_PORT),
+    },
+  });
+
+  return project('pai-presente', { resources: [database, media, api, web, painel] });
 });

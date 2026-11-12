@@ -1,6 +1,7 @@
 import React from "react";
 
 import BrandMark from "@/components/BrandMark";
+import AdaFooter from "@/components/AdaFooter";
 import BrandWordmark from "@/components/BrandWordmark";
 
 /**
@@ -13,7 +14,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-brand-navy px-6 pt-14 pb-24 text-center">
-        <BrandMark motion="enter" className="mx-auto h-20 w-24" />
+        <BrandMark motion="enter" className="mx-auto h-20 w-20" />
         <h1 className="sr-only">{title}</h1>
         <BrandWordmark tone="dark" size="lg" className="mt-4 inline-block" />
         {subtitle && <p className="mx-auto mt-4 max-w-xs text-sm text-[#F3F0E8]/80">{subtitle}</p>}
@@ -26,6 +27,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
         )}
       </div>
+      <AdaFooter className="pt-0" />
     </div>
   );
 }

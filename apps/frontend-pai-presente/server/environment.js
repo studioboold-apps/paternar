@@ -4,7 +4,7 @@
  * Licenca: proprietaria.
  */
 
-import { readAdvertisingClientId } from './advertising.js';
+import { readAdsenseClientId, readAdvertisingClientId } from './advertising.js';
 
 const DEFAULT_PORT = 8080;
 const DEFAULT_DIST_DIRECTORY = 'dist';
@@ -32,5 +32,10 @@ export function readServerEnvironment(source) {
     distDirectory: distDirectory.length === 0 ? DEFAULT_DIST_DIRECTORY : distDirectory,
     /** Vazio = sem anuncio: `ADS_ENABLED` desligado ou ausente. */
     adsenseClientId: readAdvertisingClientId(source),
+    /**
+     * O id cadastrado, com ou sem `ADS_ENABLED`: o `ads.txt` declara a conta
+     * ANTES de ligar, para o Google verificar o site sem anuncio na tela.
+     */
+    adsensePublisherId: readAdsenseClientId(source.ADSENSE_CLIENT_ID),
   };
 }

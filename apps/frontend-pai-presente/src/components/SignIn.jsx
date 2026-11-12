@@ -217,6 +217,19 @@ export default function SignIn() {
          */
         <p className="mt-6 text-xs text-muted-foreground text-center">{t('signIn.noProvider')}</p>
       )}
+
+      {/* Paginas em HTML puro, fora da SPA: o `<a>` recarrega de proposito. */}
+      <nav className="mt-6 flex justify-center gap-4 text-xs text-muted-foreground">
+        <a href="/dicas" className="underline underline-offset-2 hover:text-foreground">
+          {t('signIn.links.tips')}
+        </a>
+        <a href="/sobre" className="underline underline-offset-2 hover:text-foreground">
+          {t('signIn.links.about')}
+        </a>
+        <a href="/privacidade" className="underline underline-offset-2 hover:text-foreground">
+          {t('signIn.links.privacy')}
+        </a>
+      </nav>
     </AuthLayout>
   );
 }

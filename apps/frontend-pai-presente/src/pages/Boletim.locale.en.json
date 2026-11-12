@@ -50,6 +50,6 @@
     "score": "⭐ Score {score} ({label})",
     "strengths": "💪 Strengths:",
     "goal": "🎯 Next month's goal: {goal}",
-    "footer": "Made with Entrelaços — Pai Presente: {url}"
+    "footer": "Made with Paternar — Pai Presente: {url}"
   }
 }

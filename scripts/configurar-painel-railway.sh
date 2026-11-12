@@ -74,4 +74,4 @@ echo "-> PANEL_ADMIN_PASSWORD"
 printf '%s' "$PASSWORD" | railway variable set PANEL_ADMIN_PASSWORD --stdin --service "$SERVICE"
 unset PASSWORD
 
-echo "pronto. O Railway faz o redeploy da '$SERVICE'; depois entre em /painel com $EMAIL."
+echo "pronto. O Railway faz o redeploy da '$SERVICE'; depois entre em https://painel.paternar.com.br com $EMAIL."

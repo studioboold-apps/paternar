@@ -17,7 +17,7 @@
  */
 
 export const OFF_TOPIC_REPLY =
-  'Sou o mentor do Entrelaços e só consigo ajudar com paternidade, família e crianças. ' +
+  'Sou o mentor do Paternar e só consigo ajudar com paternidade, família e crianças. ' +
   'Tem alguma dúvida sobre seus filhos ou sobre a rotina de vocês? Estou aqui para isso.';
 
 /** Sinais de que a pergunta e' do tema: com qualquer um deles, a IA responde. */

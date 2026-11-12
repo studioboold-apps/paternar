@@ -6,36 +6,28 @@
 
 import React from 'react';
 
-import {
-  WORDMARK_ENTRE_PATHS,
-  WORDMARK_LACOS_PATHS,
-  WORDMARK_TAGLINE_PATHS,
-  WORDMARK_VIEWBOX,
-} from '@/components/brand-art';
-import { BRAND_CREAM, BRAND_NAVY, BRAND_ORANGE } from '@/components/BrandMark';
+import { WORDMARK_NAME_PATHS, WORDMARK_TAGLINE_PATHS, WORDMARK_VIEWBOX } from '@/components/brand-art';
+import { BRAND_CREAM, BRAND_NAVY } from '@/components/BrandMark';
 import { cn } from '@/lib/utils';
 
 const TAGLINE_GRAY = '#ACABA8';
 
 /**
- * "Entre" + "laços" em laranja, com PAI PRESENTE embaixo: o desenho oficial do
+ * "Paternar" com PAI PRESENTE embaixo: o desenho oficial do
  * logotipo (em curvas, entao nao depende da fonte da marca estar carregada).
  * Fica escondido do leitor de tela: quem usa poe o nome num titulo `sr-only`.
  * `tone` diz o fundo: `dark` (marinho) ou `light`.
  */
 export default function BrandWordmark({ tone = 'light', size = 'md', className }) {
-  const entreColor = tone === 'dark' ? BRAND_CREAM : BRAND_NAVY;
+  const nameColor = tone === 'dark' ? BRAND_CREAM : BRAND_NAVY;
   return (
     <svg
       aria-hidden="true"
       viewBox={WORDMARK_VIEWBOX}
-      className={cn('block', size === 'lg' ? 'h-16 w-[226px]' : 'h-12 w-[170px]', className)}
+      className={cn('block', size === 'lg' ? 'h-16 w-[197px]' : 'h-12 w-[148px]', className)}
     >
-      {WORDMARK_ENTRE_PATHS.map((d) => (
-        <path key={d} fill={entreColor} d={d} />
-      ))}
-      {WORDMARK_LACOS_PATHS.map((d) => (
-        <path key={d} fill={BRAND_ORANGE} d={d} />
+      {WORDMARK_NAME_PATHS.map((d) => (
+        <path key={d} fill={nameColor} d={d} />
       ))}
       {WORDMARK_TAGLINE_PATHS.map((d) => (
         <path key={d} fill={TAGLINE_GRAY} d={d} />

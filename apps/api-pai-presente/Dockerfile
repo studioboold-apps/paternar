@@ -12,6 +12,7 @@ WORKDIR /repo
 COPY package.json bun.lock ./
 COPY apps/api-pai-presente/package.json apps/api-pai-presente/
 COPY apps/frontend-pai-presente/package.json apps/frontend-pai-presente/
+COPY apps/painel-paternar/package.json apps/painel-paternar/
 # `--frozen-lockfile` (security.md §4): build reprodutivel, versao igual a testada.
 RUN bun install --frozen-lockfile
 

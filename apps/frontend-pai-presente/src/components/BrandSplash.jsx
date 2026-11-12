@@ -11,8 +11,8 @@ import BrandWordmark from '@/components/BrandWordmark';
 import { splashElapsedMs } from '@/lib/splash';
 
 /**
- * Abertura do app (pedido do design, nov/2026): os dois elos entram, se
- * encaixam e o coracao bate uma vez; o nome sobe logo depois. Mesmo fundo
+ * Abertura do app (pedido do design, nov/2026): o quadrado cresce, o "P" cai
+ * no lugar e sorri; o nome sobe logo depois. Mesmo fundo
  * marinho e mesma composicao da tela estatica do `index.html`, que aparece
  * antes do JavaScript — assim a troca de uma para a outra nao pisca.
  */
@@ -29,7 +29,7 @@ export default function BrandSplash({ label = 'Carregando' }) {
         .splash-word { animation: splash-fade-up 400ms ease-out calc(650ms + var(--splash-elapsed, 0ms)) both }
         @media (prefers-reduced-motion: reduce) { .splash-word { animation: none } }
       `}</style>
-      <BrandMark motion="enter" className="h-28 w-36" />
+      <BrandMark motion="enter" className="h-28 w-28" />
       <BrandWordmark tone="dark" size="lg" className="splash-word text-center" />
     </div>
   );

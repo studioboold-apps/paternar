@@ -1,5 +1,27 @@
 # Publicar o Pai Presente
 
+> **06/11/2026 — domínio próprio.** O app atende em `https://paternar.com.br`
+> (Registro.br, DNS no Cloudflare: CNAME `@` → alvo do Railway, TXT
+> `_railway-verify`, e `www` redirecionado para a raiz por Redirect Rule). O
+> plano do Railway aceita um domínio personalizado só. O endereço
+> `entrelacos.up.railway.app` continua no ar. Ao trocar o domínio, mude também
+> `WEB_ORIGINS` da `api` (senão o login dá 403), as origens do Client ID OAuth no
+> Google e `RAILWAY_PUBLIC_URL` no ambiente `production` do GitHub.
+>
+> **Painel da equipe: app e serviço próprios.** `apps/painel-paternar` sobe no
+> serviço `painel` (`apps/painel-paternar/Dockerfile`), em
+> `painel.paternar.com.br`. Quem cria e configura é o próprio deploy: o passo
+> `servicos e variaveis no Railway` (`scripts/railway-garantir-servicos.mjs`)
+> cria o serviço se faltar, grava `RAILWAY_DOCKERFILE_PATH`, `API_ORIGIN`,
+> `WEB_PORT`, `PORT` e o healthcheck, gera um domínio `*.up.railway.app` e tenta
+> o `painel.paternar.com.br`, e acrescenta as origens que faltam em
+> `WEB_ORIGINS` da `api`. Se o plano recusar o segundo domínio próprio, o painel
+> segue no domínio do Railway (aviso no log). Com o segredo
+> `CLOUDFLARE_API_TOKEN` no ambiente `production` do GitHub (token do Cloudflare
+> com Zone → DNS → Edit em paternar.com.br), o mesmo passo cria no Cloudflare o
+> CNAME `painel` e o TXT de verificação que o Railway pedir; sem ele, o log
+> lista os registros para criar à mão.
+
 > **31/10/2026 — projeto novo.** A produção mudou para o workspace da empresa
 > no Railway (projeto `6cb88306…`, ambiente `production`), criada a partir de
 > `.railway/railway.ts` com `railway config apply`. Endereço novo:
@@ -92,9 +114,10 @@ Nenhum valor mora neste arquivo nem no repositório (`security.md` §4).
 | `NODE_ENV` | já vem `production` na imagem | é o que liga `Secure` no cookie |
 | `API_PORT` | não | padrão 3000 |
 | `WEB_ORIGINS` | **sim** | a URL pública da web. Mesmo com mesma origem o navegador manda `Origin` no POST e a web repassa; vazia, a API recusa todo login com 403 |
-| `PANEL_JWT_SECRET` | não | mínimo 32 caracteres, **diferente** do `AUTH_JWT_SECRET`. Liga o painel da equipe (`/painel`, rotas `/v1/panel`); vazia, o painel não sobe e o resto da API segue igual |
-| `PANEL_ADMIN_EMAIL` | não | e-mail do primeiro admin do painel, criado no boot se ainda não existir |
-| `PANEL_ADMIN_PASSWORD` | não | senha desse primeiro admin, mínimo 12 caracteres; troque depois do primeiro acesso |
+| `PANEL_JWT_SECRET` | não | mínimo 32 caracteres, **diferente** do `AUTH_JWT_SECRET`. Liga o painel da equipe (app `apps/painel-paternar`, serviço `painel` em `painel.paternar.com.br`, rotas `/v1/panel`); vazia, o painel não sobe e o resto da API segue igual |
+| `PANEL_ADMIN_EMAIL` | não | e-mail do primeiro admin do painel, criado no boot se ainda não existir; aceita vários separados por vírgula (todos admin, mesma senha inicial) |
+| `PANEL_ADMIN_PASSWORD` | não | senha desse primeiro admin, mínimo 8 caracteres; troque depois do primeiro acesso |
+| `PANEL_ADMIN_RESET` | não | padrão `1`: a cada boot, `PANEL_ADMIN_PASSWORD` vira a senha dos e-mails de `PANEL_ADMIN_EMAIL`. Use `0` para a senha passar a ser só a trocada no painel |
 
 As três entram de uma vez, sem o segredo passar pelo terminal:
 `make painel-railway EMAIL=voce@exemplo.com` (ou `GERAR=1` para gerar a senha num arquivo só seu).

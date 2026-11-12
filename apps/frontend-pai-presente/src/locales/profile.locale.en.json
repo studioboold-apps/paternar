@@ -100,7 +100,7 @@
     "notInformed": "Prefer not to say",
     "placeholder": "Type or pick below",
     "sameAs": "Will be saved as “{option}”, which already exists.",
-    "consent": "I allow Entrelaços to store this sensitive data (LGPD, art. 11) only to personalize the AI's guidance. I can delete it at any time.",
+    "consent": "I allow Paternar to store this sensitive data (LGPD, art. 11) only to personalize the AI's guidance. I can delete it at any time.",
     "save": "Save",
     "remove": "Delete my values",
     "fields": {

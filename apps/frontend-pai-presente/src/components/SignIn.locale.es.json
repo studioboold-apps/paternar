@@ -1,5 +1,5 @@
 {
-  "title": "Entrelaços",
+  "title": "Paternar",
   "subtitle": "Inicia sesión para acompañar el tiempo con tus hijos.",
   "footer": "Usamos tu cuenta solo para identificarte.",
   "submitting": "Iniciando sesión…",
@@ -27,6 +27,12 @@
     "emailTaken": "Este correo ya tiene una cuenta. Vuelve a Iniciar sesión.",
     "failed": "El correo o la contraseña no coinciden. Revísalos e inténtalo de nuevo.",
     "registerFailed": "No pudimos crear la cuenta ahora. Inténtalo de nuevo en unos instantes.",
-    "server": "No pudimos comunicarnos con el servidor ahora. Inténtalo de nuevo en unos instantes."
+    "server": "No pudimos comunicarnos con el servidor ahora. Inténtalo de nuevo en unos instantes.",
+    "blocked": "Esta cuenta está bloqueada. Comunícate con el soporte de Entrelaços."
+  },
+  "links": {
+    "tips": "Consejos para padres",
+    "about": "Sobre Paternar",
+    "privacy": "Política de privacidad"
   }
 }

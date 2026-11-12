@@ -23,8 +23,8 @@ const indexHtml = readAppFile('index.html');
 
 describe('manifesto', () => {
   test('declara o que o celular precisa para oferecer instalar', () => {
-    expect(PWA_MANIFEST.name).toBe('Entrelaços — Pai Presente');
-    expect(PWA_MANIFEST.short_name).toBe('Entrelaços');
+    expect(PWA_MANIFEST.name).toBe('Paternar — Pai Presente');
+    expect(PWA_MANIFEST.short_name).toBe('Paternar');
     expect(PWA_MANIFEST.short_name.length).toBeLessThanOrEqual(12);
     expect(PWA_MANIFEST.start_url).toBe('/');
     expect(PWA_MANIFEST.display).toBe('standalone');
@@ -70,6 +70,16 @@ describe('service worker', () => {
     expect(PWA_WORKBOX.navigateFallbackDenylist.some((pattern) => pattern.test('/v1/children'))).toBe(true);
   });
 
+  /** Com o app instalado, a politica de privacidade nao pode cair no login. */
+  test('as paginas publicas e os arquivos dos robos nunca caem no shell', () => {
+    const denied = (path) => PWA_WORKBOX.navigateFallbackDenylist.some((pattern) => pattern.test(path));
+
+    for (const path of ['/sobre', '/privacidade', '/dicas', '/dicas/birra', '/ads.txt', '/robots.txt', '/sitemap.xml']) {
+      expect(denied(path)).toBe(true);
+    }
+    expect(denied('/Perfil')).toBe(false);
+  });
+
   test('o asset estatico fica em cache antes da rede', () => {
     const assetRule = PWA_WORKBOX.runtimeCaching.find((rule) => rule.urlPattern.test('/icons/icon-192.png'));
 
@@ -81,7 +91,7 @@ describe('service worker', () => {
     const isPrecached = PWA_WORKBOX.globPatterns.some((pattern) => new Bun.Glob(pattern).match('offline.html'));
 
     expect(isPrecached).toBe(true);
-    expect(offlineHtml).toContain('Entrelaços');
+    expect(offlineHtml).toContain('Paternar');
     expect(offlineHtml).toContain('Pai Presente');
     expect(existsSync(join(PUBLIC_DIRECTORY, 'marca-pai-presente.png'))).toBe(true);
     expect(offlineHtml).toContain('marca-pai-presente.png');
@@ -91,7 +101,7 @@ describe('service worker', () => {
 describe('index.html', () => {
   test('fala portugues e diz o nome do produto', () => {
     expect(indexHtml).toContain('lang="pt-BR"');
-    expect(indexHtml).toContain('<title>Entrelaços — Pai Presente</title>');
+    expect(indexHtml).toContain('<title>Paternar — Pai Presente</title>');
   });
 
   /**

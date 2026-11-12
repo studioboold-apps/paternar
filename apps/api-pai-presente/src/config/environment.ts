@@ -143,10 +143,21 @@ const panelShape = {
    * senha so vale na primeira criacao, nunca sobrescreve a atual.
    */
   PANEL_ADMIN_EMAIL: z.string().default(''),
-  PANEL_ADMIN_PASSWORD: z
+  // Sem `refine` de proposito: senha curta aqui derrubava a API inteira (pais
+  // inclusive). Quem recusa senha curta, com log, e' o `ensureFirstAdmin`.
+  PANEL_ADMIN_PASSWORD: z.string().default(''),
+  /**
+   * Recuperacao de acesso. Com `1`, o boot grava `PANEL_ADMIN_PASSWORD` como a
+   * senha atual de `PANEL_ADMIN_EMAIL` (e reativa a conta como admin). Serve
+   * para quando ninguem mais entra no painel; depois do login, volte para `0`.
+   */
+  // Ligado por padrao: a senha de `PANEL_ADMIN_PASSWORD` vale para os e-mails de
+  // `PANEL_ADMIN_EMAIL` a cada boot. `0` desliga (senha passa a ser so do painel).
+  // Tolerante: aceita 1/true/sim, com ou sem aspas; valor errado nao derruba a API.
+  PANEL_ADMIN_RESET: z
     .string()
-    .default('')
-    .refine((value) => value === '' || value.length >= 12, 'PANEL_ADMIN_PASSWORD precisa de 12+ caracteres'),
+    .default('1')
+    .transform((value) => ['1', 'true', 'sim', 'yes'].includes(value.trim().replace(/^["']|["']$/g, '').toLowerCase())),
 } as const;
 
 const notificationShape = {

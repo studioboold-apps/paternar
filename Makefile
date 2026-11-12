@@ -23,6 +23,7 @@ COMPOSE := docker compose --project-name $(COMPOSE_PROJECT)
 IMAGE_TAG ?= local
 API_IMAGE := $(PROJECT_NAME)-api:$(IMAGE_TAG)
 WEB_IMAGE := $(PROJECT_NAME)-web:$(IMAGE_TAG)
+PAINEL_IMAGE := $(PROJECT_NAME)-painel:$(IMAGE_TAG)
 
 # Medido: o compose publica o banco em `127.0.0.1:$(POSTGRES_PORT)`, so no
 # loopback (security.md §5). Contêiner que chega pelo `host-gateway` NAO vem do
@@ -49,7 +50,7 @@ BACKUP_SCRATCH_DB := $(POSTGRES_DB)_restore
 PG_CONNECT := -h localhost -p $(POSTGRES_PORT) -U $(POSTGRES_USER)
 PG_DUMP_FLAGS := --format=plain --no-owner --no-privileges
 
-.PHONY: help compose-project up down logs psql generate migrate seed install dev dev-web dev-api build images image-api image-web image-smoke backup restore backup-proof log-pii-audit test test-e2e typecheck validate github-railway painel-railway clean
+.PHONY: help compose-project up down logs psql generate migrate seed install dev dev-web dev-painel dev-api build images image-api image-web image-painel image-smoke backup restore backup-proof log-pii-audit test test-e2e typecheck validate github-railway painel-railway clean
 
 help: ## lista os alvos
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$'  Makefile | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -90,11 +91,15 @@ dev: up migrate ## sobe infra, api e web de uma vez (Ctrl-C derruba os dois)
 dev-web: ## sobe o frontend
 	cd apps/frontend-pai-presente && bun run dev
 
+dev-painel: ## sobe o painel da equipe (porta PAINEL_PORT, padrao 5174)
+	cd apps/painel-paternar && bun run dev
+
 dev-api: ## sobe a api
 	cd apps/api-pai-presente && bun run dev
 
 build: ## build de producao
 	cd apps/frontend-pai-presente && bun run build
+	cd apps/painel-paternar && bun run build
 
 image-api: ## constroi a imagem da API
 	docker build -f apps/api-pai-presente/Dockerfile -t $(API_IMAGE) .
@@ -106,7 +111,10 @@ image-web: ## constroi a imagem da web (APP_ENV e assado no bundle, web.md §12)
 		--build-arg APPLE_CLIENT_ID=$(APPLE_CLIENT_ID) \
 		-t $(WEB_IMAGE) .
 
-images: image-api image-web ## constroi as duas imagens
+image-painel: ## constroi a imagem do painel da equipe
+	docker build -f apps/painel-paternar/Dockerfile -t $(PAINEL_IMAGE) .
+
+images: image-api image-web image-painel ## constroi as tres imagens
 
 # Imagem que compila nao e imagem que responde: o bundle pode subir e morrer no
 # primeiro `import`, e o `dist` pode ir vazio para dentro do contêiner sem que

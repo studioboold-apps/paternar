@@ -4,9 +4,10 @@
  * Licenca: proprietaria.
  */
 
-import { and, count, desc, gte, ilike, or, sql, type SQL } from 'drizzle-orm';
+import { and, count, desc, eq, gte, ilike, isNull, or, sql, type SQL } from 'drizzle-orm';
 
 import type { Database } from '../../database/client';
+import { sessionsTable } from '../Auth/auth.table';
 import { childrenTable } from '../Child/child.table';
 import { communityPostsTable } from '../CommunityPost/community-post.table';
 import { usersTable } from '../User/user.table';
@@ -35,6 +36,8 @@ export type PanelUserRow = {
   readonly onboardingCompleted: boolean;
   readonly childrenCount: number;
   readonly createdAt: Date;
+  /** Quando a equipe bloqueou; nulo e' liberado. */
+  readonly blockedAt: Date | null;
 };
 
 export type ListPanelUsersParams = {
@@ -51,6 +54,22 @@ function escapeLike(value: string): string {
 
 export function createPanelRepository(database: Database) {
   return {
+    /**
+     * Recuperacao de acesso do painel: grava a senha nova no formato do
+     * `user-module` (Bun.password), reativa e devolve o papel de admin. O
+     * e-mail casa sem diferenciar maiusculas, que e' o erro mais comum.
+     */
+    async resetAdminPassword(input: { readonly email: string; readonly password: string }): Promise<number> {
+      const passwordHash = await Bun.password.hash(input.password);
+      const result = await database.execute(sql`
+        update "user"."users"
+           set password_hash = ${passwordHash}, is_active = true, role = 'admin', updated_at = now()
+         where lower(email) = lower(${input.email.trim()}) and deleted_at is null
+         returning id
+      `);
+      return (result as unknown as readonly unknown[]).length;
+    },
+
     async overview(now: Date = new Date()): Promise<PanelOverview> {
       const since7 = new Date(now.getTime() - 7 * DAY_MS);
       const since30 = new Date(now.getTime() - 30 * DAY_MS);
@@ -88,6 +107,32 @@ export function createPanelRepository(database: Database) {
       };
     },
 
+    /**
+     * Bloqueia (ou libera) um pai. Bloquear tambem revoga as sessoes dele, na
+     * mesma transacao: o refresh guardado no navegador deixa de valer na hora.
+     * Devolve `undefined` se o pai nao existe.
+     */
+    async setUserBlocked(input: {
+      readonly userId: string;
+      readonly blocked: boolean;
+    }): Promise<{ readonly id: string; readonly blockedAt: Date | null } | undefined> {
+      return await database.transaction(async (transaction) => {
+        const [row] = await transaction
+          .update(usersTable)
+          .set({ blockedAt: input.blocked ? new Date() : null, updatedAt: new Date() })
+          .where(eq(usersTable.id, input.userId))
+          .returning({ id: usersTable.id, blockedAt: usersTable.blockedAt });
+        if (row === undefined) return undefined;
+        if (input.blocked) {
+          await transaction
+            .update(sessionsTable)
+            .set({ revokedAt: new Date(), updatedAt: new Date() })
+            .where(and(eq(sessionsTable.userId, input.userId), isNull(sessionsTable.revokedAt)));
+        }
+        return row;
+      });
+    },
+
     async listUsers(params: ListPanelUsersParams): Promise<{ rows: PanelUserRow[]; total: number }> {
       const conditions: SQL[] = [];
       if (params.search) {
@@ -109,6 +154,7 @@ export function createPanelRepository(database: Database) {
             onboardingCompleted: usersTable.onboardingCompleted,
             childrenCount,
             createdAt: usersTable.createdAt,
+            blockedAt: usersTable.blockedAt,
           })
           .from(usersTable)
           .where(where)

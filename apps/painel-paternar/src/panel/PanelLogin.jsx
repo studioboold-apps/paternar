@@ -1,0 +1,62 @@
+/**
+ * Paternar — painel da equipe
+ * Copyright (c) 2026. Todos os direitos reservados.
+ * Licenca: proprietaria.
+ */
+
+import React, { useState } from 'react';
+
+import AdaFooter from '@/components/AdaFooter';
+import { BrandSymbol, BrandWordmark } from '@/components/PanelBrand';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+import { PANEL_TEXT } from './panel-text';
+
+export default function PanelLogin({ client }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event) {
+    event.preventDefault();
+    setBusy(true);
+    setFailed(false);
+    const ok = await client.signIn({ email, password }).catch(() => false);
+    setBusy(false);
+    if (!ok) setFailed(true);
+  }
+
+  return (
+    <div className="relative flex min-h-screen items-center justify-center bg-zinc-950 bg-[radial-gradient(circle_at_top,_#FFE8C7_0,_transparent_55%)] px-4">
+      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-2xl border border-zinc-800 bg-white p-6 shadow-lg shadow-zinc-800/40">
+        <div className="flex flex-col items-center gap-2 pb-2 text-center">
+          <BrandSymbol className="h-14 w-14" />
+          <BrandWordmark className="h-12 w-[148px]" />
+          <h1 className="sr-only">{PANEL_TEXT.title}</h1>
+          <p className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-semibold text-blue-700">{PANEL_TEXT.subtitle}</p>
+        </div>
+        <label className="block space-y-1 text-sm text-zinc-300">
+          <span>{PANEL_TEXT.email}</span>
+          <Input type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} />
+        </label>
+        <label className="block space-y-1 text-sm text-zinc-300">
+          <span>{PANEL_TEXT.password}</span>
+          <Input
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </label>
+        {failed ? <p className="text-sm text-red-600">{PANEL_TEXT.signInFailed}</p> : null}
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? PANEL_TEXT.signingIn : PANEL_TEXT.signIn}
+        </Button>
+      </form>
+      <AdaFooter className="absolute inset-x-0 bottom-0" />
+    </div>
+  );
+}

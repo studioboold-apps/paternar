@@ -1,4 +1,4 @@
-# Regras do projeto Entrelaços (Pai Presente)
+# Regras do projeto Paternar (Pai Presente)
 
 Regras do dono do projeto, para qualquer pessoa ou agente que trabalhe aqui.
 

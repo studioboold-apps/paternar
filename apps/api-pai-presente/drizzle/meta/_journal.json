@@ -64,6 +64,20 @@
       "when": 1793557950640,
       "tag": "0008_valores_familia",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794145840678,
+      "tag": "0009_bloqueio_usuario",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794146487792,
+      "tag": "0010_painel_historico_ia_denuncias",
+      "breakpoints": true
     }
   ]
 }

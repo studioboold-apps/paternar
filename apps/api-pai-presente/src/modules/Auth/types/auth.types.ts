@@ -31,6 +31,8 @@ export type AuthAccountRepository = {
   findOrCreateByIdentity(params: FindOrCreateAccountParams): Promise<AuthenticatedUser>;
   /** A sessao cai junto com o usuario (`ON DELETE CASCADE`), entao ele existe. */
   findById(userId: string): Promise<AuthenticatedUser>;
+  /** Bloqueado pela equipe no painel (`users.blocked_at` preenchido). */
+  isBlocked(userId: string): Promise<boolean>;
 };
 
 export type SessionRecord = {

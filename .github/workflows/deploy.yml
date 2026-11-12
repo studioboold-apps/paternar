@@ -51,6 +51,7 @@ jobs:
       # Imagem que nao constroi so apareceria no Railway, depois do merge.
       - run: docker build -f apps/api-pai-presente/Dockerfile -t ci-api .
       - run: docker build -f apps/frontend-pai-presente/Dockerfile --build-arg APP_ENV=production -t ci-web .
+      - run: docker build -f apps/painel-paternar/Dockerfile -t ci-painel .
 
   deploy:
     name: deploy no Railway
@@ -71,6 +72,9 @@ jobs:
       # Endereco publico da web (variavel do ambiente `production` no GitHub).
       # Muda junto com a conta: dominio do Railway e' cunhado por projeto.
       PUBLIC_URL: ${{ vars.RAILWAY_PUBLIC_URL }}
+      # Opcional: token do Cloudflare com Zone > DNS > Edit na zona do dominio.
+      # Com ele o deploy cria o CNAME do painel; sem ele, so avisa no log.
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: falta o token?
@@ -80,13 +84,37 @@ jobs:
             exit 1
           fi
       - run: npm install -g @railway/cli
+      # Cria o servico `painel` se faltar e acerta WEB_ORIGINS da api, pela API
+      # do Railway e com o mesmo token. Roda antes da api para o `railway up`
+      # dela ja levar as origens novas. Nao apaga nem sobrescreve o que existe.
+      - name: servicos e variaveis no Railway
+        id: garante
+        run: node scripts/railway-garantir-servicos.mjs
       # `--ci` acompanha o build e sai com erro se ele falhar. O pre-deploy
       # (migrations) e o healthcheck em /health continuam sendo do Railway:
       # versao que nao migra ou nao responde nao e' promovida.
       - name: api
         run: railway up --service api --ci
+      # Healthcheck reprovado nao diz POR QUE o processo nao subiu: mostra aqui
+      # o fim do log de execucao, para nao depender de abrir o painel do Railway.
+      - name: log da api quando o deploy falha
+        if: failure()
+        run: timeout 60 node scripts/railway-log-api.mjs api || true
+      # Depois de um deploy bom, o que o boot disse sobre o acesso de admin do
+      # painel (criado, senha redefinida, recusado). So linhas do painel.
+      - name: log do painel no boot da api
+        if: success()
+        run: sleep 20; timeout 60 node scripts/railway-log-api.mjs api 'painel:' || true
       - name: web
         run: railway up --service web --ci
+      # O painel da equipe e' um servico proprio: falhar aqui nao derruba o app
+      # dos pais, que ja subiu no passo anterior.
+      - name: painel
+        if: steps.garante.outputs.painel == '1'
+        run: railway up --service painel --ci
+      - name: login do painel funciona?
+        if: steps.garante.outputs.painel == '1'
+        run: sleep 15; timeout 60 node scripts/testar-login-painel.mjs || true
       - name: fumaca na URL publica
         if: env.PUBLIC_URL != ''
         run: |
@@ -95,4 +123,11 @@ jobs:
             sleep 10
           done
           echo "::error::a web nao respondeu /health em 5 minutos"
+          exit 1
+      # A api e a web ja subiram; o job so fica vermelho para o painel nao
+      # passar despercebido.
+      - name: painel preparado?
+        if: steps.garante.outputs.painel != '1'
+        run: |
+          echo "::error::o servico painel nao pode ser preparado; veja o passo 'servicos e variaveis no Railway'"
           exit 1

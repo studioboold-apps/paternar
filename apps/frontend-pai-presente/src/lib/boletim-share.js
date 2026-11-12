@@ -5,7 +5,7 @@
  */
 
 /** Endereco publico do app, que vai no fim do texto compartilhado. */
-export const APP_PUBLIC_URL = 'https://entrelacos.up.railway.app';
+export const APP_PUBLIC_URL = 'https://paternar.com.br';
 
 /**
  * Texto do boletim para mandar no WhatsApp ou publicar na Comunidade.

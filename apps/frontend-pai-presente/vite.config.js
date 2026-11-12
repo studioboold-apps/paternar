@@ -11,6 +11,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 import { resolveAppEnvironment } from './src/lib/environment.js';
+import { adsenseAccountPlugin } from './build/adsense-account.plugin.js';
 import { environmentIconPlugin } from './build/environment-icon.plugin.js';
 import { PWA_MANIFEST, PWA_WORKBOX } from './build/pwa.config.js';
 
@@ -65,6 +66,7 @@ export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     environmentIconPlugin({ environment: resolveAppEnvironment(process.env.APP_ENV) }),
+    adsenseAccountPlugin({ clientId: process.env.ADSENSE_CLIENT_ID }),
     /**
      * `injectRegister` em arquivo, e nao inline: script inline no `index.html`
      * obrigaria `unsafe-inline` na CSP (`security.md` §3) so para registrar o

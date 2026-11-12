@@ -35,6 +35,10 @@ export const PANEL_SCOPES = {
   CUSTOMERS_WRITE: 'customers:write',
   CUSTOMERS_ADMIN: 'customers:admin',
   RECOMMENDATIONS_ADMIN: 'recommendations:admin',
+  /** Bloquear e desbloquear pais do app. So admin: tira alguem do produto. */
+  APP_USERS_BLOCK: 'app-users:block',
+  /** Arquivar denuncia e tirar post ou comentario do ar. */
+  COMMUNITY_MODERATE: 'community:moderate',
 } as const;
 
 const EDITOR_SCOPES = [
@@ -42,10 +46,16 @@ const EDITOR_SCOPES = [
   PANEL_SCOPES.CUSTOMERS_READ,
   PANEL_SCOPES.CUSTOMERS_WRITE,
   PANEL_SCOPES.RECOMMENDATIONS_ADMIN,
+  PANEL_SCOPES.COMMUNITY_MODERATE,
 ] as const;
 
 export const SCOPES_BY_ROLE: Readonly<Record<PanelRole, readonly string[]>> = {
-  [PANEL_ROLES.ADMIN]: [...EDITOR_SCOPES, PANEL_SCOPES.USERS_ADMIN, PANEL_SCOPES.CUSTOMERS_ADMIN],
+  [PANEL_ROLES.ADMIN]: [
+    ...EDITOR_SCOPES,
+    PANEL_SCOPES.USERS_ADMIN,
+    PANEL_SCOPES.CUSTOMERS_ADMIN,
+    PANEL_SCOPES.APP_USERS_BLOCK,
+  ],
   [PANEL_ROLES.EDITOR]: EDITOR_SCOPES,
   [PANEL_ROLES.VIEWER]: [PANEL_SCOPES.READ, PANEL_SCOPES.CUSTOMERS_READ],
 };

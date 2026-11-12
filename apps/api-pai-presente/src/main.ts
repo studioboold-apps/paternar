@@ -106,7 +106,11 @@ const panel =
         customers: sdk.customers,
         recommendations: sdk.recommendations,
         jwtSecret: environment.PANEL_JWT_SECRET,
-        firstAdmin: { email: environment.PANEL_ADMIN_EMAIL, password: environment.PANEL_ADMIN_PASSWORD },
+        firstAdmin: {
+          email: environment.PANEL_ADMIN_EMAIL,
+          password: environment.PANEL_ADMIN_PASSWORD,
+          resetPassword: environment.PANEL_ADMIN_RESET,
+        },
         logger: logger.withScope('panel'),
       });
 await panel?.bootstrap();

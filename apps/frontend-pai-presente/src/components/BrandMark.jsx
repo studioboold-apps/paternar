@@ -6,17 +6,22 @@
 
 import React from 'react';
 
-import { SYMBOL_LEFT_PATH, SYMBOL_RIGHT_PATH, SYMBOL_VIEWBOX } from '@/components/brand-art';
+import {
+  SYMBOL_P_PATH,
+  SYMBOL_SMILE_PATH,
+  SYMBOL_SQUARE_PATH,
+  SYMBOL_VIEWBOX,
+} from '@/components/brand-art';
 import { cn } from '@/lib/utils';
 
 /**
- * O simbolo da marca (dois elos que formam um coracao), com o desenho oficial
- * do designer. Cada elo e' um caminho proprio, para poder se mover sozinho; o
- * entrelacado ja vem recortado no desenho.
+ * O simbolo da marca Paternar (quadrado laranja com um "P" que sorri), com o
+ * desenho oficial do designer. Quadrado, "P" e sorriso sao caminhos proprios,
+ * para cada um poder se mover sozinho.
  *
  * `motion`:
- * - `enter`: os elos entram um de cada lado, se encaixam e o coracao bate (abertura);
- * - `loop`:  os elos se afastam e voltam a se encaixar, sem parar (carregando);
+ * - `enter`: o quadrado cresce, o "P" cai no lugar e o sorriso abre (abertura);
+ * - `loop`:  o "P" balanca e o sorriso pulsa, sem parar (carregando);
  * - `none`:  parado.
  *
  * `--splash-elapsed` (negativo) continua a animacao de onde a abertura estatica
@@ -25,24 +30,27 @@ import { cn } from '@/lib/utils';
 export const BRAND_CREAM = '#F7F5EF';
 export const BRAND_ORANGE = '#F18700';
 export const BRAND_NAVY = '#2F3052';
+const BRAND_WHITE = '#FFFFFF';
 
 const MOTION_STYLES = `
-  @keyframes brand-from-left { from { transform: translateX(-48px); opacity: 0 } to { transform: none; opacity: 1 } }
-  @keyframes brand-from-right { from { transform: translateX(48px); opacity: 0 } to { transform: none; opacity: 1 } }
-  @keyframes brand-beat { 0%, 100% { transform: scale(1) } 40% { transform: scale(1.1) } 70% { transform: scale(0.97) } }
-  @keyframes brand-loop-left { 0%, 100% { transform: none } 45%, 55% { transform: translateX(-14px) } }
-  @keyframes brand-loop-right { 0%, 100% { transform: none } 45%, 55% { transform: translateX(14px) } }
-  .brand-enter .brand-left { animation: brand-from-left 520ms cubic-bezier(.2,.8,.2,1) var(--splash-elapsed, 0ms) both }
-  .brand-enter .brand-right { animation: brand-from-right 520ms cubic-bezier(.2,.8,.2,1) var(--splash-elapsed, 0ms) both }
-  .brand-enter .brand-heart { transform-origin: 100px 68px; animation: brand-beat 600ms ease-in-out calc(560ms + var(--splash-elapsed, 0ms)) both }
-  .brand-loop .brand-left { animation: brand-loop-left 1400ms ease-in-out infinite }
-  .brand-loop .brand-right { animation: brand-loop-right 1400ms ease-in-out infinite }
+  .brand-square, .brand-p, .brand-smile { transform-box: fill-box; transform-origin: center }
+  .brand-p { transform-origin: 50% 100% }
+  @keyframes brand-square-in { 0% { transform: scale(.4); opacity: 0 } 70% { transform: scale(1.06); opacity: 1 } 100% { transform: none; opacity: 1 } }
+  @keyframes brand-p-in { 0% { transform: translateY(-60%) rotate(-24deg); opacity: 0 } 60% { transform: translateY(4%) rotate(4deg); opacity: 1 } 100% { transform: none; opacity: 1 } }
+  @keyframes brand-smile-in { 0% { transform: scale(0); opacity: 0 } 60% { transform: scale(1.25); opacity: 1 } 100% { transform: none; opacity: 1 } }
+  @keyframes brand-p-rock { 0%, 100% { transform: rotate(0) } 30% { transform: rotate(-8deg) } 70% { transform: rotate(6deg) } }
+  @keyframes brand-smile-pulse { 0%, 100% { transform: none } 50% { transform: scale(1.2) } }
+  .brand-enter .brand-square { animation: brand-square-in 480ms cubic-bezier(.2,.8,.2,1) var(--splash-elapsed, 0ms) both }
+  .brand-enter .brand-p { animation: brand-p-in 520ms cubic-bezier(.2,.8,.2,1) calc(180ms + var(--splash-elapsed, 0ms)) both }
+  .brand-enter .brand-smile { animation: brand-smile-in 420ms ease-out calc(620ms + var(--splash-elapsed, 0ms)) both }
+  .brand-loop .brand-p { animation: brand-p-rock 1400ms ease-in-out infinite }
+  .brand-loop .brand-smile { animation: brand-smile-pulse 1400ms ease-in-out infinite }
   @media (prefers-reduced-motion: reduce) {
     .brand-enter *, .brand-loop * { animation: none !important }
   }
 `;
 
-export default function BrandMark({ motion = 'none', cream = BRAND_CREAM, className }) {
+export default function BrandMark({ motion = 'none', className }) {
   return (
     <svg
       viewBox={SYMBOL_VIEWBOX}
@@ -51,9 +59,10 @@ export default function BrandMark({ motion = 'none', cream = BRAND_CREAM, classN
       className={cn('overflow-visible', motion === 'enter' && 'brand-enter', motion === 'loop' && 'brand-loop', className)}
     >
       {motion !== 'none' && <style>{MOTION_STYLES}</style>}
-      <g className="brand-heart">
-        <path className="brand-right" fill={BRAND_ORANGE} d={SYMBOL_RIGHT_PATH} />
-        <path className="brand-left" fill={cream} d={SYMBOL_LEFT_PATH} />
+      <path className="brand-square" fill={BRAND_ORANGE} d={SYMBOL_SQUARE_PATH} />
+      <g className="brand-p">
+        <path fill={BRAND_WHITE} d={SYMBOL_P_PATH} />
+        <path className="brand-smile" fill={BRAND_ORANGE} d={SYMBOL_SMILE_PATH} />
       </g>
     </svg>
   );

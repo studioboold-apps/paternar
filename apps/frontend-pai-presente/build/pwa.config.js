@@ -14,8 +14,8 @@ const API_TIMEOUT_IN_SECONDS = 5;
 export const APP_THEME_COLOR = '#f6f5f0';
 
 export const PWA_MANIFEST = Object.freeze({
-  name: 'Entrelaços — Pai Presente',
-  short_name: 'Entrelaços',
+  name: 'Paternar — Pai Presente',
+  short_name: 'Paternar',
   description: 'Companhia diaria para pais que querem estar presentes.',
   lang: 'pt-BR',
   start_url: '/',
@@ -43,7 +43,12 @@ export const PWA_WORKBOX = Object.freeze({
    * esperava JSON quebra o cliente com um erro que nao diz "voce esta offline".
    */
   navigateFallback: '/index.html',
-  navigateFallbackDenylist: [/\/v1\//],
+  /**
+   * As paginas publicas em HTML puro e os arquivos dos robos nao sao rota da
+   * SPA: com o fallback, o pai com o app instalado abriria `/privacidade` e
+   * cairia no login.
+   */
+  navigateFallbackDenylist: [/\/v1\//, /^\/(sobre|privacidade|dicas)(\.html)?$/, /^\/dicas\//, /^\/(ads|robots)\.txt$/, /^\/sitemap\.xml$/],
   cleanupOutdatedCaches: true,
   runtimeCaching: [
     {

@@ -107,6 +107,8 @@ export type LlmImage = {
 export type LlmTextRequest = {
   /** Qual agente pede: decide modelo e esforco (`LLM_TASK_PROFILES`). */
   readonly task: LlmTask;
+  /** Quem pediu: so' para a conta de uso (`LlmUsage`); nunca viaja ao provedor. */
+  readonly userId?: string | undefined;
   readonly systemPrompt: string;
   readonly userPrompt: string;
   /** Falas anteriores da conversa, da mais antiga para a mais recente. */
@@ -131,7 +133,28 @@ export type LlmWebSearchRequest = {
   readonly userPrompt: string;
   /** Cidade do pai, para a busca priorizar resultados de la'. */
   readonly city?: string | undefined;
+  /** Quem pediu: so' para a conta de uso; nunca viaja ao provedor. */
+  readonly userId?: string | undefined;
 };
+
+/**
+ * Tokens que o PROVEDOR contou numa chamada. Sem pergunta nem resposta: e' o
+ * que o painel soma para mostrar quanto a IA custa, por dia e por pai.
+ */
+export type LlmUsage = {
+  readonly provider: string;
+  readonly model: string;
+  readonly task: string;
+  readonly userId?: string | undefined;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cacheReadTokens: number;
+  readonly cacheWriteTokens: number;
+  readonly webSearches: number;
+};
+
+/** Quem recebe a conta. Nao pode lancar: a resposta ao pai nao depende dela. */
+export type LlmUsageSink = (usage: LlmUsage) => void;
 
 export type LlmProvider = {
   readonly name: LlmProviderName;

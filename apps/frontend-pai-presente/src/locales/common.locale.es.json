@@ -1,6 +1,6 @@
 {
-  "brandLogoAlt": "Entrelaços — Pai Presente",
-  "brandName": "Entrelaços",
+  "brandLogoAlt": "Paternar — Pai Presente",
+  "brandName": "Paternar",
   "brandTagline": "Pai Presente",
   "dateFormats": {
     "dayMonth": "d 'de' MMM",
@@ -18,5 +18,9 @@
     "home": "Ir al inicio"
   },
   "aiBadge": "Hecho con IA",
-  "advertising": "Publicidad"
+  "advertising": "Publicidad",
+  "copyright": {
+    "company": "Ada Technology",
+    "rights": "Todos los derechos reservados"
+  }
 }

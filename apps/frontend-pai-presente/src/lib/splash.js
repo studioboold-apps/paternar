@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-/** Tempo da animacao inteira do `BrandSplash`: entrada + batida + nome. */
+/** Tempo da animacao inteira do `BrandSplash`: quadrado, "P", sorriso e nome. */
 export const SPLASH_MIN_DURATION_MS = 1300;
 const SPLASH_SEEN_KEY = 'entrelacos:splash-seen';
 

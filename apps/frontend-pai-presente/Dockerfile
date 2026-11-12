@@ -12,6 +12,7 @@ WORKDIR /repo
 COPY package.json bun.lock ./
 COPY apps/api-pai-presente/package.json apps/api-pai-presente/
 COPY apps/frontend-pai-presente/package.json apps/frontend-pai-presente/
+COPY apps/painel-paternar/package.json apps/painel-paternar/
 RUN bun install --frozen-lockfile
 
 COPY apps/frontend-pai-presente apps/frontend-pai-presente

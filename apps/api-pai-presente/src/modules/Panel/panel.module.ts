@@ -31,6 +31,11 @@ import {
   SCOPES_BY_ROLE,
   type PanelRole,
 } from './panel.constant';
+import { createPanelAiUsageRepository } from './panel-ai-usage.repository';
+import { createPanelEngagementRepository } from './panel-engagement.repository';
+import { createPanelHistoryRepository } from './panel-history.repository';
+import { buildPanelInsightRoutes } from './panel-insights.routes';
+import { createPanelModerationRepository } from './panel-moderation.repository';
 import { createPanelRepository } from './panel.repository';
 import { buildPanelRoutes } from './panel.routes';
 
@@ -40,7 +45,14 @@ export type BuildPanelModuleParams = {
   readonly customers: CustomerModule;
   readonly recommendations: RecommendationModule;
   readonly jwtSecret: string;
-  readonly firstAdmin?: { readonly email: string; readonly password: string };
+  readonly firstAdmin?: {
+    readonly email: string;
+    readonly password: string;
+    /** Sobrescreve a senha de quem ja existe. Ver `PANEL_ADMIN_RESET`. */
+    readonly resetPassword?: boolean;
+  };
+  /** Troca a senha de um acesso ja existente; injetavel para o teste nao precisar de banco. */
+  readonly resetAdminPassword?: (input: { readonly email: string; readonly password: string }) => Promise<number>;
   readonly logger?: Logger;
 };
 
@@ -53,6 +65,7 @@ export type PanelModule = {
 
 const BEARER_PREFIX = 'bearer ';
 const EMAIL_ALREADY_EXISTS_CODE = USER_ERROR_CODE.EMAIL_ALREADY_EXISTS;
+const MIN_ADMIN_PASSWORD_LENGTH = 8;
 
 function isPanelRole(role: string): role is PanelRole {
   return Object.values(PANEL_ROLES).includes(role as PanelRole);
@@ -78,6 +91,83 @@ export function createPanelAuthResolver(users: Pick<UserModule, 'verifyAccessTok
   };
 }
 
+type FirstAdmin = NonNullable<BuildPanelModuleParams['firstAdmin']>;
+type AdminCredentials = { readonly email: string; readonly password: string };
+
+/**
+ * Cria o primeiro admin se o e-mail ainda nao existe. Se ja existe, a senha so
+ * e' trocada com `resetPassword` (variavel `PANEL_ADMIN_RESET=1`): e' a porta de
+ * recuperacao para quando ninguem mais consegue entrar no painel.
+ */
+export async function ensureFirstAdmin(params: {
+  readonly firstAdmin?: FirstAdmin | undefined;
+  readonly createUser: (input: AdminCredentials & { readonly name: string; readonly role: PanelRole }) => Promise<unknown>;
+  readonly resetAdminPassword: (input: AdminCredentials) => Promise<number>;
+  readonly logger?: Logger | undefined;
+}): Promise<void> {
+  const { firstAdmin } = params;
+  if (!firstAdmin || !firstAdmin.email || !firstAdmin.password) return;
+
+  // Aceita uma lista separada por virgula: todos entram como admin com a mesma senha inicial.
+  const emails = unquote(firstAdmin.email)
+    .split(',')
+    .map(unquote)
+    .filter((email) => email.length > 0);
+  const password = unquote(firstAdmin.password);
+  if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
+    params.logger?.error('painel: PANEL_ADMIN_PASSWORD precisa de 8+ caracteres; acesso de admin nao preparado', {
+      length: password.length,
+    });
+    return;
+  }
+
+  for (const email of emails) {
+    // Acesso do painel nunca derruba a API: erro aqui vira log, e o resto sobe.
+    try {
+      await ensureOneAdmin({ ...params, email, password, resetPassword: firstAdmin.resetPassword === true });
+    } catch (error) {
+      params.logger?.error('painel: nao consegui preparar o acesso de admin', {
+        email,
+        code: (error as { code?: unknown }).code,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+}
+
+/** Valor colado com aspas no painel do provedor ("x") chega com as aspas: tira. */
+function unquote(value: string): string {
+  const trimmed = value.trim();
+  const quoted = trimmed.length >= 2 && /^(["']).*\1$/.test(trimmed);
+  return quoted ? trimmed.slice(1, -1).trim() : trimmed;
+}
+
+async function ensureOneAdmin(params: {
+  readonly email: string;
+  readonly password: string;
+  readonly resetPassword: boolean;
+  readonly createUser: (input: AdminCredentials & { readonly name: string; readonly role: PanelRole }) => Promise<unknown>;
+  readonly resetAdminPassword: (input: AdminCredentials) => Promise<number>;
+  readonly logger?: Logger | undefined;
+}): Promise<void> {
+  const credentials = { email: params.email, password: params.password };
+  try {
+    await params.createUser({ ...credentials, name: 'Administrador', role: PANEL_ROLES.ADMIN });
+    params.logger?.info('painel: acesso de admin criado', { email: params.email });
+    return;
+  } catch (error) {
+    // Ja existe: e' o caso de todo boot depois do primeiro.
+    if ((error as { code?: unknown }).code !== EMAIL_ALREADY_EXISTS_CODE) throw error;
+  }
+
+  if (!params.resetPassword) return;
+  const updated = await params.resetAdminPassword(credentials);
+  params.logger?.warn('painel: senha do admin redefinida pelo PANEL_ADMIN_RESET; volte a variavel para 0', {
+    email: params.email,
+    updated,
+  });
+}
+
 export async function buildPanelModule(params: BuildPanelModuleParams): Promise<PanelModule> {
   // Os modulos tipam o banco pelo drizzle 1.x deles; o app esta no 0.4x. A API
   // usada (select/insert/update/onConflict) e' a mesma nas duas linhas.
@@ -98,6 +188,12 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
     ...createCustomerRoutes({ module: customers }),
     ...createRecommendationRoutes({ module: recommendations, features: { feed: false, admin: true } }),
     ...buildPanelRoutes(createPanelRepository(params.database)),
+    ...buildPanelInsightRoutes({
+      history: createPanelHistoryRepository(params.database),
+      engagement: createPanelEngagementRepository(params.database),
+      aiUsage: createPanelAiUsageRepository(params.database),
+      moderation: createPanelModerationRepository(params.database),
+    }),
   ];
 
   const router = createModuleFetchRouter({
@@ -107,20 +203,12 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
   });
 
   async function bootstrap(): Promise<void> {
-    if (params.firstAdmin && params.firstAdmin.email && params.firstAdmin.password) {
-      try {
-        await users.useCases.createUser.execute({
-          email: params.firstAdmin.email,
-          name: 'Administrador',
-          password: params.firstAdmin.password,
-          role: PANEL_ROLES.ADMIN,
-        });
-        params.logger?.info('painel: primeiro acesso criado', { email: params.firstAdmin.email });
-      } catch (error) {
-        // Ja existe: e' o caso de todo boot depois do primeiro. A senha nunca e' trocada aqui.
-        if ((error as { code?: unknown }).code !== EMAIL_ALREADY_EXISTS_CODE) throw error;
-      }
-    }
+    await ensureFirstAdmin({
+      firstAdmin: params.firstAdmin,
+      createUser: (input) => users.useCases.createUser.execute(input),
+      resetAdminPassword: params.resetAdminPassword ?? createPanelRepository(params.database).resetAdminPassword,
+      logger: params.logger,
+    });
 
     const settings = await customers.useCases.getSettings.execute({});
     if (!settings.fieldCatalog.some((field) => field.name === ADVERTISER_CATEGORY_FIELD.name)) {

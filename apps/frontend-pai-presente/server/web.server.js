@@ -84,14 +84,28 @@ async function forwardToApi({ request, apiOrigin }) {
   });
 }
 
+/**
+ * Paginas publicas em HTML puro (`/sobre`, `/privacidade`, `/dicas/<artigo>`): o pai deslogado e o
+ * robo do AdSense precisam le-las sem passar pelo login da SPA. O endereco
+ * limpo vale pelo arquivo `.html` do mesmo nome — so quando ele existe; o resto
+ * segue para o shell, e o roteador do navegador decide.
+ */
+const PUBLIC_PAGE_PATTERN = /^\/[a-z-]+(\/[a-z-]+)?$/;
+
 async function serveStatic({ distDirectory, pathname }) {
-  const filePath = resolveStaticPath({ distDirectory, pathname });
-  if (filePath === undefined) return undefined;
+  const candidates = PUBLIC_PAGE_PATTERN.test(pathname) ? [pathname, `${pathname}.html`] : [pathname];
 
-  const file = Bun.file(filePath);
-  if (!(await file.exists())) return undefined;
+  for (const candidate of candidates) {
+    const filePath = resolveStaticPath({ distDirectory, pathname: candidate });
+    if (filePath === undefined) continue;
 
-  return new Response(file, { headers: { 'Cache-Control': chooseCacheControl(pathname) } });
+    const file = Bun.file(filePath);
+    if (!(await file.exists())) continue;
+
+    return new Response(file, { headers: { 'Cache-Control': chooseCacheControl(candidate) } });
+  }
+
+  return undefined;
 }
 
 /**
@@ -100,19 +114,42 @@ async function serveStatic({ distDirectory, pathname }) {
  * raiz. Caminho desconhecido devolve o `index.html`, e o roteador do navegador
  * decide.
  */
-async function serveApplicationShell(distDirectory) {
+const ADSENSE_ACCOUNT_META = 'google-adsense-account';
+
+/**
+ * A metatag do AdSense tambem entra AQUI, no boot, e nao so no build: o build
+ * so a grava se o id chegar como build arg, e o robo do Google le o HTML que o
+ * servidor entrega. Com o id no ambiente do container, um restart ja basta.
+ */
+export function withAdsenseAccountMeta(html, publisherId) {
+  if (!publisherId || html.includes(ADSENSE_ACCOUNT_META)) return html;
+  return html.replace('</head>', `<meta name="${ADSENSE_ACCOUNT_META}" content="${publisherId}" /></head>`);
+}
+
+async function serveApplicationShell(distDirectory, adsensePublisherId = '') {
   const shell = Bun.file(join(resolve(distDirectory), INDEX_FILE));
   if (!(await shell.exists())) return new Response('dist ausente', { status: HTTP_NOT_FOUND });
 
-  return new Response(shell, {
+  const body = adsensePublisherId ? withAdsenseAccountMeta(await shell.text(), adsensePublisherId) : shell;
+
+  return new Response(body, {
     headers: { 'Cache-Control': REVALIDATE_CACHE, 'Content-Type': 'text/html; charset=utf-8' },
   });
 }
 
 /**
- * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string }} params
+ * `adsenseClientId` so vem com `ADS_ENABLED` ligado e abre a CSP;
+ * `adsensePublisherId` e' o id cadastrado, e basta para o `ads.txt`.
+ *
+ * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string, adsensePublisherId?: string }} params
  */
-export function createWebServer({ port, distDirectory, apiOrigin, adsenseClientId = '' }) {
+export function createWebServer({
+  port,
+  distDirectory,
+  apiOrigin,
+  adsenseClientId = '',
+  adsensePublisherId = adsenseClientId,
+}) {
   const advertising = adsenseClientId.length > 0;
   const securityHeaders = buildSecurityHeaders({ advertising });
   const decorate = (response) => decorateWithSecurityHeaders(response, securityHeaders);
@@ -145,11 +182,11 @@ export function createWebServer({ port, distDirectory, apiOrigin, adsenseClientI
         return decorate(Response.json({ data: { status: 'ok' } }));
       }
 
-      /** Desligado, 404 de verdade — e nao o shell da SPA fingindo ser texto. */
+      /** Sem id cadastrado, 404 de verdade — e nao o shell da SPA fingindo ser texto. */
       if (pathname === ADS_TXT_PATH) {
-        if (!advertising) return decorate(new Response('', { status: HTTP_NOT_FOUND }));
+        if (adsensePublisherId.length === 0) return decorate(new Response('', { status: HTTP_NOT_FOUND }));
         return decorate(
-          new Response(buildAdsTxt(adsenseClientId), {
+          new Response(buildAdsTxt(adsensePublisherId), {
             headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': REVALIDATE_CACHE },
           }),
         );
@@ -157,7 +194,7 @@ export function createWebServer({ port, distDirectory, apiOrigin, adsenseClientI
 
       const response =
         (await serveStatic({ distDirectory, pathname })) ??
-        (await serveApplicationShell(distDirectory));
+        (await serveApplicationShell(distDirectory, adsensePublisherId));
 
       return decorate(response);
     },

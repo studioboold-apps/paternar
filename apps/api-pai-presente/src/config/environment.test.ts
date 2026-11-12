@@ -70,3 +70,16 @@ describe('acoplamento de boot', () => {
     expect(source).not.toMatch(/import \{ environment \}/);
   });
 });
+
+describe('recuperacao do admin do painel', () => {
+  test('flag com aspas ou escrita por extenso nao derruba o boot', () => {
+    expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: '"1"' }).PANEL_ADMIN_RESET).toBe(true);
+    expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: 'true' }).PANEL_ADMIN_RESET).toBe(true);
+    expect(readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_RESET: '0' }).PANEL_ADMIN_RESET).toBe(false);
+    expect(readEnvironment(BOOT_WITHOUT_AI_KEY).PANEL_ADMIN_RESET).toBe(true);
+  });
+
+  test('senha de admin curta nao impede a API de subir', () => {
+    expect(() => readEnvironment({ ...BOOT_WITHOUT_AI_KEY, PANEL_ADMIN_PASSWORD: 'curta' })).not.toThrow();
+  });
+});

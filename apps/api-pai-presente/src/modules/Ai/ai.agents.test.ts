@@ -22,7 +22,8 @@ import { previousMonth } from './ai.use-case';
 import { isOffTopic } from './ai.topic-guard';
 import { LlmResponseInvalidError } from './ai.error';
 import { createAnthropicProvider, toAnthropicJsonSchema } from './providers/anthropic.provider';
-import type { ActivityDigestRow, ChildContext } from './types/ai.types';
+import { createOpenAiProvider } from './providers/openai.provider';
+import type { ActivityDigestRow, ChildContext, LlmUsage } from './types/ai.types';
 
 const TODAY = new Date(Date.UTC(2026, 10, 15));
 const MARIA: ChildContext = { name: 'Maria', age: 10, gender: 'feminino' };
@@ -35,7 +36,7 @@ describe('um especialista por tarefa', () => {
   test('cada agente tem o proprio papel, com a mesma voz da marca', () => {
     const prompts = [MENTOR_SYSTEM_PROMPT, INSIGHTS_SYSTEM_PROMPT, SUGGESTIONS_SYSTEM_PROMPT, REPORT_SYSTEM_PROMPT];
     expect(new Set(prompts).size).toBe(prompts.length);
-    for (const prompt of prompts) expect(prompt).toContain('Entrelaços — Pai Presente');
+    for (const prompt of prompts) expect(prompt).toContain('Paternar — Pai Presente');
   });
 
   test('o boletim nao decide a nota, so explica', () => {
@@ -277,5 +278,84 @@ describe('filtro de tema antes da IA', () => {
   test('pergunta comum sem palavra suspeita segue para a IA', () => {
     expect(isOffTopic({ message: 'Estou muito cansado ultimamente, o que faço?' })).toBe(false);
     expect(isOffTopic({ message: '' })).toBe(false);
+  });
+});
+
+describe('conta de uso da IA (painel)', () => {
+  const USER = '11111111-1111-4111-8111-111111111111';
+
+  test('anthropic entrega os tokens contados pelo provedor, com tarefa e pai, sem mandar o pai na rede', async () => {
+    const { requests } = captureRequests({
+      model: 'claude-sonnet-5-5',
+      content: [{ type: 'text', text: 'ok' }],
+      stop_reason: 'end_turn',
+      usage: {
+        input_tokens: 120,
+        output_tokens: 40,
+        cache_read_input_tokens: 900,
+        cache_creation_input_tokens: 10,
+        server_tool_use: { web_search_requests: 2 },
+      },
+    });
+    const usages: LlmUsage[] = [];
+    await createAnthropicProvider({ apiKey: 'k', models: MODELS, onUsage: (usage) => usages.push(usage) }).generateText({
+      task: 'chat',
+      userId: USER,
+      systemPrompt: 's',
+      userPrompt: 'p',
+    });
+    expect(usages).toEqual([
+      {
+        provider: 'anthropic',
+        model: 'claude-sonnet-5-5',
+        task: 'chat',
+        userId: USER,
+        inputTokens: 120,
+        outputTokens: 40,
+        cacheReadTokens: 900,
+        cacheWriteTokens: 10,
+        webSearches: 2,
+      },
+    ]);
+    expect(JSON.stringify(requests[0]?.body)).not.toContain(USER);
+  });
+
+  test('chamada cortada no teto tambem e contada, porque tambem e cobrada', async () => {
+    captureRequests({ content: [], stop_reason: 'max_tokens', usage: { input_tokens: 5, output_tokens: 7 } });
+    const usages: LlmUsage[] = [];
+    const call = createAnthropicProvider({ apiKey: 'k', models: MODELS, onUsage: (usage) => usages.push(usage) }).generateText({
+      task: 'chat',
+      systemPrompt: 's',
+      userPrompt: 'p',
+    });
+    await expect(call).rejects.toThrow();
+    expect(usages[0]?.outputTokens).toBe(7);
+  });
+
+  test('conta que falha nao derruba a resposta', async () => {
+    captureRequests(TEXT_REPLY);
+    const reply = await createAnthropicProvider({
+      apiKey: 'k',
+      models: MODELS,
+      onUsage: () => {
+        throw new Error('banco fora');
+      },
+    }).generateText({ task: 'chat', systemPrompt: 's', userPrompt: 'p' });
+    expect(reply).toBe('ok');
+  });
+
+  test('openai separa o cache de dentro do prompt_tokens', async () => {
+    captureRequests({
+      model: 'gpt-4o-mini',
+      choices: [{ message: { content: 'ok' } }],
+      usage: { prompt_tokens: 1000, completion_tokens: 50, prompt_tokens_details: { cached_tokens: 800 } },
+    });
+    const usages: LlmUsage[] = [];
+    await createOpenAiProvider({
+      apiKey: 'k',
+      models: { main: 'gpt-4o-mini', fast: 'gpt-4o-mini' },
+      onUsage: (usage) => usages.push(usage),
+    }).generateText({ task: 'insights', userId: USER, systemPrompt: 's', userPrompt: 'p' });
+    expect(usages[0]).toMatchObject({ provider: 'openai', inputTokens: 200, cacheReadTokens: 800, outputTokens: 50, userId: USER });
   });
 });

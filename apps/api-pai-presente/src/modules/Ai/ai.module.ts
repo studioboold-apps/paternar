@@ -24,6 +24,7 @@ import type {
   FamilyValuesPort,
   InsightDigestPort,
   LlmTurn,
+  LlmUsageSink,
   ParentRegionPort,
 } from './types/ai.types';
 
@@ -40,6 +41,8 @@ export type BuildAiModuleParams = {
   /** Modelo da faixa barata (insights e sugestoes). Vazio cai no padrao do provedor. */
   readonly modelFast?: string;
   readonly transcription: { readonly apiKey: string; readonly model: string };
+  /** Conta de uso: recebe os tokens de cada chamada. Ausente, nada e' gravado. */
+  readonly recordUsage?: LlmUsageSink;
 };
 
 /**
@@ -93,9 +96,10 @@ export function buildAiModule({
   model,
   modelFast = '',
   transcription,
+  recordUsage,
 }: BuildAiModuleParams): readonly RouteDefinition[] {
   const useCases = createAiUseCases({
-    provider: createLlmProvider({ providerName, apiKey, model, modelFast }),
+    provider: createLlmProvider({ providerName, apiKey, model, modelFast, onUsage: recordUsage }),
     children: adaptChildrenContext(children),
     activities: adaptActivityDigest(activities),
     insights: adaptInsightDigest(insights),
