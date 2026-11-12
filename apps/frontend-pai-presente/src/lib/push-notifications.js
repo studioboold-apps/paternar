@@ -11,7 +11,31 @@ import { request } from '@/api/http';
 export const PUSH_STORAGE_KEYS = Object.freeze({
   DISMISSED: 'paternar:push:dismissed',
   DEVICE_ID: 'paternar:push:device-id',
+  /** O pai desligou neste aparelho: o cadastro automatico na abertura nao religa. */
+  OPTED_OUT: 'paternar:push:opted-out',
 });
+
+function readStorage(key) {
+  try {
+    return typeof window !== 'undefined' && window.localStorage ? window.localStorage.getItem(key) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key, value) {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    if (value === null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, value);
+  } catch {
+    // Armazenamento indisponivel (aba anonima, cota): segue sem lembrar.
+  }
+}
+
+export function isPushOptedOut() {
+  return readStorage(PUSH_STORAGE_KEYS.OPTED_OUT) === '1';
+}
 
 const DEFAULT_DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
@@ -115,8 +139,9 @@ function sameKey(current, expected) {
  * app, e assim conserta o aparelho que deu permissao antes de a chave VAPID
  * existir no servidor, ou cuja inscricao o navegador trocou.
  */
-export async function registerPushDevice(deps = { request }) {
+export async function registerPushDevice(deps = { request }, { automatic = false } = {}) {
   if (!isPushSupported() || Notification.permission !== 'granted') return false;
+  if (automatic && isPushOptedOut()) return false;
 
   try {
     const vapidResponse = await deps.request('GET', '/v1/push/vapid-public-key');
@@ -165,6 +190,7 @@ export async function subscribeToPush(deps = { request }) {
   if (!isPushSupported()) return false;
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') return false;
+  writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, null);
   return registerPushDevice(deps);
 }
 
@@ -173,6 +199,9 @@ export async function subscribeToPush(deps = { request }) {
  */
 export async function unsubscribeFromPush() {
   if (!isPushSupported()) return true;
+  // A permissao do navegador continua "granted" (o site nao consegue revoga-la):
+  // sem esta marca, a proxima abertura do app cadastraria o aparelho de novo.
+  writeStorage(PUSH_STORAGE_KEYS.OPTED_OUT, '1');
 
   try {
     const registration = await navigator.serviceWorker.ready;

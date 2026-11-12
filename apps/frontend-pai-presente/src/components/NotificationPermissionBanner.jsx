@@ -41,7 +41,7 @@ export default function NotificationPermissionBanner({
     // Com permissao ja dada, (re)cadastra o aparelho a cada abertura: quem
     // ativou antes de o servidor ter chave VAPID ficava "ativo" sem aparelho.
     if (isPushSupported() && getNotificationPermission() === 'granted') {
-      registerPushDevice()
+      registerPushDevice(undefined, { automatic: true })
         .then(setIsSubscribed)
         .catch(() => setIsSubscribed(false));
     }

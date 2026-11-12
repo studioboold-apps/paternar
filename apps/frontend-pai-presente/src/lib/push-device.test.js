@@ -6,7 +6,13 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
-import { registerPushDevice, urlBase64ToUint8Array } from './push-notifications';
+import {
+  isPushOptedOut,
+  PUSH_STORAGE_KEYS,
+  registerPushDevice,
+  unsubscribeFromPush,
+  urlBase64ToUint8Array,
+} from './push-notifications';
 
 const KEY = 'BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QT9tWVHRZ6w0o4VNf55J15D34q7EHoOx6mdEDGDeVelRGCdg';
 const OTHER_KEY = 'BLtHQNmv2LTZlWwMJrukZXVZCVEmOo7SznJi8_FzkXETcJTz6bxmzg5-b0m9JTUmu6205GmYaXqzwMCs5dZ5Y4c';
@@ -35,6 +41,12 @@ function installBrowser({ permission = 'granted', existingKey } = {}) {
     },
   };
   globalThis.window = globalThis;
+  const store = new Map();
+  globalThis.localStorage = {
+    getItem: (key) => (store.has(key) ? store.get(key) : null),
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: (key) => store.delete(key),
+  };
   globalThis.PushManager = function PushManager() {};
   globalThis.Notification = { permission };
   Object.defineProperty(globalThis.navigator, 'serviceWorker', {
@@ -64,6 +76,7 @@ describe('registerPushDevice', () => {
     delete globalThis.window;
     delete globalThis.PushManager;
     delete globalThis.Notification;
+    delete globalThis.localStorage;
     delete globalThis.navigator.serviceWorker;
   });
 
@@ -102,5 +115,21 @@ describe('registerPushDevice', () => {
     expect(await registerPushDevice(api)).toBe(true);
     expect(log).toEqual([]);
     expect(api.calls.some((call) => call.path === '/v1/notification-devices')).toBe(true);
+  });
+
+  it('depois de desativar, a abertura do app nao cadastra o aparelho de novo', async () => {
+    installBrowser({ existingKey: KEY });
+    expect(await unsubscribeFromPush()).toBe(true);
+    expect(isPushOptedOut()).toBe(true);
+
+    const api = fakeApi(KEY);
+    expect(await registerPushDevice(api, { automatic: true })).toBe(false);
+    expect(api.calls).toHaveLength(0);
+  });
+
+  it('ativar de novo pelo botao vale mesmo depois de desativar', async () => {
+    installBrowser();
+    globalThis.localStorage.setItem(PUSH_STORAGE_KEYS.OPTED_OUT, '1');
+    expect(await registerPushDevice(fakeApi(KEY))).toBe(true);
   });
 });
