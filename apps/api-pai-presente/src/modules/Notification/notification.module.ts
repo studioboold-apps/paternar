@@ -10,10 +10,14 @@
 import { eq } from 'drizzle-orm';
 import type { ModuleFetchRouter } from '@adatechnology/module-http/fetch';
 import { createModuleFetchRouter } from '@adatechnology/module-http/fetch';
+import type { QueuePort } from '@adatechnology/notification-contracts';
 import {
+  createInProcessQueue,
   createNotificationModule,
   createNotificationRoutes,
+  createNotificationWorker,
   type NotificationModule,
+  type NotificationWorker,
 } from '@adatechnology/notification-module';
 import { createWebPushProvider } from '@adatechnology/push-provider';
 
@@ -33,7 +37,36 @@ export type BuildNotificationModuleParams = {
     readonly privateKey: string;
     readonly subject: string;
   } | undefined;
+  /**
+   * A fila que liga o envio ao despacho. Sem ela o modulo cria uma propria e
+   * ninguem a consome: a notificacao fica `queued` para sempre e o push nunca
+   * sai. Quem monta o modulo passa a mesma fila para `startNotificationWorker`.
+   */
+  readonly queue?: QueuePort | undefined;
 };
+
+/** Fila em memoria: o worker roda no mesmo processo da API (uma replica). */
+export function createNotificationQueue(): QueuePort {
+  return createInProcessQueue();
+}
+
+/**
+ * Liga o consumidor da fila. Sem isto, o envio grava a notificacao e a
+ * entrega, e para ai: nenhum push chega ao aparelho.
+ */
+export async function startNotificationWorker(params: {
+  readonly notification: NotificationModule;
+  readonly queue: QueuePort;
+  readonly logger?: Logger | undefined;
+}): Promise<NotificationWorker> {
+  const worker = createNotificationWorker({
+    module: params.notification,
+    queue: params.queue,
+    ...(params.logger ? { logger: params.logger } : {}),
+  });
+  await worker.start();
+  return worker;
+}
 
 export function buildNotificationModule(params: BuildNotificationModuleParams): NotificationModule {
   const db = params.database as never;
@@ -77,10 +110,20 @@ export function buildNotificationModule(params: BuildNotificationModuleParams): 
       channels: {
         ...(pushDriver === undefined ? {} : { push: pushDriver }),
       },
+      ...(params.queue ? { queue: params.queue } : {}),
       ...(params.logger ? { logger: params.logger } : {}),
     },
   });
 }
+
+/**
+ * O que o app dos pais pode chamar: a propria caixa de entrada, os proprios
+ * aparelhos, as proprias preferencias e a chave VAPID. As rotas `admin`
+ * (modelos e politicas) e `service` (disparar para qualquer pai) do SDK nao
+ * pedem escopo nenhum, e no roteador do app bastaria estar logado para editar
+ * o texto que chega a todo mundo ou mandar push para outro pai.
+ */
+const APP_NOTIFICATION_SCOPES: ReadonlySet<string> = new Set(['user', 'public']);
 
 export function buildNotificationRouter(params: {
   readonly notification: NotificationModule;
@@ -90,7 +133,7 @@ export function buildNotificationRouter(params: {
   const routes = createNotificationRoutes({
     module: params.notification,
     ...(params.vapidPublicKey ? { vapidPublicKey: params.vapidPublicKey } : {}),
-  });
+  }).filter((route) => APP_NOTIFICATION_SCOPES.has(route.scope));
 
   return createModuleFetchRouter({
     authResolver: createAppAuthResolver(params.authenticatedUserResolver),

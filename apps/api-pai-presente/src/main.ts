@@ -25,6 +25,8 @@ import { buildRecommendationFeedRouter, buildSdkModules } from './modules/Recomm
 import {
   buildNotificationModule,
   buildNotificationRouter,
+  createNotificationQueue,
+  startNotificationWorker,
 } from './modules/Notification/notification.module';
 import { bootstrapNotificationTemplates } from './modules/Notification/seed-templates';
 
@@ -44,8 +46,10 @@ const auth = buildAuthModule({
   isSecureCookie: isProduction,
 });
 
+const notificationQueue = createNotificationQueue();
 const notificationModule = buildNotificationModule({
   database,
+  queue: notificationQueue,
   logger: logger.withScope('notification'),
   suppressionHmacKey: environment.NOTIFICATION_SUPPRESSION_HMAC_KEY,
   vapidKeys:
@@ -58,6 +62,15 @@ const notificationModule = buildNotificationModule({
       : undefined,
 });
 await bootstrapNotificationTemplates(database);
+// Sem consumidor, a fila em memoria so acumula: nenhum push chegava ao aparelho.
+await startNotificationWorker({
+  notification: notificationModule,
+  queue: notificationQueue,
+  logger: logger.withScope('notification-worker'),
+});
+if (!environment.VAPID_PUBLIC_KEY || !environment.VAPID_PRIVATE_KEY) {
+  logger.warn('push desligado: VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY vazias; so a caixa de entrada funciona');
+}
 
 const DISPATCH_INTERVAL_MS = 60_000;
 const dispatchTimer = setInterval(async () => {

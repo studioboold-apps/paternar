@@ -9,6 +9,8 @@ import { describe, expect, it } from 'bun:test';
 import {
   buildNotificationModule,
   buildNotificationRouter,
+  createNotificationQueue,
+  startNotificationWorker,
 } from './notification.module';
 import { NOTIFICATION_COMPANY_ID } from './notification.constant';
 import {
@@ -59,7 +61,11 @@ describe('notification module', () => {
 
     expect(router.match(new Request('http://local/v1/notification-devices', { method: 'POST' }))).toBe(true);
     expect(router.match(new Request('http://local/v1/push/vapid-public-key', { method: 'GET' }))).toBe(true);
-    expect(router.match(new Request('http://local/v1/notifications', { method: 'POST' }))).toBe(true);
+    // Disparar para qualquer pai e editar modelos nao sao do app: so do painel.
+    expect(router.match(new Request('http://local/v1/notifications', { method: 'POST' }))).toBe(false);
+    expect(router.match(new Request('http://local/v1/notification-templates', { method: 'GET' }))).toBe(false);
+    expect(router.match(new Request('http://local/v1/notification-category-policies', { method: 'PUT' }))).toBe(false);
+    expect(router.match(new Request('http://local/v1/notifications', { method: 'GET' }))).toBe(true);
     expect(router.match(new Request('http://local/v1/unknown-route', { method: 'GET' }))).toBe(false);
 
     // GET /v1/push/vapid-public-key devolve a chave publica configurada
@@ -128,5 +134,23 @@ describe('notification module', () => {
     expect(result.templatesCount).toBe(DEFAULT_NOTIFICATION_TEMPLATES.length);
     expect(result.policiesCount).toBe(DEFAULT_CATEGORY_POLICIES.length);
     expect(queries.length).toBe(DEFAULT_NOTIFICATION_TEMPLATES.length + DEFAULT_CATEGORY_POLICIES.length);
+  });
+});
+
+describe('worker de notificacoes', () => {
+  it('consome a fila: a entrega enfileirada pelo envio chega ao despacho', async () => {
+    const dispatched: unknown[] = [];
+    const notification = {
+      useCases: { dispatchDelivery: { execute: async (job: unknown) => { dispatched.push(job); } } },
+    } as unknown as Parameters<typeof startNotificationWorker>[0]['notification'];
+    const queue = createNotificationQueue();
+
+    // Enfileirado antes do worker subir (boot): nao pode se perder.
+    await queue.enqueue({ job: { deliveryId: 'antes' } } as never);
+    const worker = await startNotificationWorker({ notification, queue });
+    await queue.enqueue({ job: { deliveryId: 'depois' } } as never);
+
+    expect(dispatched).toEqual([{ deliveryId: 'antes' }, { deliveryId: 'depois' }]);
+    await worker.stop();
   });
 });

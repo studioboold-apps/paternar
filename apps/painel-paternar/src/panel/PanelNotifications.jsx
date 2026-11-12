@@ -14,6 +14,7 @@ import '@adatechnology/notification-ui/styles.css';
 import { createPanelNotificationClient } from './panel-apis';
 import { PANEL_TEXT } from './panel-text';
 import { PageHeader } from './panel-ui';
+import PanelTemplateTestButton from './PanelTemplateTestButton';
 
 const NOTIFICATION_CHANNELS = [
   { id: 'inbox', label: 'Mensagem no app (Inbox)', hint: 'Aviso interno na caixa de entrada do aplicativo' },
@@ -52,6 +53,9 @@ export default function PanelNotifications({ client }) {
             channels={NOTIFICATION_CHANNELS}
             categories={NOTIFICATION_CATEGORIES}
             senderName="Paternar"
+            renderEditorActions={({ templateKey }) => (
+              <PanelTemplateTestButton client={client} templateKey={templateKey} />
+            )}
           />
         </div>
       </NotificationProvider>
