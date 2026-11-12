@@ -44,6 +44,15 @@ export type CreateActivityUseCasesParams = {
 /** America/Sao_Paulo nao tem horario de verao desde 2019. */
 const APP_TIMEZONE_OFFSET = '-03:00';
 
+/**
+ * A data chega como `2026-11-15` (ISO); no texto da notificacao o pai le
+ * `15/11/2026`. Valor fora do formato passa como veio.
+ */
+export function formatBrazilianDate(isoDate: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDate;
+}
+
 export function createActivityUseCases(params: CreateActivityUseCasesParams): ActivityUseCases {
   const { repository, childOwnership, notifications } = params;
   const companyId = params.companyId ?? NOTIFICATION_COMPANY_ID;
@@ -86,7 +95,7 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
             payload: {
               title: values.title,
               description: values.description ?? '',
-              activityDate: values.activityDate,
+              activityDate: formatBrazilianDate(values.activityDate),
               activityTime: values.activityTime ? ` às ${values.activityTime}` : '',
               calendarEvent: {
                 title: values.title,
@@ -117,7 +126,7 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
               payload: {
                 title: values.title,
                 description: values.description ?? '',
-                activityDate: values.activityDate,
+                activityDate: formatBrazilianDate(values.activityDate),
                 activityTime: values.activityTime ? ` às ${values.activityTime}` : '',
                 calendarEvent: {
                   title: values.title,

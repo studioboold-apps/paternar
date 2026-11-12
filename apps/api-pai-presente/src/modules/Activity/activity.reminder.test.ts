@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, setSystemTime } from 'bun:
 import type { SendNotificationParams } from '@adatechnology/notification-contracts';
 import type { NotificationModule } from '@adatechnology/notification-module';
 
-import { createActivityUseCases } from './activity.use-case';
+import { createActivityUseCases, formatBrazilianDate } from './activity.use-case';
 import type { ActivityRepository } from './types/activity.types';
 
 const USER_ID = '22222222-2222-4222-8222-222222222222';
@@ -58,5 +58,12 @@ describe('lembrete de atividade', () => {
 
     const reminder = sent.find((params) => params.templateKey === 'atividades.lembrete');
     expect(new Date(reminder?.scheduledFor as Date).toISOString()).toBe('2026-03-10T11:00:00.000Z');
+  });
+});
+
+describe('formatBrazilianDate', () => {
+  it('mostra a data da atividade como o pai le', () => {
+    expect(formatBrazilianDate('2026-11-15')).toBe('15/11/2026');
+    expect(formatBrazilianDate('15/11/2026')).toBe('15/11/2026');
   });
 });
