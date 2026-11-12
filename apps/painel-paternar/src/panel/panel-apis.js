@@ -8,6 +8,7 @@
  * objeto com metodos, e o token entra aqui.
  */
 
+import { createNotificationClient } from '@adatechnology/notification-client';
 import { createFetchRecommendationsApi } from '@adatechnology/recommendations-ui';
 
 const query = (params) => {
@@ -42,6 +43,14 @@ export function createCustomersApi(client) {
 /** @param {ReturnType<typeof import('./panel-client').createPanelClient>} client */
 export function createPanelRecommendationsApi(client) {
   return createFetchRecommendationsApi({ baseUrl: client.root, fetch: client.authorizedFetch });
+}
+
+/** @param {ReturnType<typeof import('./panel-client').createPanelClient>} client */
+export function createPanelNotificationClient(client) {
+  return createNotificationClient({
+    baseUrl: client.root,
+    fetchImpl: client.authorizedFetch,
+  });
 }
 
 /** Todos os anunciantes para o seletor da recomendacao patrocinada. */

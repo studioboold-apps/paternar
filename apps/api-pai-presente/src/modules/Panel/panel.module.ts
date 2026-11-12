@@ -17,6 +17,7 @@
 import { createCustomerRoutes, type CustomerModule } from '@adatechnology/customer-module';
 import type { AuthContext, AuthContextResolverPort, ModuleRouteTable } from '@adatechnology/module-http';
 import { createModuleFetchRouter, type ModuleFetchRouter } from '@adatechnology/module-http/fetch';
+import { createNotificationRoutes, type NotificationModule } from '@adatechnology/notification-module';
 import { createRecommendationRoutes, type RecommendationModule } from '@adatechnology/recommendation-module';
 import { USER_ERROR_CODE } from '@adatechnology/user-contracts';
 import { createUserModule, createUserRoutes, type UserModule } from '@adatechnology/user-module';
@@ -44,6 +45,7 @@ export type BuildPanelModuleParams = {
   /** Os mesmos que servem o feed dos pais: uma instancia, dois publicos. */
   readonly customers: CustomerModule;
   readonly recommendations: RecommendationModule;
+  readonly notifications?: NotificationModule | undefined;
   readonly jwtSecret: string;
   readonly firstAdmin?: {
     readonly email: string;
@@ -187,6 +189,7 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
     ...createUserRoutes({ module: users }),
     ...createCustomerRoutes({ module: customers }),
     ...createRecommendationRoutes({ module: recommendations, features: { feed: false, admin: true } }),
+    ...(params.notifications ? createNotificationRoutes({ module: params.notifications }) : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),
     ...buildPanelInsightRoutes({
       history: createPanelHistoryRepository(params.database),

@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Flag, LayoutDashboard, LogOut, ShieldCheck, Sparkles, Star, Store, Users } from 'lucide-react';
+import { Bell, Flag, LayoutDashboard, LogOut, ShieldCheck, Sparkles, Star, Store, Users } from 'lucide-react';
 
 import AdaFooter from '@/components/AdaFooter';
 import { BrandSymbol, BrandWordmark } from '@/components/PanelBrand';
@@ -22,6 +22,7 @@ import PanelAdvertisers from './PanelAdvertisers';
 import PanelAiUsage from './PanelAiUsage';
 import PanelAppUsers from './PanelAppUsers';
 import PanelLogin from './PanelLogin';
+import PanelNotifications from './PanelNotifications';
 import PanelOverview from './PanelOverview';
 import PanelRecommendations from './PanelRecommendations';
 import PanelReports from './PanelReports';
@@ -44,6 +45,7 @@ const SECTIONS = [
   { section: 'ia', key: 'ai', icon: Sparkles, Component: PanelAiUsage },
   { section: 'anunciantes', key: 'advertisers', icon: Store, Component: PanelAdvertisers },
   { section: 'recomendacoes', key: 'recommendations', icon: Star, Component: PanelRecommendations },
+  { section: 'notificacoes', key: 'notifications', icon: Bell, Component: PanelNotifications },
   { section: 'equipe', key: 'team', icon: ShieldCheck, Component: PanelTeamAccess, scope: PANEL_SCOPE.ADMIN },
 ];
 
