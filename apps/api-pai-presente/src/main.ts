@@ -10,6 +10,7 @@ import { readEnvironment } from './config/environment';
 import { createDatabaseClient } from './database/client';
 import { buildApplicationRoutes } from './app';
 import { buildAuthModule } from './modules/Auth/auth.module';
+import { buildBillingModule } from './modules/Billing/billing.module';
 import { createCorsPolicy } from './modules/shared/http/cors';
 import {
   HEALTH_PATH,
@@ -84,29 +85,50 @@ const dispatchTimer = setInterval(async () => {
 }, DISPATCH_INTERVAL_MS);
 dispatchTimer.unref?.();
 
+const billing = buildBillingModule({
+  database,
+  config: {
+    checkoutProvider: environment.PAYMENTS_PROVIDER,
+    hotmart: { hottok: environment.HOTMART_HOTTOK },
+    checkoutUrls: {
+      monthly: environment.HOTMART_CHECKOUT_URL_MONTHLY,
+      yearly: environment.HOTMART_CHECKOUT_URL_YEARLY,
+    },
+    fakeSecret: environment.PAYMENTS_FAKE_SECRET,
+    isProduction,
+  },
+  logger: logger.withScope('billing'),
+});
+if (!environment.HOTMART_HOTTOK) {
+  logger.warn('pagamentos: HOTMART_HOTTOK vazio; o webhook da Hotmart responde 503');
+}
+
 const router = createRouter({
-  routes: buildApplicationRoutes({
-    database,
-    notifications: notificationModule,
-    llm: {
-      providerName: environment.LLM_PROVIDER,
-      apiKey: environment.LLM_API_KEY,
-      model: environment.LLM_MODEL,
-      modelFast: environment.LLM_MODEL_FAST,
-      transcription: {
-        apiKey: environment.TRANSCRIPTION_GROQ_API_KEY,
-        model: environment.TRANSCRIPTION_MODEL,
+  routes: [
+    ...buildApplicationRoutes({
+      database,
+      notifications: notificationModule,
+      llm: {
+        providerName: environment.LLM_PROVIDER,
+        apiKey: environment.LLM_API_KEY,
+        model: environment.LLM_MODEL,
+        modelFast: environment.LLM_MODEL_FAST,
+        transcription: {
+          apiKey: environment.TRANSCRIPTION_GROQ_API_KEY,
+          model: environment.TRANSCRIPTION_MODEL,
+        },
       },
-    },
-    media: {
-      destination: environment.MEDIA_DESTINATION,
-      directory: environment.MEDIA_DIRECTORY,
-      bucket: environment.MEDIA_S3_BUCKET,
-      endpoint: environment.MEDIA_S3_ENDPOINT,
-      encryptionKey: environment.MEDIA_ENCRYPTION_KEY,
-    },
-  }),
-  publicRoutes: auth.publicRoutes,
+      media: {
+        destination: environment.MEDIA_DESTINATION,
+        directory: environment.MEDIA_DIRECTORY,
+        bucket: environment.MEDIA_S3_BUCKET,
+        endpoint: environment.MEDIA_S3_ENDPOINT,
+        encryptionKey: environment.MEDIA_ENCRYPTION_KEY,
+      },
+    }),
+    ...billing.routes,
+  ],
+  publicRoutes: [...auth.publicRoutes, ...billing.publicRoutes],
   authenticatedUserResolver: auth.authenticatedUserResolver,
 });
 const cors = createCorsPolicy(environment.WEB_ORIGINS);

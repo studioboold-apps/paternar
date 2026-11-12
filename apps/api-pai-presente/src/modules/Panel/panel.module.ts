@@ -33,6 +33,8 @@ import {
   type PanelRole,
 } from './panel.constant';
 import { createPanelAiUsageRepository } from './panel-ai-usage.repository';
+import { createPanelBillingRepository } from './panel-billing.repository';
+import { buildPanelBillingRoutes } from './panel-billing.routes';
 import { createPanelEngagementRepository } from './panel-engagement.repository';
 import { createPanelHistoryRepository } from './panel-history.repository';
 import { buildPanelInsightRoutes } from './panel-insights.routes';
@@ -203,6 +205,7 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
         })
       : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),
+    ...buildPanelBillingRoutes(createPanelBillingRepository(params.database)),
     ...buildPanelInsightRoutes({
       history: createPanelHistoryRepository(params.database),
       engagement: createPanelEngagementRepository(params.database),

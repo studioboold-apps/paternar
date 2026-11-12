@@ -28,3 +28,4 @@ export {
 } from '../modules/FamilyValues/family-values.table';
 export { aiUsageTable } from '../modules/AiUsage/ai-usage.table';
 export { communityReportsTable } from '../modules/CommunityReport/community-report.table';
+export { paymentEventsTable, subscriptionsTable } from '../modules/Billing/billing.table';
