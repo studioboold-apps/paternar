@@ -55,12 +55,13 @@ describe('notificacoes no painel', () => {
     expect((await call(router, 'POST', '/notification-templates/avisos.plataforma/test')).status).toBe(403);
   });
 
-  it('nao publica no painel o disparo livre para qualquer pai nem as rotas do proprio pai', () => {
+  it('nao publica no painel o disparo livre para qualquer pai', () => {
     const router = buildRouter(PANEL_ROLES.ADMIN, neverCalled);
     const at = (method: string, path: string) =>
       router.match(new Request(`http://local${PANEL_BASE_PATH}${path}`, { method }));
     expect(at('POST', '/notifications')).toBe(false);
-    expect(at('POST', '/notification-devices')).toBe(false);
+    // A tela de configuracoes do SDK le as preferencias de quem esta logado.
+    expect(at('GET', '/notification-preferences')).toBe(true);
     expect(at('GET', '/notification-templates')).toBe(true);
   });
 

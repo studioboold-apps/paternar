@@ -18,20 +18,24 @@ import { PANEL_SCOPES } from './panel.constant';
  * (ate o "so olha") editaria o texto que chega a todos os pais. Ler pede
  * `panel:read`; mudar pede `notifications:admin` (admin e editor).
  *
- * As rotas `user` (caixa de entrada, aparelhos) sao do pai, nao da equipe, e a
- * `service` (disparar para qualquer pai pelo id) nao tem uso no painel: ficam fora.
+ * As rotas `user` ficam: a tela de configuracoes do SDK le e grava as
+ * preferencias de quem esta logado. A `service` (disparar para qualquer pai
+ * pelo id) nao tem uso no painel e fica fora.
  */
 export function buildPanelNotificationRoutes(params: {
   readonly notification: NotificationModule;
   readonly sendTemplateTest: SendTemplateTest;
 }): ModuleRoute[] {
   const sdkRoutes = (createNotificationRoutes({ module: params.notification }) as readonly ModuleRoute[])
-    .filter((route) => route.scope === ROUTE_SCOPE.ADMIN)
+    .filter((route) => route.scope === ROUTE_SCOPE.ADMIN || route.scope === ROUTE_SCOPE.USER)
     .map(
-      (route): ModuleRoute => ({
-        ...route,
-        requiredScopes: [route.method === 'GET' ? PANEL_SCOPES.READ : PANEL_SCOPES.NOTIFICATIONS_ADMIN],
-      }),
+      (route): ModuleRoute =>
+        route.scope === ROUTE_SCOPE.ADMIN
+          ? {
+              ...route,
+              requiredScopes: [route.method === 'GET' ? PANEL_SCOPES.READ : PANEL_SCOPES.NOTIFICATIONS_ADMIN],
+            }
+          : route,
     );
 
   return [
