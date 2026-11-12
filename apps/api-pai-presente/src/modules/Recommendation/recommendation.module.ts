@@ -27,11 +27,12 @@ import type { AuthenticatedUserResolver } from '../shared/auth/authenticated-use
 import { API_VERSION_PREFIX } from '../shared/http/http.constant';
 import { createRateLimiter, type RateLimiter } from '../shared/http/rate-limit';
 import type { Logger } from '../shared/logger/logger';
+import { NOTIFICATION_COMPANY_ID } from '../Notification/notification.constant';
 import { RECOMMENDATION_CONFIG, RECOMMENDATION_EVENTS_RATE_LIMIT } from './recommendation.constant';
 
 const TRACK_OPERATION_ID = 'trackRecommendationEvent';
-/** O feed dos pais nao tem empresa; o `module-http` so pede um valor. */
-const APP_COMPANY_ID = 'entrelacos';
+/** O feed dos pais e as notificacoes compartilham o UUID da empresa. */
+const APP_COMPANY_ID = NOTIFICATION_COMPANY_ID;
 
 export type SdkModules = {
   readonly customers: CustomerModule;

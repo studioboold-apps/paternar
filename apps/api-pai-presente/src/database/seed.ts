@@ -26,6 +26,7 @@ import { createUserRepository } from '../modules/User/user.repository';
 import { createUserUseCases } from '../modules/User/user.use-case';
 import type { ChildFilePurgePort } from '../modules/shared/child-file-purge.interface';
 import type { ChildFileExportPort } from '../modules/shared/child-file-export.interface';
+import { bootstrapNotificationTemplates } from '../modules/Notification/seed-templates';
 import { createDatabaseClient, type Database } from './client';
 import { SEED_LIST_LIMIT } from './seed.constant';
 import { runSeed } from './seed.service';
@@ -182,9 +183,12 @@ export function buildSeedPorts({
 
 const environment = readSeedEnvironment();
 
+const databaseClient = createDatabaseClient(environment.DATABASE_URL);
+await bootstrapNotificationTemplates(databaseClient);
+
 const summary = await runSeed({
   ports: buildSeedPorts({
-    database: createDatabaseClient(environment.DATABASE_URL),
+    database: databaseClient,
     jwtSecret: environment.AUTH_JWT_SECRET,
     isProduction: environment.NODE_ENV === 'production',
   }),

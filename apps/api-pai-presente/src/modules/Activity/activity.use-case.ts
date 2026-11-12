@@ -5,6 +5,7 @@
  */
 
 import type { NotificationModule } from '@adatechnology/notification-module';
+import { NOTIFICATION_COMPANY_ID } from '../Notification/notification.constant';
 import type { ChildOwnershipPort } from '../shared/child-ownership.interface';
 import { ERROR_CODES } from '../shared/errors/codes';
 import { ResourceNotFoundError, ResourceNotOwnedError } from '../shared/errors/shared.error';
@@ -42,7 +43,7 @@ export type CreateActivityUseCasesParams = {
 
 export function createActivityUseCases(params: CreateActivityUseCasesParams): ActivityUseCases {
   const { repository, childOwnership, notifications } = params;
-  const companyId = params.companyId ?? 'entrelacos';
+  const companyId = params.companyId ?? NOTIFICATION_COMPANY_ID;
 
   /** Sem isto, um id de filho alheio entraria numa atividade propria (BOLA). */
   async function assertChildIsOwned(childId: string | undefined, userId: string): Promise<void> {

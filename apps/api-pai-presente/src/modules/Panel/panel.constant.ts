@@ -4,13 +4,14 @@
  * Licenca: proprietaria.
  */
 
+import { NOTIFICATION_COMPANY_ID } from '../Notification/notification.constant';
 import { API_VERSION_PREFIX } from '../shared/http/http.constant';
 
 /** Tudo do painel mora aqui embaixo: nenhuma rota da equipe colide com rota de pai. */
 export const PANEL_BASE_PATH = `${API_VERSION_PREFIX}/panel`;
 
-/** `user-module` exige um id de empresa mesmo em single-tenant. */
-export const PANEL_COMPANY_ID = 'entrelacos';
+/** `user-module` e `notification-module` compartilham o ID de empresa (UUID compativel com PostgreSQL). */
+export const PANEL_COMPANY_ID = NOTIFICATION_COMPANY_ID;
 
 /**
  * Papeis da EQUIPE. O papel mora no token do `user-module`; o que cada um pode
