@@ -105,6 +105,7 @@ const panel =
         database,
         customers: sdk.customers,
         recommendations: sdk.recommendations,
+        notifications: notificationModule,
         jwtSecret: environment.PANEL_JWT_SECRET,
         firstAdmin: {
           email: environment.PANEL_ADMIN_EMAIL,

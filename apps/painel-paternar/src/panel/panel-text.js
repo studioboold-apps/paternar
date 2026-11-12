@@ -26,6 +26,7 @@ export const PANEL_TEXT = Object.freeze({
     ai: 'Uso de IA',
     advertisers: 'Anunciantes',
     recommendations: 'Recomendações',
+    notifications: 'Notificações',
     team: 'Acessos da equipe',
   },
   overview: {
@@ -207,6 +208,9 @@ export const PANEL_TEXT = Object.freeze({
   },
   recommendations: {
     description: 'Lugares e programas que aparecem para os pais, com campanhas e números de cliques.',
+  },
+  notifications: {
+    description: 'Gerencie os canais de envio, políticas por categoria e os modelos de mensagens disparados aos pais.',
   },
   advertisers: {
     description: 'Quem anuncia no app. A categoria decide em que tipo de recomendação ele aparece.',
