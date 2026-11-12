@@ -47,8 +47,10 @@ export function createPanelRecommendationsApi(client) {
 
 /** @param {ReturnType<typeof import('./panel-client').createPanelClient>} client */
 export function createPanelNotificationClient(client) {
+  const origin = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : 'http://localhost';
+  const baseUrl = client.root.startsWith('http') ? client.root : `${origin}${client.root}`;
   return createNotificationClient({
-    baseUrl: client.root,
+    baseUrl,
     fetchImpl: client.authorizedFetch,
   });
 }
