@@ -8,5 +8,8 @@
   "disable": "Disable notifications",
   "disabling": "Disabling…",
   "deniedTitle": "Notifications blocked",
-  "deniedDescription": "Notifications are blocked in your browser. To receive reminders, allow them in your site settings."
+  "deniedDescription": "Notifications are blocked in your browser. To receive reminders, allow them in your site settings.",
+  "inactiveTitle": "Notifications off on this device",
+  "inactiveDescription": "Your browser allows notifications, but this device isn't registered to receive them yet. On iPhone, add the app to your Home Screen before enabling.",
+  "enableHere": "Enable on this device"
 }

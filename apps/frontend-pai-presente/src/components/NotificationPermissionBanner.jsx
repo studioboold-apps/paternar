@@ -15,7 +15,7 @@ import {
   dismissPush,
   getNotificationPermission,
   isPushDismissed,
-  isPushSubscribed,
+  registerPushDevice,
   isPushSupported,
   subscribeToPush,
   unsubscribeFromPush,
@@ -29,7 +29,8 @@ export default function NotificationPermissionBanner({
 }) {
   const { t } = useTranslation();
   const [permission, setPermission] = useState(() => getNotificationPermission());
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  // `null` enquanto confere com a API; depois, se ESTE aparelho esta cadastrado.
+  const [isSubscribed, setIsSubscribed] = useState(null);
   const [isDismissed, setIsDismissed] = useState(() => isPushDismissed());
   const [isBusy, setIsBusy] = useState(false);
 
@@ -37,8 +38,12 @@ export default function NotificationPermissionBanner({
     setPermission(getNotificationPermission());
     setIsDismissed(isPushDismissed());
 
-    if (isPushSupported()) {
-      isPushSubscribed().then(setIsSubscribed).catch(() => undefined);
+    // Com permissao ja dada, (re)cadastra o aparelho a cada abertura: quem
+    // ativou antes de o servidor ter chave VAPID ficava "ativo" sem aparelho.
+    if (isPushSupported() && getNotificationPermission() === 'granted') {
+      registerPushDevice()
+        .then(setIsSubscribed)
+        .catch(() => setIsSubscribed(false));
     }
   }, []);
 
@@ -131,7 +136,47 @@ export default function NotificationPermissionBanner({
     );
   }
 
-  // 2. Estado Ativo: opcao de desativacao
+  // 2. Permissao dada, mas este aparelho nao esta cadastrado (ou ainda conferindo)
+  if (permission === 'granted' && isSubscribed !== true) {
+    if (!showWhenGranted || isSubscribed === null) return null;
+
+    return (
+      <aside
+        className={cn(
+          'flex items-start gap-3.5 p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-zinc-100',
+          className
+        )}
+        role="region"
+        aria-label={t('notificationBanner.inactiveTitle')}
+      >
+        <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 shrink-0 mt-0.5">
+          <Bell aria-hidden="true" className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-zinc-100">
+            {t('notificationBanner.inactiveTitle')}
+          </h3>
+          <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+            {t('notificationBanner.inactiveDescription')}
+          </p>
+          <div className="mt-3">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSubscribe}
+              disabled={isBusy}
+              className="bg-blue-600 hover:bg-blue-500 text-white text-xs h-8 px-3 rounded-lg"
+            >
+              {isBusy && <Loader2 aria-hidden="true" className="w-3.5 h-3.5 mr-1.5 animate-spin" />}
+              {t('notificationBanner.enableHere')}
+            </Button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // 3. Estado Ativo: aparelho cadastrado, opcao de desativacao
   if (permission === 'granted') {
     if (!showWhenGranted) return null;
 
@@ -172,7 +217,7 @@ export default function NotificationPermissionBanner({
     );
   }
 
-  // 3. Estado Bloqueado: aviso de que o navegador bloqueou notificacoes
+  // 4. Estado Bloqueado: aviso de que o navegador bloqueou notificacoes
   if (permission === 'denied') {
     if (!showWhenDenied || isDismissed) return null;
 

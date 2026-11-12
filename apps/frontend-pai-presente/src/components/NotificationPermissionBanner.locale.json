@@ -8,5 +8,8 @@
   "disable": "Desativar notificações",
   "disabling": "Desativando…",
   "deniedTitle": "Notificações bloqueadas",
-  "deniedDescription": "As notificações estão bloqueadas no navegador. Para receber lembretes das atividades, permita nas configurações do site."
+  "deniedDescription": "As notificações estão bloqueadas no navegador. Para receber lembretes das atividades, permita nas configurações do site.",
+  "inactiveTitle": "Notificações desligadas neste aparelho",
+  "inactiveDescription": "Seu navegador permite notificações, mas este aparelho ainda não está cadastrado para receber. No iPhone, adicione o app à Tela de Início antes de ativar.",
+  "enableHere": "Ativar neste aparelho"
 }
