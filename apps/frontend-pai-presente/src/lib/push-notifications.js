@@ -145,7 +145,10 @@ export async function registerPushDevice(deps = { request }, { automatic = false
 
   try {
     const vapidResponse = await deps.request('GET', '/v1/push/vapid-public-key');
-    const vapidPublicKey = vapidResponse?.publicKey;
+    // `request` devolve as chaves em snake_case (`toPagePayload`): `publicKey`
+    // chega como `public_key`. Ler so `publicKey` dava "sem chave" sempre, e
+    // nenhum aparelho era cadastrado.
+    const vapidPublicKey = vapidResponse?.public_key ?? vapidResponse?.publicKey;
     // Sem chave no servidor nao ha push: dizer "ativo" aqui era mentir para o pai.
     if (!vapidPublicKey) return false;
 
