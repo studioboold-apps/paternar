@@ -15,9 +15,9 @@
         "@adatechnology/customer-contracts": "0.1.1",
         "@adatechnology/customer-module": "0.1.2",
         "@adatechnology/module-http": "0.1.1",
-        "@adatechnology/notification-contracts": "0.3.0",
-        "@adatechnology/notification-module": "0.3.0",
-        "@adatechnology/push-provider": "0.1.3",
+        "@adatechnology/notification-contracts": "0.4.0",
+        "@adatechnology/notification-module": "0.4.0",
+        "@adatechnology/push-provider": "0.2.0",
         "@adatechnology/recommendation-contracts": "0.2.0",
         "@adatechnology/recommendation-module": "0.2.0",
         "@adatechnology/user-contracts": "0.2.0",
@@ -140,11 +140,11 @@
 
     "@adatechnology/module-http": ["@adatechnology/module-http@0.1.1", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-eIFa2eqDS3Rred0JG4zCg1sdpEnv9vUmoqBzzhrC9UyQY8txJGE7R0gLLPGB7bAJANEw+lYoQIF47at0GtVZaA=="],
 
-    "@adatechnology/notification-contracts": ["@adatechnology/notification-contracts@0.3.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-EV02BWP4ZgOunlLJOXBKCZskICj7X4fB5jH+MZEgLSqQncT3zkc8F+DDXHljbQnO7yWR0MgA8Lpev9V+aHyoyA=="],
+    "@adatechnology/notification-contracts": ["@adatechnology/notification-contracts@0.4.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-du4sk9SXsG+nSnPNqDG3cs4lteYH5STvSg3TCc1fhnVJZsmZ2kMb58tn8iWQ141t0KAYbNz2QAxsLroM4lraww=="],
 
-    "@adatechnology/notification-module": ["@adatechnology/notification-module@0.3.0", "", { "dependencies": { "@adatechnology/module-http": "0.1.1", "@adatechnology/notification-contracts": "0.3.0", "zod": "^3.24.1" }, "peerDependencies": { "drizzle-orm": ">=0.36.0 <2" } }, "sha512-ruXwMEJcsX0bcAXoJ37t9XIgnK1pYn24YXaCunePJHUJaBpa39/DsaCF1lebS61ppcvbkDjmu7Q9ufQTs84HHQ=="],
+    "@adatechnology/notification-module": ["@adatechnology/notification-module@0.4.0", "", { "dependencies": { "@adatechnology/module-http": "0.1.1", "@adatechnology/notification-contracts": "0.4.0", "zod": "^3.24.1" }, "peerDependencies": { "drizzle-orm": ">=0.36.0 <2" } }, "sha512-YE2+7PqMKz2WPRkLzjQ4nqgPxiaztsPNzQZ6rbHsSYH6+KEMhqlTW30BTM2odEF3Gyk1cMxo8ruO66DIeIKOWw=="],
 
-    "@adatechnology/push-provider": ["@adatechnology/push-provider@0.1.3", "", { "dependencies": { "@adatechnology/notification-contracts": "0.3.0" }, "peerDependencies": { "firebase-admin": ">=12 <14" }, "optionalPeers": ["firebase-admin"] }, "sha512-lL811lXM7l1j1G4+2rSoY+EOc2s9VkQldPSD06AdQ4kUH3ctNM9phPG7JYJw0J8PrgE9KkMl0P6TV6a1ceUAAQ=="],
+    "@adatechnology/push-provider": ["@adatechnology/push-provider@0.2.0", "", { "dependencies": { "@adatechnology/notification-contracts": "0.4.0" }, "peerDependencies": { "firebase-admin": ">=12 <14" }, "optionalPeers": ["firebase-admin"] }, "sha512-ogKuqMd0HHHNeu3MueeBaG75jQdMkdckkd+FKsj8HujDKJhxwhI64wzjFHfP6u0Fw5ZEQq/QVFWI7D3w1j3rhw=="],
 
     "@adatechnology/recommendation-contracts": ["@adatechnology/recommendation-contracts@0.2.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-+4RwUaQW5+I6e6FQa3Q1myjUxqkoWakWbUbbbw9BYD1fiBp3ihZFeHZdQbDcKhuJEKq2W5p1+3gJjbsmR+EglA=="],
 
