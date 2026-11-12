@@ -6,6 +6,7 @@
 
 import activityCard from '@/components/ActivityCard.locale.json';
 import insightCard from '@/components/InsightCard.locale.json';
+import notificationBanner from '@/components/NotificationPermissionBanner.locale.json';
 import signIn from '@/components/SignIn.locale.json';
 import boletim from '@/pages/Boletim.locale.json';
 import chat from '@/pages/Chat.locale.json';
@@ -21,6 +22,7 @@ import insights from './insights.locale.json';
 import profile from './profile.locale.json';
 import activityCardEN from '@/components/ActivityCard.locale.en.json';
 import insightCardEN from '@/components/InsightCard.locale.en.json';
+import notificationBannerEN from '@/components/NotificationPermissionBanner.locale.en.json';
 import signInEN from '@/components/SignIn.locale.en.json';
 import boletimEN from '@/pages/Boletim.locale.en.json';
 import chatEN from '@/pages/Chat.locale.en.json';
@@ -36,6 +38,7 @@ import insightsEN from './insights.locale.en.json';
 import profileEN from './profile.locale.en.json';
 import activityCardES from '@/components/ActivityCard.locale.es.json';
 import insightCardES from '@/components/InsightCard.locale.es.json';
+import notificationBannerES from '@/components/NotificationPermissionBanner.locale.es.json';
 import signInES from '@/components/SignIn.locale.es.json';
 import boletimES from '@/pages/Boletim.locale.es.json';
 import chatES from '@/pages/Chat.locale.es.json';
@@ -76,6 +79,7 @@ export const LOCALE_MESSAGES = Object.freeze({
   insightCard: insightCard,
   insights: insights,
   juntinhos: juntinhos,
+  notificationBanner: notificationBanner,
   onboarding: onboarding,
   perfil: perfil,
   profile: profile,
@@ -94,6 +98,7 @@ const EN_MESSAGES = Object.freeze({
   insightCard: insightCardEN,
   insights: insightsEN,
   juntinhos: juntinhosEN,
+  notificationBanner: notificationBannerEN,
   onboarding: onboardingEN,
   perfil: perfilEN,
   profile: profileEN,
@@ -112,6 +117,7 @@ const ES_MESSAGES = Object.freeze({
   insightCard: insightCardES,
   insights: insightsES,
   juntinhos: juntinhosES,
+  notificationBanner: notificationBannerES,
   onboarding: onboardingES,
   perfil: perfilES,
   profile: profileES,

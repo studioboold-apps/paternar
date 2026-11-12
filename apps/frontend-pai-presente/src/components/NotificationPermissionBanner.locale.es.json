@@ -1,0 +1,12 @@
+{
+  "title": "Recordatorios y Notificaciones",
+  "description": "Activa las notificaciones para recibir recordatorios de actividades con tus hijos y novedades importantes.",
+  "allow": "Activar notificaciones",
+  "dismiss": "Ahora no",
+  "activeTitle": "Notificaciones activadas",
+  "activeDescription": "Estás recibiendo recordatorios de actividades en este dispositivo.",
+  "disable": "Desactivar notificaciones",
+  "disabling": "Desactivando…",
+  "deniedTitle": "Notificaciones bloqueadas",
+  "deniedDescription": "Las notificaciones están bloqueadas en tu navegador. Para recibir recordatorios, permítelas en la configuración del sitio."
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Reminders & Notifications",
+  "description": "Enable notifications to receive activity reminders with your children and important updates.",
+  "allow": "Enable notifications",
+  "dismiss": "Not now",
+  "activeTitle": "Notifications enabled",
+  "activeDescription": "You are receiving activity reminders on this device.",
+  "disable": "Disable notifications",
+  "disabling": "Disabling…",
+  "deniedTitle": "Notifications blocked",
+  "deniedDescription": "Notifications are blocked in your browser. To receive reminders, allow them in your site settings."
+}

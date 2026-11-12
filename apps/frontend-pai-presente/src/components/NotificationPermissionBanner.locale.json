@@ -1,0 +1,12 @@
+{
+  "title": "Lembretes e Notificações",
+  "description": "Ative notificações para receber avisos de atividades com seus filhos e novidades importantes.",
+  "allow": "Ativar notificações",
+  "dismiss": "Agora não",
+  "activeTitle": "Notificações ativas",
+  "activeDescription": "Você está recebendo lembretes de atividades neste dispositivo.",
+  "disable": "Desativar notificações",
+  "disabling": "Desativando…",
+  "deniedTitle": "Notificações bloqueadas",
+  "deniedDescription": "As notificações estão bloqueadas no navegador. Para receber lembretes das atividades, permita nas configurações do site."
+}
