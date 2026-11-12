@@ -4,6 +4,7 @@
  * Licenca: proprietaria.
  */
 
+import type { NotificationModule } from '@adatechnology/notification-module';
 import type { ChildOwnershipPort } from '../shared/child-ownership.interface';
 import { ERROR_CODES } from '../shared/errors/codes';
 import { ResourceNotFoundError, ResourceNotOwnedError } from '../shared/errors/shared.error';
@@ -35,12 +36,14 @@ export type ActivityUseCases = {
 export type CreateActivityUseCasesParams = {
   readonly repository: ActivityRepository;
   readonly childOwnership: ChildOwnershipPort;
+  readonly notifications?: NotificationModule | undefined;
+  readonly companyId?: string | undefined;
 };
 
-export function createActivityUseCases({
-  repository,
-  childOwnership,
-}: CreateActivityUseCasesParams): ActivityUseCases {
+export function createActivityUseCases(params: CreateActivityUseCasesParams): ActivityUseCases {
+  const { repository, childOwnership, notifications } = params;
+  const companyId = params.companyId ?? 'entrelacos';
+
   /** Sem isto, um id de filho alheio entraria numa atividade propria (BOLA). */
   async function assertChildIsOwned(childId: string | undefined, userId: string): Promise<void> {
     if (childId === undefined) return;
@@ -53,26 +56,103 @@ export function createActivityUseCases({
   }
 
   return {
-    list: (params) => repository.list(params),
+    list: (listParams) => repository.list(listParams),
 
-    async getById(params) {
-      const activity = await repository.findById(params);
+    async getById(findParams) {
+      const activity = await repository.findById(findParams);
       return activity ?? activityNotFound();
     },
 
     async create({ userId, values }) {
       await assertChildIsOwned(values.childId, userId);
-      return repository.insert({ ...values, userId });
+      const activity = await repository.insert({ ...values, userId });
+
+      if (notifications) {
+        const startsAt = values.activityTime
+          ? `${values.activityDate}T${values.activityTime}:00`
+          : `${values.activityDate}T09:00:00`;
+
+        // 1. Notificação imediata de agendamento na Inbox com metadados para calendário
+        notifications.useCases.sendNotification
+          .execute({
+            companyId,
+            recipientUserId: userId,
+            category: 'atividades',
+            templateKey: 'atividade_agendada',
+            payload: {
+              title: values.title,
+              description: values.description ?? '',
+              activityDate: values.activityDate,
+              activityTime: values.activityTime ? ` às ${values.activityTime}` : '',
+              calendarEvent: {
+                title: values.title,
+                description: values.description ?? undefined,
+                startsAt,
+              },
+            },
+          })
+          .catch(() => {});
+
+        // 2. Lembrete antecipado se no futuro
+        const targetDate = new Date(startsAt);
+        const now = new Date();
+        const reminderDate = values.activityTime
+          ? new Date(targetDate.getTime() - 60 * 60 * 1000)
+          : new Date(`${values.activityDate}T08:00:00`);
+
+        if (reminderDate > now) {
+          notifications.useCases.sendNotification
+            .execute({
+              companyId,
+              recipientUserId: userId,
+              category: 'atividades',
+              templateKey: 'atividade_lembrete',
+              scheduledFor: reminderDate,
+              payload: {
+                title: values.title,
+                description: values.description ?? '',
+                activityDate: values.activityDate,
+                activityTime: values.activityTime ? ` às ${values.activityTime}` : '',
+                calendarEvent: {
+                  title: values.title,
+                  description: values.description ?? undefined,
+                  startsAt,
+                },
+              },
+            })
+            .catch(() => {});
+        }
+      }
+
+      return activity;
     },
 
-    async update(params) {
-      await assertChildIsOwned(params.values.childId, params.userId);
-      const activity = await repository.update(params);
-      return activity ?? activityNotFound();
+    async update(updateParams) {
+      await assertChildIsOwned(updateParams.values.childId, updateParams.userId);
+      const activity = await repository.update(updateParams);
+      if (!activity) activityNotFound();
+
+      if (notifications && updateParams.values.isCompleted === true) {
+        notifications.useCases.sendNotification
+          .execute({
+            companyId,
+            recipientUserId: updateParams.userId,
+            category: 'atividades',
+            templateKey: 'atividade_concluida',
+            payload: {
+              title: activity.title,
+              description: activity.description ?? '',
+              activityDate: activity.activityDate,
+            },
+          })
+          .catch(() => {});
+      }
+
+      return activity;
     },
 
-    async remove(params) {
-      const wasRemoved = await repository.remove(params);
+    async remove(findParams) {
+      const wasRemoved = await repository.remove(findParams);
       if (!wasRemoved) activityNotFound();
     },
   };

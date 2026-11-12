@@ -10,6 +10,7 @@ import { Calendar, Clock, User, CheckCircle, Tent, BookOpen, Dumbbell, Palette, 
 import { format, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toLocalDate } from '@/lib/calendar-date';
+import AddToCalendarMenu from '@/components/AddToCalendarMenu';
 import { useTranslation } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import RatingButton from '@/components/ui/RatingButton';
@@ -119,6 +120,8 @@ export default function ActivityCard({
             <CheckCircle aria-hidden="true" className="w-4 h-4 mr-1" />
             {t('activityCard.markCompleted')}
           </Button>
+        ) : !activity.completed ? (
+          <AddToCalendarMenu activity={activity} label={t('activityCard.addToCalendar')} />
         ) : (
           <div />
         )}
