@@ -28,6 +28,10 @@ export default function AdaFooter({ className }) {
       >
         {t('common.copyright.company')}
       </a>
+      {' & '}
+      <span className="font-semibold text-foreground/80">
+        {t('common.copyright.partner')}
+      </span>
       {' · '}
       {t('common.copyright.rights')}
     </footer>

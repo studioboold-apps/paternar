@@ -21,6 +21,8 @@ export default function AdaFooter({ className = '' }) {
       >
         {PANEL_TEXT.copyright.company}
       </a>
+      {' & '}
+      <span className="font-semibold text-zinc-300">{PANEL_TEXT.copyright.partner}</span>
       {' · '}
       {PANEL_TEXT.copyright.rights}
     </footer>
