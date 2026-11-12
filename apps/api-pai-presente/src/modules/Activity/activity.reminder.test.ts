@@ -48,7 +48,7 @@ describe('lembrete de atividade', () => {
       values: { title: 'Parque', activityDate: '2026-03-10', activityTime: '10:00' } as never,
     });
 
-    const reminder = sent.find((params) => params.templateKey === 'atividade_lembrete');
+    const reminder = sent.find((params) => params.templateKey === 'atividades.lembrete');
     expect(new Date(reminder?.scheduledFor as Date).toISOString()).toBe('2026-03-10T12:00:00.000Z');
   });
 
@@ -56,7 +56,7 @@ describe('lembrete de atividade', () => {
     const { useCases, sent } = setup();
     await useCases.create({ userId: USER_ID, values: { title: 'Parque', activityDate: '2026-03-10' } as never });
 
-    const reminder = sent.find((params) => params.templateKey === 'atividade_lembrete');
+    const reminder = sent.find((params) => params.templateKey === 'atividades.lembrete');
     expect(new Date(reminder?.scheduledFor as Date).toISOString()).toBe('2026-03-10T11:00:00.000Z');
   });
 });

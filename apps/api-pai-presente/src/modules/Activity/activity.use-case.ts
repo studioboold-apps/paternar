@@ -82,7 +82,7 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
             companyId,
             recipientUserId: userId,
             category: 'atividades',
-            templateKey: 'atividade_agendada',
+            templateKey: 'atividades.agendada',
             payload: {
               title: values.title,
               description: values.description ?? '',
@@ -112,7 +112,7 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
               companyId,
               recipientUserId: userId,
               category: 'atividades',
-              templateKey: 'atividade_lembrete',
+              templateKey: 'atividades.lembrete',
               scheduledFor: reminderDate,
               payload: {
                 title: values.title,
@@ -144,7 +144,7 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
             companyId,
             recipientUserId: updateParams.userId,
             category: 'atividades',
-            templateKey: 'atividade_concluida',
+            templateKey: 'atividades.concluida',
             payload: {
               title: activity.title,
               description: activity.description ?? '',

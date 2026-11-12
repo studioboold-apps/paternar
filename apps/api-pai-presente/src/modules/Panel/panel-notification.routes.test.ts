@@ -38,9 +38,16 @@ const neverCalled: SendTemplateTest = async () => {
   throw new Error('nao devia enviar');
 };
 
-function call(router: ReturnType<typeof buildRouter>, method: string, path: string) {
-  return router.handle(new Request(`http://local${PANEL_BASE_PATH}${path}`, { method }));
+function call(router: ReturnType<typeof buildRouter>, method: string, path: string, body?: unknown) {
+  return router.handle(
+    new Request(`http://local${PANEL_BASE_PATH}${path}`, {
+      method,
+      ...(body === undefined ? {} : { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+    }),
+  );
 }
+
+const OTHER_PARENT_ID = '33333333-3333-4333-8333-333333333333';
 
 describe('notificacoes no painel', () => {
   it('editor e admin tem o escopo de notificacoes; quem so olha, nao', () => {
@@ -69,14 +76,41 @@ describe('notificacoes no painel', () => {
     const calls: Parameters<SendTemplateTest>[0][] = [];
     const router = buildRouter(PANEL_ROLES.EDITOR, async (input) => {
       calls.push(input);
-      return { notificationId: 'n1', templateKey: input.templateKey, category: 'atividades', deliveries: [] };
+      return { notificationId: 'n1', recipientUserId: 'x', templateKey: input.templateKey, category: 'atividades', deliveries: [] };
     });
 
     const response = await call(router, 'POST', '/notification-templates/atividade_lembrete/test');
 
     expect(response.status).toBe(202);
-    expect(calls).toEqual([{ staffUserId: STAFF_ID, templateKey: 'atividade_lembrete' }]);
+    expect(calls).toEqual([{ staffUserId: STAFF_ID, templateKey: 'atividade_lembrete', recipientUserId: undefined }]);
     const body = (await response.json()) as { data: { notificationId: string } };
     expect(body.data.notificationId).toBe('n1');
+  });
+
+  it('so admin escolhe outro pai: editor recebe 403 e nada e' + "'" + ' enviado', async () => {
+    const router = buildRouter(PANEL_ROLES.EDITOR, neverCalled);
+    const response = await call(router, 'POST', '/notification-templates/avisos.plataforma/test', {
+      recipientUserId: OTHER_PARENT_ID,
+    });
+    expect(response.status).toBe(403);
+  });
+
+  it('admin envia para o pai escolhido', async () => {
+    const calls: Parameters<SendTemplateTest>[0][] = [];
+    const router = buildRouter(PANEL_ROLES.ADMIN, async (input) => {
+      calls.push(input);
+      return { notificationId: 'n1', recipientUserId: OTHER_PARENT_ID, templateKey: input.templateKey, category: 'avisos', deliveries: [] };
+    });
+    const response = await call(router, 'POST', '/notification-templates/avisos.plataforma/test', {
+      recipientUserId: OTHER_PARENT_ID,
+    });
+    expect(response.status).toBe(202);
+    expect(calls[0]?.recipientUserId).toBe(OTHER_PARENT_ID);
+  });
+
+  it('destinatario que nao e' + "'" + ' id valido e' + "'" + ' 400', async () => {
+    const router = buildRouter(PANEL_ROLES.ADMIN, neverCalled);
+    const response = await call(router, 'POST', '/notification-templates/avisos.plataforma/test', { recipientUserId: 'x' });
+    expect(response.status).toBe(400);
   });
 });

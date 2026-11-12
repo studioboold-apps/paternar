@@ -19,6 +19,7 @@ import { buildTemplateVariableCatalog } from './template-variables';
 import {
   DEFAULT_CATEGORY_POLICIES,
   DEFAULT_NOTIFICATION_TEMPLATES,
+  LEGACY_TEMPLATE_KEYS,
   bootstrapNotificationTemplates,
 } from './seed-templates';
 
@@ -136,7 +137,8 @@ describe('notification module', () => {
     const result = await bootstrapNotificationTemplates(mockDb);
     expect(result.templatesCount).toBe(DEFAULT_NOTIFICATION_TEMPLATES.length);
     expect(result.policiesCount).toBe(DEFAULT_CATEGORY_POLICIES.length);
-    expect(queries.length).toBe(DEFAULT_NOTIFICATION_TEMPLATES.length + DEFAULT_CATEGORY_POLICIES.length);
+    // +1: desativacao das chaves antigas.
+    expect(queries.length).toBe(DEFAULT_NOTIFICATION_TEMPLATES.length + DEFAULT_CATEGORY_POLICIES.length + 1);
   });
 });
 
@@ -171,6 +173,21 @@ describe('catalogo de variaveis dos modelos', () => {
     }
     for (const variables of Object.values(catalog)) {
       for (const variable of variables) expect(variable.example).not.toMatch(/^\(/);
+    }
+  });
+});
+
+describe('chaves dos modelos', () => {
+  it('a semente so usa o formato categoria.evento, sem as chaves antigas duplicadas', () => {
+    for (const template of DEFAULT_NOTIFICATION_TEMPLATES) {
+      expect(template.key).toMatch(/^[a-z]+\.[a-z_]+$/);
+      expect(LEGACY_TEMPLATE_KEYS).not.toContain(template.key);
+    }
+  });
+
+  it('as chaves que a agenda envia existem na semente para push', () => {
+    for (const key of ['atividades.agendada', 'atividades.lembrete', 'atividades.concluida']) {
+      expect(DEFAULT_NOTIFICATION_TEMPLATES.some((t) => t.key === key && t.channel === 'push')).toBe(true);
     }
   });
 });

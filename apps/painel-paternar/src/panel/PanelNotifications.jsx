@@ -15,6 +15,7 @@ import { createPanelNotificationClient } from './panel-apis';
 import { PANEL_TEXT } from './panel-text';
 import { PageHeader } from './panel-ui';
 import PanelTemplateTestButton from './PanelTemplateTestButton';
+import { SEND_ANY_SCOPE } from './panel-template-test';
 
 const NOTIFICATION_CHANNELS = [
   { id: 'inbox', label: 'Mensagem no app (Inbox)', hint: 'Aviso interno na caixa de entrada do aplicativo' },
@@ -44,7 +45,7 @@ const PREVIEW_PAYLOAD = Object.freeze({
   summary: 'Vocês fizeram 3 atividades juntos esta semana.',
 });
 
-export default function PanelNotifications({ client }) {
+export default function PanelNotifications({ client, can }) {
   const queryClient = useMemo(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -69,7 +70,11 @@ export default function PanelNotifications({ client }) {
             senderName="Paternar"
             previewPayload={PREVIEW_PAYLOAD}
             renderEditorActions={({ templateKey }) => (
-              <PanelTemplateTestButton client={client} templateKey={templateKey} />
+              <PanelTemplateTestButton
+                client={client}
+                templateKey={templateKey}
+                canChooseRecipient={Boolean(can?.(SEND_ANY_SCOPE))}
+              />
             )}
           />
         </div>

@@ -87,6 +87,16 @@ export function createPanelRepository(database: Database) {
       return rows[0]?.id;
     },
 
+    /** Pai que existe e nao esta bloqueado: so ele pode receber um teste escolhido no painel. */
+    async isActiveAppUser(userId: string): Promise<boolean> {
+      const [row] = await database
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(and(eq(usersTable.id, userId), isNull(usersTable.blockedAt)))
+        .limit(1);
+      return Boolean(row);
+    },
+
     async overview(now: Date = new Date()): Promise<PanelOverview> {
       const since7 = new Date(now.getTime() - 7 * DAY_MS);
       const since30 = new Date(now.getTime() - 30 * DAY_MS);

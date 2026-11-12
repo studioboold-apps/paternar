@@ -14,6 +14,7 @@ import {
   categoryForTemplateKey,
   createSendTemplateTest,
   InvalidTemplateKeyError,
+  RecipientNotFoundError,
   TEMPLATE_TEST_PAYLOAD,
 } from './template-test';
 
@@ -63,6 +64,7 @@ describe('createSendTemplateTest', () => {
     const sendTest = createSendTemplateTest({
       notification,
       findAppUserIdForStaff: async (staffId) => (staffId === STAFF_ID ? APP_USER_ID : undefined),
+      isActiveAppUser: async () => true,
       newDedupeKey: () => 'chave-fixa',
     });
 
@@ -82,7 +84,7 @@ describe('createSendTemplateTest', () => {
 
   it('usa uma chave de deduplicacao nova a cada clique', async () => {
     const { notification, sent } = fakeNotification();
-    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => APP_USER_ID });
+    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => APP_USER_ID, isActiveAppUser: async () => true });
 
     await sendTest({ staffUserId: STAFF_ID, templateKey: 'avisos.plataforma' });
     await sendTest({ staffUserId: STAFF_ID, templateKey: 'avisos.plataforma' });
@@ -92,7 +94,7 @@ describe('createSendTemplateTest', () => {
 
   it('sem conta no app com o mesmo e-mail, recusa sem enviar nada', async () => {
     const { notification, sent } = fakeNotification();
-    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => undefined });
+    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => undefined, isActiveAppUser: async () => true });
 
     await expect(sendTest({ staffUserId: STAFF_ID, templateKey: 'avisos.plataforma' })).rejects.toBeInstanceOf(
       AppAccountNotFoundError,
@@ -102,8 +104,36 @@ describe('createSendTemplateTest', () => {
 
   it('chave vazia e' + "'" + ' erro de validacao', async () => {
     const { notification } = fakeNotification();
-    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => APP_USER_ID });
+    const sendTest = createSendTemplateTest({ notification, findAppUserIdForStaff: async () => APP_USER_ID, isActiveAppUser: async () => true });
 
     await expect(sendTest({ staffUserId: STAFF_ID, templateKey: '  ' })).rejects.toBeInstanceOf(InvalidTemplateKeyError);
+  });
+
+  it('com pai escolhido, envia para ele e nao para quem esta logado', async () => {
+    const { notification, sent } = fakeNotification();
+    const sendTest = createSendTemplateTest({
+      notification,
+      findAppUserIdForStaff: async () => APP_USER_ID,
+      isActiveAppUser: async (id) => id === 'outro-pai',
+    });
+
+    const result = await sendTest({ staffUserId: STAFF_ID, templateKey: 'avisos.plataforma', recipientUserId: 'outro-pai' });
+
+    expect(sent[0]?.recipientUserId).toBe('outro-pai');
+    expect(result.recipientUserId).toBe('outro-pai');
+  });
+
+  it('pai escolhido inexistente ou bloqueado e' + "'" + ' 404, sem envio', async () => {
+    const { notification, sent } = fakeNotification();
+    const sendTest = createSendTemplateTest({
+      notification,
+      findAppUserIdForStaff: async () => APP_USER_ID,
+      isActiveAppUser: async () => false,
+    });
+
+    await expect(
+      sendTest({ staffUserId: STAFF_ID, templateKey: 'avisos.plataforma', recipientUserId: 'bloqueado' }),
+    ).rejects.toBeInstanceOf(RecipientNotFoundError);
+    expect(sent).toHaveLength(0);
   });
 });
