@@ -18,7 +18,10 @@ RUN bun install --frozen-lockfile
 
 COPY apps/api-pai-presente apps/api-pai-presente
 WORKDIR /repo/apps/api-pai-presente
-RUN bun build ./src/main.ts ./src/database/migrate.ts ./src/backup/run-backup.ts ./src/backup/run-restore.ts --target=bun --outdir=dist
+# `--external firebase-admin`: o `@adatechnology/push-provider` suporta FCM via
+# importacao dinamica opcional; o backend roda webpush (VAPID) ou Expo e nao
+# instala `firebase-admin`, evitando inflar a imagem com ~40 MB nao utilizados.
+RUN bun build ./src/main.ts ./src/database/migrate.ts ./src/backup/run-backup.ts ./src/backup/run-restore.ts --target=bun --outdir=dist --external firebase-admin
 # O bundle perde o `__dirname` dos pacotes do SDK, e com ele a pasta de
 # migrations de cada um. `cp -L` porque o `node_modules` do Bun e' feito de
 # links: copiar o link levaria para a imagem um caminho que nao existe nela.
