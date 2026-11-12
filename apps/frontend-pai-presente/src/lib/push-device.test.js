@@ -62,7 +62,8 @@ function fakeApi(vapidKey, deviceId = 'dev-1') {
     calls,
     request: async (method, path, options) => {
       calls.push({ method, path, body: options?.body });
-      if (path === '/v1/push/vapid-public-key') return vapidKey ? { publicKey: vapidKey } : {};
+      // Como o `request` de verdade devolve: chaves em snake_case.
+      if (path === '/v1/push/vapid-public-key') return vapidKey ? { public_key: vapidKey } : {};
       return { id: deviceId };
     },
   };
