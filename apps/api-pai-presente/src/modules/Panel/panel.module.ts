@@ -17,7 +17,7 @@
 import { createCustomerRoutes, type CustomerModule } from '@adatechnology/customer-module';
 import type { AuthContext, AuthContextResolverPort, ModuleRouteTable } from '@adatechnology/module-http';
 import { createModuleFetchRouter, type ModuleFetchRouter } from '@adatechnology/module-http/fetch';
-import { createNotificationRoutes, type NotificationModule } from '@adatechnology/notification-module';
+import type { NotificationModule } from '@adatechnology/notification-module';
 import { createRecommendationRoutes, type RecommendationModule } from '@adatechnology/recommendation-module';
 import { USER_ERROR_CODE } from '@adatechnology/user-contracts';
 import { createUserModule, createUserRoutes, type UserModule } from '@adatechnology/user-module';
@@ -37,6 +37,8 @@ import { createPanelEngagementRepository } from './panel-engagement.repository';
 import { createPanelHistoryRepository } from './panel-history.repository';
 import { buildPanelInsightRoutes } from './panel-insights.routes';
 import { createPanelModerationRepository } from './panel-moderation.repository';
+import { createSendTemplateTest } from '../Notification/template-test';
+import { buildPanelNotificationRoutes } from './panel-notification.routes';
 import { createPanelRepository } from './panel.repository';
 import { buildPanelRoutes } from './panel.routes';
 
@@ -189,7 +191,15 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
     ...createUserRoutes({ module: users }),
     ...createCustomerRoutes({ module: customers }),
     ...createRecommendationRoutes({ module: recommendations, features: { feed: false, admin: true } }),
-    ...(params.notifications ? createNotificationRoutes({ module: params.notifications }) : []),
+    ...(params.notifications
+      ? buildPanelNotificationRoutes({
+          notification: params.notifications,
+          sendTemplateTest: createSendTemplateTest({
+            notification: params.notifications,
+            findAppUserIdForStaff: createPanelRepository(params.database).findAppUserIdForStaff,
+          }),
+        })
+      : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),
     ...buildPanelInsightRoutes({
       history: createPanelHistoryRepository(params.database),

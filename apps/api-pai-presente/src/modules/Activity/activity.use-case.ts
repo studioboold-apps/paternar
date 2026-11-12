@@ -41,6 +41,9 @@ export type CreateActivityUseCasesParams = {
   readonly companyId?: string | undefined;
 };
 
+/** America/Sao_Paulo nao tem horario de verao desde 2019. */
+const APP_TIMEZONE_OFFSET = '-03:00';
+
 export function createActivityUseCases(params: CreateActivityUseCasesParams): ActivityUseCases {
   const { repository, childOwnership, notifications } = params;
   const companyId = params.companyId ?? NOTIFICATION_COMPANY_ID;
@@ -95,11 +98,13 @@ export function createActivityUseCases(params: CreateActivityUseCasesParams): Ac
           .catch(() => {});
 
         // 2. Lembrete antecipado se no futuro
-        const targetDate = new Date(startsAt);
+        // Data e hora digitadas pelo pai sao de Brasilia. Sem o fuso, o servidor
+        // (UTC) lia "10:00" como 07:00 de Brasilia e o lembrete chegava 3h antes.
+        const targetDate = new Date(`${startsAt}${APP_TIMEZONE_OFFSET}`);
         const now = new Date();
         const reminderDate = values.activityTime
           ? new Date(targetDate.getTime() - 60 * 60 * 1000)
-          : new Date(`${values.activityDate}T08:00:00`);
+          : new Date(`${values.activityDate}T08:00:00${APP_TIMEZONE_OFFSET}`);
 
         if (reminderDate > now) {
           notifications.useCases.sendNotification

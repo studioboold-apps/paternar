@@ -40,6 +40,8 @@ export const PANEL_SCOPES = {
   APP_USERS_BLOCK: 'app-users:block',
   /** Arquivar denuncia e tirar post ou comentario do ar. */
   COMMUNITY_MODERATE: 'community:moderate',
+  /** Editar modelos e politicas de notificacao e enviar teste para si. */
+  NOTIFICATIONS_ADMIN: 'notifications:admin',
 } as const;
 
 const EDITOR_SCOPES = [
@@ -48,6 +50,7 @@ const EDITOR_SCOPES = [
   PANEL_SCOPES.CUSTOMERS_WRITE,
   PANEL_SCOPES.RECOMMENDATIONS_ADMIN,
   PANEL_SCOPES.COMMUNITY_MODERATE,
+  PANEL_SCOPES.NOTIFICATIONS_ADMIN,
 ] as const;
 
 export const SCOPES_BY_ROLE: Readonly<Record<PanelRole, readonly string[]>> = {

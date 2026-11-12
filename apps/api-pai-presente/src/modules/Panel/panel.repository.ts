@@ -70,6 +70,23 @@ export function createPanelRepository(database: Database) {
       return (result as unknown as readonly unknown[]).length;
     },
 
+    /**
+     * A conta de pai com o mesmo e-mail do acesso do painel: e' para ela que o
+     * "Enviar teste para mim" manda. Pai bloqueado nao recebe nem teste.
+     */
+    async findAppUserIdForStaff(staffUserId: string): Promise<string | undefined> {
+      const rows = (await database.execute(sql`
+        select app.id
+          from ${usersTable} app
+          join "user"."users" staff on lower(staff.email) = lower(app.email)
+         where staff.id::text = ${staffUserId}
+           and staff.deleted_at is null
+           and app.blocked_at is null
+         limit 1
+      `)) as unknown as readonly { readonly id: string }[];
+      return rows[0]?.id;
+    },
+
     async overview(now: Date = new Date()): Promise<PanelOverview> {
       const since7 = new Date(now.getTime() - 7 * DAY_MS);
       const since30 = new Date(now.getTime() - 30 * DAY_MS);
