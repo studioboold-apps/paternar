@@ -149,6 +149,13 @@ const panelShape = {
     .refine((value) => value === '' || value.length >= 12, 'PANEL_ADMIN_PASSWORD precisa de 12+ caracteres'),
 } as const;
 
+const notificationShape = {
+  NOTIFICATION_SUPPRESSION_HMAC_KEY: z.string().default('dev-notification-suppression-hmac-key'),
+  VAPID_PUBLIC_KEY: z.string().default(''),
+  VAPID_PRIVATE_KEY: z.string().default(''),
+  VAPID_SUBJECT: z.string().default('mailto:admin@entrelacos.com.br'),
+} as const;
+
 const databaseEnvironmentSchema = z.object({ ...runtimeShape, ...databaseShape });
 const backupEnvironmentSchema = z.object({
   ...runtimeShape,
@@ -169,6 +176,7 @@ const environmentSchema = z.object({
   ...aiShape,
   ...mediaShape,
   ...panelShape,
+  ...notificationShape,
 });
 
 export type DatabaseEnvironment = z.infer<typeof databaseEnvironmentSchema>;

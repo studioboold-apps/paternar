@@ -9,6 +9,10 @@ import { join } from 'node:path';
 
 import { CUSTOMER_MIGRATIONS_TABLE, customerMigrationsFolder } from '@adatechnology/customer-module';
 import {
+  NOTIFICATION_MIGRATIONS_TABLE,
+  notificationMigrationsFolder,
+} from '@adatechnology/notification-module';
+import {
   RECOMMENDATION_MIGRATIONS_TABLE,
   recommendationMigrationsFolder,
 } from '@adatechnology/recommendation-module';
@@ -37,6 +41,11 @@ export function listSdkMigrations(directory: string = SDK_MIGRATIONS_DIRECTORY):
       name: 'recommendation-module',
       fallback: recommendationMigrationsFolder,
       table: RECOMMENDATION_MIGRATIONS_TABLE,
+    },
+    {
+      name: 'notification-module',
+      fallback: notificationMigrationsFolder,
+      table: NOTIFICATION_MIGRATIONS_TABLE,
     },
   ];
 
