@@ -37,6 +37,7 @@ export const PWA_MANIFEST = Object.freeze({
 
 export const PWA_WORKBOX = Object.freeze({
   globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+  importScripts: ['/sw-push.js'],
   /**
    * Rota de SPA nao existe como arquivo: offline, qualquer caminho tem de cair
    * no shell ja precacheado. A API fica de fora — devolver HTML para quem

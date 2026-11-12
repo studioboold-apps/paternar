@@ -12,6 +12,7 @@ import ActivityCard from '@/components/ActivityCard';
 import ActivitySuggestionsDialog from '@/components/ActivitySuggestionsDialog';
 import JuntinhosCalendar from '@/components/JuntinhosCalendar';
 import NewActivityDialog from '@/components/NewActivityDialog';
+import NotificationPermissionBanner from '@/components/NotificationPermissionBanner';
 import { Button } from '@/components/ui/button';
 import ChildQuickAccess from '@/components/ChildQuickAccess';
 import { BRAND_LOGO } from '@/lib/brand';
@@ -44,6 +45,10 @@ export default function Juntinhos() {
         </div>
         <h1 className="text-2xl font-bold text-zinc-100">{t('juntinhos.title')}</h1>
         <p className="text-zinc-500 text-sm mt-1">{t('juntinhos.subtitle')}</p>
+      </div>
+
+      <div className="px-4 mb-4">
+        <NotificationPermissionBanner />
       </div>
 
       <div className="px-4 mb-6">
