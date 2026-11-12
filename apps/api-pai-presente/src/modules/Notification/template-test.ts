@@ -19,16 +19,12 @@ import type { DeliverySummary } from '@adatechnology/notification-contracts';
 import type { NotificationModule } from '@adatechnology/notification-module';
 
 import { NOTIFICATION_COMPANY_ID } from './notification.constant';
+import { TEMPLATE_EXAMPLE_VALUES } from './template-variables';
 
-/** Valores de exemplo para todas as variaveis que os modelos padrao usam. */
+/** O teste usa os mesmos exemplos do preview, marcados como teste no titulo. */
 export const TEMPLATE_TEST_PAYLOAD = Object.freeze({
-  title: 'Piquenique no parque (teste)',
-  description: 'Mensagem de teste enviada pelo painel.',
-  activityDate: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-  activityTime: ' às 10:00',
-  childName: 'Seu filho',
-  commentText: 'Que ideia boa! (teste)',
-  summary: 'Resumo de exemplo da semana (teste).',
+  ...TEMPLATE_EXAMPLE_VALUES,
+  title: `${TEMPLATE_EXAMPLE_VALUES['title']} (teste)`,
 });
 
 /** O prefixo da chave diz a categoria; modelo criado no painel cai em `avisos`. */

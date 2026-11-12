@@ -12,7 +12,10 @@ import {
   createNotificationQueue,
   startNotificationWorker,
 } from './notification.module';
+import { diffTemplateVariables } from '@adatechnology/notification-contracts';
+
 import { NOTIFICATION_COMPANY_ID } from './notification.constant';
+import { buildTemplateVariableCatalog } from './template-variables';
 import {
   DEFAULT_CATEGORY_POLICIES,
   DEFAULT_NOTIFICATION_TEMPLATES,
@@ -152,5 +155,22 @@ describe('worker de notificacoes', () => {
 
     expect(dispatched).toEqual([{ deliveryId: 'antes' }, { deliveryId: 'depois' }]);
     await worker.stop();
+  });
+});
+
+describe('catalogo de variaveis dos modelos', () => {
+  it('cada modelo padrao so usa variaveis do catalogo da sua chave, todas com exemplo', () => {
+    const catalog = buildTemplateVariableCatalog();
+    for (const template of DEFAULT_NOTIFICATION_TEMPLATES) {
+      const diff = diffTemplateVariables({
+        subject: template.subject,
+        body: template.body,
+        variables: catalog[template.key],
+      });
+      expect({ key: template.key, unknown: diff.unknown }).toEqual({ key: template.key, unknown: [] });
+    }
+    for (const variables of Object.values(catalog)) {
+      for (const variable of variables) expect(variable.example).not.toMatch(/^\(/);
+    }
   });
 });

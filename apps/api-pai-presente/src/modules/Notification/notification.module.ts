@@ -27,6 +27,7 @@ import type { AuthenticatedUserResolver } from '../shared/auth/authenticated-use
 import { API_VERSION_PREFIX } from '../shared/http/http.constant';
 import type { Logger } from '../shared/logger/logger';
 import { createAppAuthResolver } from '../Recommendation/recommendation.module';
+import { buildTemplateVariableCatalog } from './template-variables';
 
 export type BuildNotificationModuleParams = {
   readonly database: Database;
@@ -79,6 +80,8 @@ export function buildNotificationModule(params: BuildNotificationModuleParams): 
       defaultLocale: 'pt-BR',
       defaultTimezone: 'America/Sao_Paulo',
       suppressionHmacKey: params.suppressionHmacKey,
+      // Sem catalogo, o preview do painel mostrava as variaveis vazias.
+      templateVariables: buildTemplateVariableCatalog(),
     },
     features: {
       push: pushDriver !== undefined,

@@ -30,6 +30,20 @@ const NOTIFICATION_CATEGORIES = [
   { id: 'avisos', label: 'Avisos da Plataforma', hint: 'Comunicações gerais, novidades e avisos importantes' },
 ];
 
+/**
+ * Exemplo para o preview de modelo criado aqui no painel, que nao tem catalogo
+ * na API. Os modelos padrao recebem os exemplos do catalogo da propria API.
+ */
+const PREVIEW_PAYLOAD = Object.freeze({
+  title: 'Piquenique no parque',
+  description: 'Levar a bola e a toalha xadrez.',
+  activityDate: '15/11/2026',
+  activityTime: ' às 10:00',
+  childName: 'Miguel',
+  commentText: 'Que ideia boa! Vou fazer com a minha filha.',
+  summary: 'Vocês fizeram 3 atividades juntos esta semana.',
+});
+
 export default function PanelNotifications({ client }) {
   const queryClient = useMemo(() => new QueryClient({
     defaultOptions: {
@@ -53,6 +67,7 @@ export default function PanelNotifications({ client }) {
             channels={NOTIFICATION_CHANNELS}
             categories={NOTIFICATION_CATEGORIES}
             senderName="Paternar"
+            previewPayload={PREVIEW_PAYLOAD}
             renderEditorActions={({ templateKey }) => (
               <PanelTemplateTestButton client={client} templateKey={templateKey} />
             )}
