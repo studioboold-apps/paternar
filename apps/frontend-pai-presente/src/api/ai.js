@@ -41,6 +41,8 @@ function toPageReport(report) {
     })),
     mensagem_motivacional: report.motivational_message,
     meta_proximo_mes: report.next_month_goal,
+    /** Plano gratuito: veio so' a nota e a mensagem. */
+    bloqueado: report.locked === true,
   };
 }
 

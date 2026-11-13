@@ -408,6 +408,25 @@ Para ligar na Hotmart:
    **Assinaturas** no painel.
 
 Os planos (nomes e o que cada um libera) ficam em
-`apps/api-pai-presente/src/modules/Billing/billing.plans.ts`. Nenhuma rota exige
-plano ainda: para exigir, a rota chama `billing.payments.useCases.requireFeature(...)`,
-que responde 402 quando o plano do pai não libera o recurso.
+`apps/api-pai-presente/src/modules/Billing/billing.plans.ts`.
+
+### Limites do plano e teto de gasto com IA
+
+Ficam atrás de uma chave na aba **Limites dos planos** do painel, que começa
+**desligada** (tabela `plan_limits`, migration 0011). Desligada, ninguém tem
+limite. Ligada:
+
+- **Gratuito:** N conversas com a IA em 7 dias corridos (padrão 10), sem foto nem
+  áudio no chat, só o primeiro insight e o resumo do Boletim, e até M filhos
+  (padrão 1). A API responde 402 com `PLAN_CHAT_LIMIT_REACHED` ou
+  `PLAN_FEATURE_LOCKED`, e o app mostra o convite para assinar.
+- **Assinante, com teto pela média:** orçamento de IA = assinantes com acesso ×
+  receita líquida por assinante × % para IA ÷ cotação do dólar, em 30 dias.
+  Acima do % de aviso (padrão 80%), só quem gasta acima da média perde foto e
+  áudio; acima de 100%, essas pessoas voltam ao limite do gratuito até a janela
+  andar. Um teto individual (padrão US$ 5 em 30 dias) segue os mesmos degraus
+  contra abuso.
+- O gasto vem de `ai_usage` (tokens reais; a foto entra nos tokens). A
+  transcrição é estimada pelo tamanho do áudio (Groq, US$ 0,04 por hora).
+- Mudar os números exige o escopo `plans:admin` (só admin). O app lê o próprio
+  estado em `GET /v1/plan/status`.

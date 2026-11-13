@@ -12,6 +12,7 @@ import ChildFields from '@/components/ChildFields';
 import ChildWizard from '@/components/ChildWizard';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import PlanUpsell from '@/components/PlanUpsell';
 import { useTranslation } from '@/lib/i18n';
 
 /**
@@ -26,6 +27,7 @@ export default function ChildEditDialog({ perfil }) {
     editingChild,
     childForm,
     childFailure,
+    childPlanBlock,
     isSavingChild,
     canSaveChild,
     handleCloseChildDialog,
@@ -81,6 +83,8 @@ export default function ChildEditDialog({ perfil }) {
               {isSavingChild ? t('perfil.saving') : t('perfil.save')}
             </Button>
           </div>
+        ) : childPlanBlock ? (
+          <PlanUpsell {...childPlanBlock} />
         ) : (
           <ChildWizard
             value={childForm}

@@ -12,6 +12,8 @@ import AiIcon from '@/components/AiIcon';
 import AdSlot from '@/components/AdSlot';
 import CommunityCreatePost from '@/components/CommunityCreatePost';
 import CommunityPostCard from '@/components/CommunityPostCard';
+import PlanUpsell from '@/components/PlanUpsell';
+import { PLAN_LOCKS } from '@/lib/use-plan';
 import InsightCard from '@/components/InsightCard';
 import ChildQuickAccess from '@/components/ChildQuickAccess';
 import BrandLoader from '@/components/BrandLoader';
@@ -36,6 +38,7 @@ export default function Comunidade() {
     insights,
     ratings,
     insightsFailure,
+    insightsLocked,
     isLoadingInsights,
     hasChildren,
     handleTabChange,
@@ -174,6 +177,7 @@ export default function Comunidade() {
                     delay={index * 0.1}
                   />
                 ))}
+                {insightsLocked ? <PlanUpsell lock={PLAN_LOCKS.FULL_REPORT} /> : null}
               </div>
             )}
           </div>

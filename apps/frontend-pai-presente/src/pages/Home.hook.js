@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { usePlanStatus } from '@/lib/use-plan';
 
 import { api } from '@/api/client';
 import { describeApiFailure } from '@/lib/api-error-message';
@@ -58,6 +59,7 @@ export function useHome() {
   });
 
   const insights = insightsQuery.data ?? [];
+  const plan = usePlanStatus();
   const insightsFailure = insightsQuery.isError ? describeApiFailure(insightsQuery.error) : null;
 
   /** Sincronizar com o roteador e' efeito legitimo — sistema externo. */
@@ -127,6 +129,8 @@ export function useHome() {
     ratings,
     rateFailure,
     insightsFailure,
+    /** Plano gratuito: veio so' o primeiro insight; o convite fica embaixo dele. */
+    insightsLocked: !plan.full_reports && (insightsQuery.data ?? []).length > 0,
     isLoadingInsights: insightsQuery.isFetching,
     hasChildren: children.length > 0,
     /** Sem nome, quem decide o que dizer e' a tela — texto nao mora no hook (§6). */
