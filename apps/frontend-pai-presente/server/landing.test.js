@@ -26,13 +26,25 @@ let api;
 let web;
 let origin = '';
 
-/** O teste fala com `localhost`, mas diz ao servidor qual dominio pediu. */
-function get(path, host, init = {}) {
-  return fetch(`${origin}${path}`, {
+/**
+ * O teste fala com o IP de loopback, mas diz ao servidor qual dominio pediu.
+ * IP e nao `localhost`: no CI `localhost` pode resolver para `::1`, e o repasse
+ * para a API falsa ficou pendurado ate o limite do teste (13/11/2026).
+ * `Connection: close` e o corpo sempre lido evitam reaproveitar conexao presa.
+ */
+async function get(path, host, init = {}) {
+  const response = await fetch(`${origin}${path}`, {
     redirect: 'manual',
     ...init,
-    headers: { 'x-forwarded-host': host, ...(init.headers ?? {}) },
+    headers: { 'x-forwarded-host': host, connection: 'close', ...(init.headers ?? {}) },
   });
+  const body = await response.text();
+  return {
+    status: response.status,
+    headers: response.headers,
+    text: async () => body,
+    json: async () => JSON.parse(body),
+  };
 }
 
 beforeAll(() => {
@@ -46,18 +58,19 @@ beforeAll(() => {
 
   api = Bun.serve({
     port: 0,
+    hostname: '127.0.0.1',
     fetch: (request) => Response.json({ path: new URL(request.url).pathname, method: request.method }),
   });
 
   web = createWebServer({
     port: 0,
     distDirectory,
-    apiOrigin: api.url.origin,
+    apiOrigin: `http://127.0.0.1:${api.port}`,
     adsensePublisherId: PUBLISHER_ID,
     landingHosts: readLandingHosts(`${LANDING_HOST}, www.${LANDING_HOST}`),
     appUrl: APP_URL,
   });
-  origin = web.url.origin;
+  origin = `http://127.0.0.1:${web.port}`;
 });
 
 afterAll(() => {

@@ -97,10 +97,7 @@ export default function Home() {
                     : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700',
                 )}
               >
-                <category.icon
-                  aria-hidden="true"
-                  className={cn('w-8 h-8', isActive ? 'text-emerald-600' : 'text-zinc-400')}
-                />
+                <category.icon aria-hidden="true" className={cn('w-8 h-8', isActive ? 'text-emerald-600' : 'text-zinc-400')} />
                 <span className={cn('text-xs text-center leading-tight', isActive ? 'text-zinc-100' : 'text-zinc-500')}>
                   {t(category.labelKey)}
                 </span>
