@@ -19,6 +19,15 @@ export const SIGN_IN_MODES = Object.freeze({
   REGISTER: 'register',
 });
 
+/**
+ * Os botoes de "reservar vaga" da vitrine levam a `app.../?cadastro=1`: quem
+ * chega por ali ainda nao tem conta, e abrir na aba de entrar faria o pai
+ * procurar onde se cadastra.
+ */
+export function initialSignInMode(search = '') {
+  return new URLSearchParams(search).has('cadastro') ? SIGN_IN_MODES.REGISTER : SIGN_IN_MODES.SIGN_IN;
+}
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**

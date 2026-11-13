@@ -179,6 +179,8 @@ describe('o ambiente e conferido no boot', () => {
       distDirectory: 'dist',
       adsenseClientId: '',
       adsensePublisherId: '',
+      landingHosts: new Set(),
+      appUrl: '',
     });
   });
 });

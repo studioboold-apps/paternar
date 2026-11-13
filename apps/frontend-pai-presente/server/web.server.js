@@ -8,6 +8,14 @@ import { join, normalize, resolve, sep } from 'node:path';
 
 import { buildAdsTxt } from './advertising.js';
 import { buildHttpsRedirect } from './https-redirect.js';
+import {
+  APP_REDIRECT_STATUS,
+  buildAppRedirectUrl,
+  isLandingRequest,
+  LANDING_FILE,
+  RETIRING_SERVICE_WORKER,
+  SERVICE_WORKER_PATH,
+} from './landing.js';
 import { buildSecurityHeaders, decorateWithSecurityHeaders } from './security-headers.js';
 
 /**
@@ -126,8 +134,8 @@ export function withAdsenseAccountMeta(html, publisherId) {
   return html.replace('</head>', `<meta name="${ADSENSE_ACCOUNT_META}" content="${publisherId}" /></head>`);
 }
 
-async function serveApplicationShell(distDirectory, adsensePublisherId = '') {
-  const shell = Bun.file(join(resolve(distDirectory), INDEX_FILE));
+async function serveApplicationShell(distDirectory, adsensePublisherId = '', file = INDEX_FILE) {
+  const shell = Bun.file(join(resolve(distDirectory), file));
   if (!(await shell.exists())) return new Response('dist ausente', { status: HTTP_NOT_FOUND });
 
   const body = adsensePublisherId ? withAdsenseAccountMeta(await shell.text(), adsensePublisherId) : shell;
@@ -138,10 +146,36 @@ async function serveApplicationShell(distDirectory, adsensePublisherId = '') {
 }
 
 /**
+ * No dominio da vitrine (`landing.js`): `/` e' a vitrine, `/sw.js` aposenta o
+ * service worker antigo, arquivo que existe sai como sempre (paginas publicas,
+ * imagens, `robots.txt`), e rota da SPA vai para o app com o mesmo caminho.
+ */
+async function serveLanding({ distDirectory, pathname, search, appUrl, adsensePublisherId }) {
+  if (pathname === '/') return serveApplicationShell(distDirectory, adsensePublisherId, LANDING_FILE);
+
+  if (pathname === SERVICE_WORKER_PATH) {
+    return new Response(RETIRING_SERVICE_WORKER, {
+      headers: { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': REVALIDATE_CACHE },
+    });
+  }
+
+  if (pathname !== `/${INDEX_FILE}`) {
+    const file = await serveStatic({ distDirectory, pathname });
+    if (file !== undefined) return file;
+  }
+
+  return new Response(undefined, {
+    status: APP_REDIRECT_STATUS,
+    headers: { Location: buildAppRedirectUrl(appUrl, pathname, search), 'Cache-Control': REVALIDATE_CACHE },
+  });
+}
+
+/**
  * `adsenseClientId` so vem com `ADS_ENABLED` ligado e abre a CSP;
  * `adsensePublisherId` e' o id cadastrado, e basta para o `ads.txt`.
+ * `landingHosts` vazio desliga a vitrine: todo host serve o app, como antes.
  *
- * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string, adsensePublisherId?: string }} params
+ * @param {{ port: number, distDirectory: string, apiOrigin: string, adsenseClientId?: string, adsensePublisherId?: string, landingHosts?: Set<string>, appUrl?: string }} params
  */
 export function createWebServer({
   port,
@@ -149,6 +183,8 @@ export function createWebServer({
   apiOrigin,
   adsenseClientId = '',
   adsensePublisherId = adsenseClientId,
+  landingHosts = new Set(),
+  appUrl = '',
 }) {
   const advertising = adsenseClientId.length > 0;
   const securityHeaders = buildSecurityHeaders({ advertising });
@@ -158,7 +194,7 @@ export function createWebServer({
     hostname: SERVER_BIND_HOSTNAME,
     port,
     async fetch(request) {
-      const { pathname } = new URL(request.url);
+      const { pathname, search } = new URL(request.url);
 
       /** Antes de qualquer coisa: nada de servir a tela do pai em texto puro. */
       const redirect = buildHttpsRedirect(request);
@@ -190,6 +226,10 @@ export function createWebServer({
             headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': REVALIDATE_CACHE },
           }),
         );
+      }
+
+      if (isLandingRequest(request, landingHosts)) {
+        return decorate(await serveLanding({ distDirectory, pathname, search, appUrl, adsensePublisherId }));
       }
 
       const response =

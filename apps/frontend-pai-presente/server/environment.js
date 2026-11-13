@@ -5,6 +5,7 @@
  */
 
 import { readAdsenseClientId, readAdvertisingClientId } from './advertising.js';
+import { readLandingHosts } from './landing.js';
 
 const DEFAULT_PORT = 8080;
 const DEFAULT_DIST_DIRECTORY = 'dist';
@@ -26,6 +27,16 @@ export function readServerEnvironment(source) {
 
   const distDirectory = (source.WEB_DIST_DIR ?? '').trim();
 
+  /**
+   * Vitrine ligada sem o endereco do app desviaria o pai para lugar nenhum: a
+   * imagem nao sobe, e o deploy anterior continua no ar (`landing.js`).
+   */
+  const landingHosts = readLandingHosts(source.LANDING_HOSTS);
+  const appUrl = (source.APP_URL ?? '').trim();
+  if (landingHosts.size > 0 && !/^https?:\/\/[^/]+/.test(appUrl)) {
+    throw new Error('LANDING_HOSTS pede APP_URL (ex.: https://app.paternar.com.br)');
+  }
+
   return {
     apiOrigin,
     port,
@@ -37,5 +48,7 @@ export function readServerEnvironment(source) {
      * ANTES de ligar, para o Google verificar o site sem anuncio na tela.
      */
     adsensePublisherId: readAdsenseClientId(source.ADSENSE_CLIENT_ID),
+    landingHosts,
+    appUrl,
   };
 }

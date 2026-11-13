@@ -66,6 +66,14 @@ const PUBLIC_DOMAIN = 'paternar.com.br';
 const PANEL_DOMAIN = `painel.${PUBLIC_DOMAIN}`;
 
 /**
+ * 13/11/2026: o dominio principal virou VITRINE (landing page) e o app mudou
+ * para `app.`. Os dois saem do MESMO servico `web`; quem separa e' o `Host`
+ * (`apps/frontend-pai-presente/server/landing.js`). No dominio principal
+ * continuam o `/v1` (webhook da Hotmart), o `/ads.txt` e as paginas publicas.
+ */
+const APP_DOMAIN = `app.${PUBLIC_DOMAIN}`;
+
+/**
  * A midia do historico (foto e exame) mora em DISCO, e o disco do container
  * morre com ele. Medido em 07/09/2026: sem volume, `MEDIA_DIRECTORY` valia o
  * padrao relativo `.media`, a API tentava `mkdir '/app/.media'` — pasta da
@@ -213,7 +221,7 @@ export default defineRailway(() => {
        * cabecalho intacto, e a API recusa (403 FORBIDDEN_ORIGIN) o que nao esta
        * na lista. Vazia, recusou TODO login em 31/10/2026 — Google e senha.
        */
-      WEB_ORIGINS: `https://${PUBLIC_DOMAIN},https://${PANEL_DOMAIN},https://${WEB_DOMAIN}`,
+      WEB_ORIGINS: `https://${PUBLIC_DOMAIN},https://${APP_DOMAIN},https://${PANEL_DOMAIN},https://${WEB_DOMAIN}`,
       /**
        * `D7` FECHOU em 31/10/2026 (ver `GOOGLE_CLIENT_ID` no topo). Historico:
        * `D7` estava aberta: nao existia client_id do Google, e VAZIO e' a unica
@@ -266,7 +274,7 @@ export default defineRailway(() => {
      */
     networking: {
       serviceDomains: { [WEB_DOMAIN]: { port: WEB_PORT } },
-      customDomains: { [PUBLIC_DOMAIN]: { port: WEB_PORT } },
+      customDomains: { [PUBLIC_DOMAIN]: { port: WEB_PORT }, [APP_DOMAIN]: { port: WEB_PORT } },
     },
     deploy: { region: REGION, restartPolicyType: 'ON_FAILURE' },
     env: {
@@ -310,6 +318,14 @@ export default defineRailway(() => {
        */
       ADSENSE_CLIENT_ID: 'ca-pub-3420826522507538',
       ADSENSE_SLOT_ID: '',
+      /**
+       * Vitrine no dominio principal; o resto vai para `APP_URL`. O
+       * `.up.railway.app` NAO entra: ele segue servindo o app, para quem ja
+       * salvou aquele endereco. O deploy so grava `LANDING_HOSTS` depois que o
+       * certificado do `app.` estiver valido (`railway-garantir-servicos.mjs`).
+       */
+      LANDING_HOSTS: `${PUBLIC_DOMAIN},www.${PUBLIC_DOMAIN}`,
+      APP_URL: `https://${APP_DOMAIN}`,
     },
   });
 

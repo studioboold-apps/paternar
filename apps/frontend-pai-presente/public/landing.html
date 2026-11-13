@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2F3052" />
+    <title>Entrelaços — Pai Presente | Presença não se promete, pratica-se</title>
+    <meta
+      name="description"
+      content="Entrelaços — Pai Presente: a companhia diária de quem escolheu estar perto. Atividades na medida da idade do seu filho, um agente para tirar dúvidas a qualquer hora e um boletim mensal honesto."
+    />
+    <link rel="canonical" href="https://paternar.com.br/" />
+    <link rel="icon" href="/landing/marca.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Entrelaços — Pai Presente" />
+    <meta property="og:title" content="Presença não se promete, pratica-se!" />
+    <meta
+      property="og:description"
+      content="Atividades na medida da idade do seu filho, um agente para tirar dúvidas e um boletim mensal honesto. Seja um dos 100 pais da Turma Fundadora."
+    />
+    <meta property="og:url" content="https://paternar.com.br/" />
+    <meta property="og:image" content="https://paternar.com.br/landing/pai-e-filho.jpg" />
+    <link rel="preload" as="image" href="/landing/pai-e-filho.webp" type="image/webp" />
+    <style>
+      :root {
+        color-scheme: light;
+        --navy: #2f3052;
+        --navy-2: #3b3c63;
+        --laranja: #f18700;
+        --laranja-escuro: #c76f00;
+        --creme: #f7f5ef;
+        --creme-2: #efece3;
+        --texto: #2f3052;
+        --suave: #5e5d78;
+        --linha: #e2e0d8;
+        --branco: #ffffff;
+        --raio: 1.25rem;
+        --largura: 72rem;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+      body {
+        margin: 0;
+        background: var(--creme);
+        color: var(--texto);
+        font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      img { max-width: 100%; display: block; }
+      a { color: inherit; }
+      h1, h2, h3 { line-height: 1.15; margin: 0; letter-spacing: -0.01em; }
+      p { margin: 0; }
+      .conteiner { width: 100%; max-width: var(--largura); margin: 0 auto; padding: 0 1rem; }
+      @media (min-width: 48rem) { .conteiner { padding: 0 1.5rem; } }
+      section { scroll-margin-top: 5rem; }
+
+      /* faixa superior */
+      .faixa {
+        display: block;
+        background: var(--laranja);
+        color: var(--branco);
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+      }
+      .faixa:hover { background: var(--laranja-escuro); }
+
+      /* cabecalho */
+      .cabecalho {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(247, 245, 239, 0.94);
+        backdrop-filter: saturate(1.4) blur(8px);
+        border-bottom: 1px solid var(--linha);
+      }
+      .cabecalho .conteiner { display: flex; align-items: center; gap: 1rem; min-height: 4rem; }
+      .marca { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+      .marca img { width: 2.25rem; height: 2.25rem; border-radius: 0.6rem; }
+      .marca span { display: flex; flex-direction: column; line-height: 1.05; }
+      .marca strong { font-size: 1.15rem; font-weight: 800; color: var(--navy); }
+      .marca small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8d8c8a; }
+      .menu { display: none; gap: 1.5rem; margin-left: auto; }
+      .menu a { text-decoration: none; font-weight: 600; color: var(--suave); font-size: 0.95rem; }
+      .menu a:hover { color: var(--navy); }
+      .acoes-topo { display: flex; gap: 0.5rem; margin-left: auto; align-items: center; }
+      @media (min-width: 60rem) {
+        .menu { display: flex; }
+        .acoes-topo { margin-left: 1.5rem; }
+      }
+      .botao { white-space: nowrap; }
+      @media (max-width: 26rem) { .acoes-topo .botao { display: none; } }
+      .entrar { font-weight: 700; text-decoration: none; padding: 0.5rem 0.75rem; color: var(--navy); }
+      .entrar:hover { text-decoration: underline; }
+
+      /* botoes */
+      .botao {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 3rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 800;
+        text-decoration: none;
+        border: 2px solid transparent;
+        transition: transform 0.15s ease, background 0.15s ease;
+      }
+      .botao:hover { transform: translateY(-1px); }
+      .botao:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--laranja); outline-offset: 3px; }
+      .botao-principal { background: var(--laranja); color: var(--branco); }
+      .botao-principal:hover { background: var(--laranja-escuro); }
+      .botao-contorno { border-color: var(--navy); color: var(--navy); background: transparent; }
+      .botao-claro { background: var(--branco); color: var(--navy); }
+      .botao-pequeno { min-height: 2.5rem; padding: 0.5rem 1.1rem; font-size: 0.95rem; }
+
+      .rotulo {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--laranja-escuro);
+        margin-bottom: 0.75rem;
+      }
+      .titulo-secao { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; max-width: 40rem; }
+      .texto-secao { margin-top: 1rem; font-size: 1.1rem; color: var(--suave); max-width: 40rem; }
+      .bloco { padding: 4.5rem 0; }
+      @media (min-width: 48rem) { .bloco { padding: 6rem 0; } }
+
+      /* hero */
+      .hero { padding: 3rem 0 4rem; }
+      .hero .conteiner { display: grid; gap: 2.5rem; align-items: center; }
+      @media (min-width: 60rem) {
+        .hero { padding: 4.5rem 0 6rem; }
+        .hero .conteiner { grid-template-columns: 1.05fr 1fr; gap: 3.5rem; }
+      }
+      .selo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--branco);
+        border: 1px solid var(--linha);
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .selo::before { content: ''; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #2fa36b; box-shadow: 0 0 0 4px rgba(47, 163, 107, 0.18); }
+      .hero h1 { margin-top: 1.25rem; font-size: clamp(2.25rem, 6vw, 3.75rem); font-weight: 900; }
+      .hero h1 em { font-style: normal; color: var(--laranja); white-space: nowrap; }
+      .hero .texto-secao { font-size: 1.2rem; }
+      .hero .botoes { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+      .atributos { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; list-style: none; padding: 0; margin: 2rem 0 0; color: var(--suave); font-weight: 600; font-size: 0.95rem; }
+      .atributos li::before { content: '✓'; color: var(--laranja); font-weight: 900; margin-right: 0.4rem; }
+      .foto { position: relative; }
+      .foto picture img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3.4;
+        object-fit: cover;
+        object-position: 55% 30%;
+        border-radius: 2rem;
+        box-shadow: 0 30px 60px -30px rgba(47, 48, 82, 0.55);
+      }
+      .insight {
+        position: relative;
+        margin: -3rem 1rem 0;
+        background: var(--branco);
+        border-radius: var(--raio);
+        padding: 1.1rem 1.25rem;
+        box-shadow: 0 18px 40px -20px rgba(47, 48, 82, 0.45);
+        border: 1px solid var(--linha);
+      }
+      @media (min-width: 60rem) {
+        .insight { position: absolute; left: -2.5rem; bottom: -2rem; margin: 0; max-width: 21rem; }
+      }
+      .insight .cabeca { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--laranja-escuro); }
+      .insight p { margin-top: 0.4rem; font-weight: 600; }
+      .insight small { display: block; margin-top: 0.6rem; color: #8d8c8a; font-weight: 700; font-size: 0.8rem; }
+
+      /* lancamento + agente */
+      .escuro { background: var(--navy); color: var(--creme); }
+      .escuro .texto-secao, .escuro p { color: #d7d6e3; }
+      .escuro .rotulo { color: #ffb24d; }
+      .lancamento-grade { display: grid; gap: 2.5rem; }
+      @media (min-width: 60rem) { .lancamento-grade { grid-template-columns: 1.2fr 1fr; align-items: center; } }
+      .agente {
+        background: var(--navy-2);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .agente h3 { font-size: 1.5rem; color: var(--branco); }
+      .agente .sub { margin-top: 0.35rem; color: #ffb24d; font-weight: 700; }
+      .agente p.descr { margin-top: 1rem; }
+      .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; margin: 1.25rem 0 0; }
+      .chips li { border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.85rem; font-weight: 700; background: rgba(255, 255, 255, 0.1); color: var(--creme); }
+
+      /* dentro do app */
+      .cartoes { display: grid; gap: 1rem; margin-top: 3rem; list-style: none; padding: 0; }
+      @media (min-width: 48rem) { .cartoes { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; } }
+      .cartao {
+        background: var(--branco);
+        border: 1px solid var(--linha);
+        border-radius: 1.5rem;
+        padding: 1.75rem;
+      }
+      .cartao .numero { font-weight: 900; color: var(--laranja); font-size: 0.95rem; letter-spacing: 0.08em; }
+      .cartao h3 { margin-top: 0.5rem; font-size: 1.35rem; }
+      .cartao p { margin-top: 0.6rem; color: var(--suave); }
+      .cartao .chips li { background: var(--creme-2); color: var(--navy); }
+
+      /* ritual */
+      .ritual { background: var(--creme-2); }
+      .passos { display: grid; gap: 1.25rem; margin-top: 3rem; list-style: none; padding: 0; counter-reset: passo; }
+      @media (min-width: 60rem) { .passos { grid-template-columns: repeat(3, 1fr); } }
+      .passos li { counter-increment: passo; background: var(--creme); border-radius: 1.5rem; padding: 1.75rem; border: 1px solid var(--linha); }
+      .passos li::before {
+        content: counter(passo);
+        display: grid;
+        place-items: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.85rem;
+        background: var(--laranja);
+        color: var(--branco);
+        font-weight: 900;
+        font-size: 1.2rem;
+      }
+      .passos h3 { margin-top: 1rem; font-size: 1.25rem; }
+      .passos p { margin-top: 0.6rem; color: var(--suave); }
+
+      /* o que muda */
+      .muda-lista { margin-top: 3rem; display: grid; gap: 1rem; list-style: none; padding: 0; }
+      .muda-lista li {
+        display: grid;
+        gap: 0.5rem;
+        background: var(--branco);
+        border: 1px solid var(--linha);
+        border-radius: 1.25rem;
+        padding: 1.25rem 1.5rem;
+      }
+      @media (min-width: 48rem) {
+        .muda-lista li { grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.5rem; }
+      }
+      .muda-lista .antes { color: var(--suave); }
+      .muda-lista .seta { color: var(--laranja); font-weight: 900; font-size: 1.25rem; }
+      .muda-lista .depois { font-weight: 700; }
+
+      /* comunidade */
+      .comunidade-grade { display: grid; gap: 2.5rem; margin-top: 3rem; }
+      @media (min-width: 60rem) { .comunidade-grade { grid-template-columns: 1fr 1fr; align-items: start; } }
+      .pilares { display: grid; gap: 1rem; list-style: none; padding: 0; margin: 0; }
+      .pilares li { border-left: 4px solid var(--laranja); padding: 0.25rem 0 0.25rem 1rem; }
+      .pilares strong { display: block; font-size: 1.1rem; color: var(--branco); }
+      .fundadora { background: var(--laranja); color: var(--branco); border-radius: 1.5rem; padding: 2rem; }
+      .fundadora h3 { font-size: 1.5rem; color: var(--branco); }
+      .escuro .fundadora p { color: #fff4e6; margin-top: 0.75rem; }
+      .fundadora .botao { margin-top: 1.5rem; }
+
+      /* vagas */
+      .precos { display: grid; gap: 1.25rem; margin-top: 3rem; }
+      @media (min-width: 52rem) { .precos { grid-template-columns: repeat(2, 1fr); } }
+      .preco {
+        position: relative;
+        background: var(--branco);
+        border: 2px solid var(--linha);
+        border-radius: 1.75rem;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .preco.destaque { border-color: var(--laranja); box-shadow: 0 24px 50px -30px rgba(241, 135, 0, 0.6); }
+      .preco .etiqueta {
+        align-self: flex-start;
+        border-radius: 999px;
+        padding: 0.3rem 0.85rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: var(--creme-2);
+        color: var(--navy);
+      }
+      .preco.destaque .etiqueta { background: var(--laranja); color: var(--branco); }
+      .preco .nome { margin-top: 1rem; font-weight: 800; color: var(--suave); }
+      .preco .valor { margin-top: 0.25rem; font-size: 2.75rem; font-weight: 900; }
+      .preco .valor small { font-size: 1rem; font-weight: 700; color: var(--suave); }
+      .preco ul { list-style: none; padding: 0; margin: 1.25rem 0 0; display: grid; gap: 0.6rem; }
+      .preco li { padding-left: 1.6rem; position: relative; color: var(--suave); }
+      .preco li::before { content: '✓'; position: absolute; left: 0; color: var(--laranja); font-weight: 900; }
+      .preco .botao { margin-top: 1.75rem; }
+      .preco .nota { margin-top: 0.85rem; font-size: 0.85rem; color: #8d8c8a; text-align: center; }
+
+      /* frase */
+      .frase { text-align: center; padding: 4rem 0; }
+      .frase p { font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 800; max-width: 46rem; margin: 0 auto; line-height: 1.25; }
+      .frase p em { font-style: normal; color: var(--laranja); }
+
+      /* duvidas */
+      .duvidas { margin-top: 2.5rem; display: grid; gap: 0.75rem; max-width: 50rem; }
+      .duvidas details { background: var(--branco); border: 1px solid var(--linha); border-radius: 1.25rem; padding: 0 1.5rem; }
+      .duvidas summary {
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 1.2rem 0;
+        font-weight: 800;
+        font-size: 1.05rem;
+      }
+      .duvidas summary::-webkit-details-marker { display: none; }
+      .duvidas summary .n { color: var(--laranja); font-weight: 900; min-width: 1.75rem; }
+      .duvidas summary::after { content: '+'; margin-left: auto; font-size: 1.5rem; color: var(--laranja); line-height: 1; }
+      .duvidas details[open] summary::after { content: '–'; }
+      .duvidas details p { padding: 0 0 1.25rem 2.75rem; color: var(--suave); }
+
+      /* chamada final */
+      .final { text-align: center; }
+      .final .titulo-secao, .final .texto-secao { margin-left: auto; margin-right: auto; }
+      .final .botoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 2rem; }
+
+      /* rodape */
+      .rodape { background: #26273f; color: #c9c8d6; padding: 3.5rem 0 2rem; font-size: 0.95rem; }
+      .rodape-grade { display: grid; gap: 2rem; }
+      @media (min-width: 48rem) { .rodape-grade { grid-template-columns: 1.4fr 1fr 1fr; } }
+      .rodape .marca strong { color: var(--creme); }
+      .rodape p { margin-top: 1rem; max-width: 22rem; }
+      .rodape h4 { margin: 0 0 0.75rem; color: var(--creme); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; }
+      .rodape ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+      .rodape a { text-decoration: none; }
+      .rodape a:hover { color: var(--branco); text-decoration: underline; }
+      .rodape .baixo { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.85rem; display: grid; gap: 0.25rem; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    </style>
+  </head>
+  <body id="topo">
+    <a class="faixa" href="#vagas">Membro fundador · Vagas limitadas</a>
+
+    <header class="cabecalho">
+      <div class="conteiner">
+        <a class="marca" href="#topo" aria-label="Entrelaços — Pai Presente, início">
+          <img src="/landing/marca.svg" alt="" width="36" height="36" />
+          <span><strong>Entrelaços</strong><small>Pai Presente</small></span>
+        </a>
+        <nav class="menu" aria-label="Seções">
+          <a href="#app">O app</a>
+          <a href="#ritual">O ritual</a>
+          <a href="#muda">O que muda</a>
+          <a href="#comunidade">Comunidade</a>
+          <a href="#duvidas">Dúvidas</a>
+        </nav>
+        <div class="acoes-topo">
+          <a class="entrar" href="https://app.paternar.com.br/">Entrar</a>
+          <a class="botao botao-principal botao-pequeno" href="#vagas">Garantir vaga</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="conteiner">
+          <div>
+            <span class="selo">O app está no ar</span>
+            <h1>Presença não se promete, <em>pratica-se!</em></h1>
+            <p class="texto-secao">
+              O Entrelaços propõe a atividade certa para a idade do seu filho, responde às suas dúvidas
+              e, no fim do mês, devolve um retrato honesto do pai que você foi.
+            </p>
+            <div class="botoes">
+              <a class="botao botao-principal" href="#vagas">Garantir minha vaga</a>
+              <a class="botao botao-contorno" href="#app">Conhecer o app</a>
+            </div>
+            <ul class="atributos">
+              <li>Webapp instalável</li>
+              <li>Português · Inglês · Espanhol</li>
+              <li>Seus dados protegidos (LGPD)</li>
+            </ul>
+          </div>
+          <div class="foto">
+            <picture>
+              <source
+                type="image/webp"
+                srcset="/landing/pai-e-filho-760.webp 760w, /landing/pai-e-filho.webp 1400w"
+                sizes="(min-width: 60rem) 34rem, 100vw"
+              />
+              <img
+                src="/landing/pai-e-filho.jpg"
+                srcset="/landing/pai-e-filho-760.jpg 760w, /landing/pai-e-filho.jpg 1400w"
+                sizes="(min-width: 60rem) 34rem, 100vw"
+                width="1400"
+                height="925"
+                alt="Pai e filho sorrindo, de mãos dadas no sofá da sala"
+              />
+            </picture>
+            <aside class="insight" aria-label="Exemplo de insight do app">
+              <span class="cabeca">Insight de hoje · 3 anos</span>
+              <p>
+                Ele não está te desafiando: está aprendendo a esperar. Um jogo de “espera 1 minuto”
+                treina isso hoje.
+              </p>
+              <small>Sugerido pelo Entrelaços</small>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco escuro" id="app" aria-labelledby="titulo-lancamento">
+        <div class="conteiner">
+          <div class="lancamento-grade">
+            <div>
+              <span class="rotulo">O lançamento</span>
+              <h2 class="titulo-secao" id="titulo-lancamento">O app nasceu. E ele é feito de dias, não de promessas.</h2>
+              <p class="texto-secao">
+                A primeira versão já está no ar. Não é contador de metas nem diário: é uma companhia
+                que aparece todo dia com algo concreto para você viver com seu filho.
+              </p>
+            </div>
+            <div class="agente">
+              <h3>Conte com um agente</h3>
+              <p class="sub">Você não precisa descobrir tudo sozinho.</p>
+              <p class="descr">
+                Um agente de dúvidas sobre paternidade, que entende mensagens de voz e imagens e
+                responde com o contexto do seu filho.
+              </p>
+              <ul class="chips">
+                <li>Mensagem de voz</li>
+                <li>Imagens</li>
+                <li>24 horas</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco" aria-labelledby="titulo-dentro">
+        <div class="conteiner">
+          <span class="rotulo">Dentro do app</span>
+          <h2 class="titulo-secao" id="titulo-dentro">Tudo o que cabe no seu dia, e nada que pese.</h2>
+          <ol class="cartoes">
+            <li class="cartao">
+              <span class="numero">01</span>
+              <h3>Insights diários</h3>
+              <ul class="chips">
+                <li>Comportamento</li>
+                <li>Sexualidade</li>
+                <li>Saúde</li>
+                <li>Educação financeira</li>
+              </ul>
+              <p>Um recorte por dia, na medida da idade e do jeito do seu filho.</p>
+            </li>
+            <li class="cartao">
+              <span class="numero">02</span>
+              <h3>Comunidade exclusiva dentro do app</h3>
+              <p>Um lugar para compartilhar vivências e trocar experiências com outros pais.</p>
+            </li>
+            <li class="cartao">
+              <span class="numero">03</span>
+              <h3>Agenda Juntinhos</h3>
+              <p>
+                Planeje eventos e atividades com seus filhos, com sugestões do agente de acordo com o
+                perfil da criança e a sua cidade.
+              </p>
+            </li>
+            <li class="cartao">
+              <span class="numero">04</span>
+              <h3>Boletim de desempenho mensal</h3>
+              <p>
+                Nada de metas impossíveis por aqui. O boletim mostra seus pontos fortes e os pontos de
+                atenção do mês.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="bloco ritual" id="ritual" aria-labelledby="titulo-ritual">
+        <div class="conteiner">
+          <span class="rotulo">O ritual</span>
+          <h2 class="titulo-secao" id="titulo-ritual">A presença tem método. E o método tem 3 gestos.</h2>
+          <ol class="passos">
+            <li>
+              <h3>Conte quem é você e cadastre seus filhos</h3>
+              <p>Nome, idade, hobbies, preferências e os valores da família. Leva 2 minutos.</p>
+            </li>
+            <li>
+              <h3>Deixe o app lembrar por você</h3>
+              <p>Insights diários, atividades para o fim de semana e um mentor sempre disponível.</p>
+            </li>
+            <li>
+              <h3>Feche o mês com um panorama honesto</h3>
+              <p>
+                O boletim mostra o que foi vivido, não o que foi planejado, e sugere ajustes para o mês
+                seguinte.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="bloco" id="muda" aria-labelledby="titulo-muda">
+        <div class="conteiner">
+          <span class="rotulo">O que muda?</span>
+          <h2 class="titulo-secao" id="titulo-muda">Mais potência para a sua presença.</h2>
+          <ul class="muda-lista">
+            <li>
+              <span class="antes">Você quer estar presente, mas o dia acaba antes.</span>
+              <span class="seta" aria-hidden="true">→</span>
+              <span class="depois">Uma sugestão concreta chega antes do fim do dia.</span>
+            </li>
+            <li>
+              <span class="antes">A dúvida chega às 22h e você não tem com quem falar.</span>
+              <span class="seta" aria-hidden="true">→</span>
+              <span class="depois">O app responde às 22h, com o contexto do seu filho.</span>
+            </li>
+            <li>
+              <span class="antes">O fim de semana passa em branco, na tela.</span>
+              <span class="seta" aria-hidden="true">→</span>
+              <span class="depois">Uma atividade planejada em dois minutos.</span>
+            </li>
+            <li>
+              <span class="antes">Você não sabe se está melhorando e nem sabe como começar.</span>
+              <span class="seta" aria-hidden="true">→</span>
+              <span class="depois">Um boletim por mês, com nota e caminho.</span>
+            </li>
+            <li>
+              <span class="antes">Paternidade vira solidão disfarçada de força.</span>
+              <span class="seta" aria-hidden="true">→</span>
+              <span class="depois">Uma turma de pais na mesma fase, sem pose.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="bloco escuro" id="comunidade" aria-labelledby="titulo-comunidade">
+        <div class="conteiner">
+          <span class="rotulo">A comunidade fundadora</span>
+          <h2 class="titulo-secao" id="titulo-comunidade">Paternidade não se faz sozinho.</h2>
+          <p class="texto-secao">
+            O app é a ferramenta; a comunidade é o apoio. Quem entra na Turma Fundadora recebe as
+            novidades antes de todo mundo.
+          </p>
+          <div class="comunidade-grade">
+            <ul class="pilares">
+              <li><strong>Conversa</strong><p>O feed “Pais Presentes”, dentro do app.</p></li>
+              <li><strong>Orientação</strong><p>Um agente disponível a qualquer hora.</p></li>
+              <li>
+                <strong>Continuidade</strong>
+                <p>Insights semanais, atividades por idade e perfil, e o boletim mensal.</p>
+              </li>
+            </ul>
+            <div class="fundadora">
+              <h3>Faça parte da comunidade fundadora</h3>
+              <p>
+                Os 100 primeiros pais formam um grupo pequeno, com acesso prioritário e voz ativa no
+                futuro do app.
+              </p>
+              <a class="botao botao-claro" href="#vagas">Quero entrar</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco" id="vagas" aria-labelledby="titulo-vagas">
+        <div class="conteiner">
+          <span class="rotulo">Seja usuário fundador</span>
+          <h2 class="titulo-secao" id="titulo-vagas">São 100 vagas. Depois, lista de espera.</h2>
+          <p class="texto-secao">
+            A Turma Fundadora fecha com 100 pais. Não é truque de marketing: é o tamanho certo para
+            começar bem, ouvindo cada um.
+          </p>
+          <div class="precos">
+            <article class="preco destaque">
+              <span class="etiqueta">Oportunidade imperdível</span>
+              <p class="nome">Fundador</p>
+              <p class="valor">R$&nbsp;19,90 <small>/mês</small></p>
+              <ul>
+                <li>Acesso antecipado a cada novidade, antes de todo mundo</li>
+                <li>Vaga na Turma Fundadora — os 100 primeiros pais</li>
+                <li>Agente, insights, atividades e boletim mensal</li>
+                <li>Condição de fundador travada enquanto a assinatura estiver ativa</li>
+              </ul>
+              <a class="botao botao-principal" href="https://app.paternar.com.br/?cadastro=1">Reserve agora sua vaga</a>
+              <p class="nota">Crie sua conta no app e escolha o plano lá dentro.</p>
+            </article>
+            <article class="preco">
+              <span class="etiqueta">Sem fidelidade · Cancele quando quiser</span>
+              <p class="nome">Mensal</p>
+              <p class="valor">R$&nbsp;39 <small>/mês</small></p>
+              <ul>
+                <li>Acesso antecipado a cada novidade, antes de todo mundo</li>
+                <li>Vaga na Turma Fundadora — os 100 primeiros pais</li>
+                <li>Agente, insights, atividades e boletim mensal</li>
+                <li>Condição de fundador travada enquanto a assinatura estiver ativa</li>
+              </ul>
+              <a class="botao botao-contorno" href="https://app.paternar.com.br/?cadastro=1">Reserve agora sua vaga</a>
+              <p class="nota">Crie sua conta no app e escolha o plano lá dentro.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="frase ritual" aria-label="Frase">
+        <div class="conteiner">
+          <p>Seu filho nem vai lembrar de app. <em>Ele vai se lembrar de você.</em></p>
+        </div>
+      </section>
+
+      <section class="bloco" id="duvidas" aria-labelledby="titulo-duvidas">
+        <div class="conteiner">
+          <span class="rotulo">Dúvidas</span>
+          <h2 class="titulo-secao" id="titulo-duvidas">Antes de você decidir.</h2>
+          <div class="duvidas">
+            <details>
+              <summary><span class="n">01</span>Preciso assinar para usar o app?</summary>
+              <p>
+                Sim. A assinatura garante a sua vaga de fundador, o acesso à comunidade e a condição
+                de fundador. As vagas são limitadas.
+              </p>
+            </details>
+            <details>
+              <summary><span class="n">02</span>Serve para pais de filhos de qual idade?</summary>
+              <p>
+                De bebês a pré-adolescentes. Cada filho é cadastrado com a idade e o jeito dele, e o
+                conteúdo se ajusta a isso. Nada de conteúdo genérico.
+              </p>
+            </details>
+            <details>
+              <summary><span class="n">03</span>E se eu não for o pai biológico?</summary>
+              <p>
+                Padrastos, avós, tios e mães já usam. O app acompanha o tempo que você passa com a
+                criança, não o sobrenome.
+              </p>
+            </details>
+            <details>
+              <summary><span class="n">04</span>O tira-dúvidas é uma pessoa ou inteligência artificial?</summary>
+              <p>
+                É uma inteligência artificial orientada por comunicação positiva e criação consciente,
+                disponível 24 horas. Ela não substitui terapia nem atendimento de saúde, e o app deixa
+                isso claro.
+              </p>
+            </details>
+            <details>
+              <summary><span class="n">05</span>O que acontece com os dados dos meus filhos?</summary>
+              <p>
+                Eles ficam na sua conta. Exames e documentos são guardados cifrados, nada é vendido nem
+                usado em anúncios, e você pode apagar tudo quando quiser, como manda a LGPD. Os
+                detalhes estão na <a href="/privacidade">política de privacidade</a>.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloco escuro final" aria-labelledby="titulo-final">
+        <div class="conteiner">
+          <span class="rotulo">Última chamada</span>
+          <h2 class="titulo-secao" id="titulo-final">
+            Seus filhos vão crescer de qualquer jeito, e você pode estar lá por inteiro.
+          </h2>
+          <p class="texto-secao">
+            A Turma Fundadora fecha com 100 pais. Criar sua conta leva menos de um minuto.
+          </p>
+          <div class="botoes">
+            <a class="botao botao-principal" href="#vagas">Garanta sua vaga</a>
+            <a class="botao botao-claro" href="https://app.paternar.com.br/">Já tenho conta</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="rodape">
+      <div class="conteiner">
+        <div class="rodape-grade">
+          <div>
+            <a class="marca" href="#topo">
+              <img src="/landing/marca.svg" alt="" width="36" height="36" />
+              <span><strong>Entrelaços</strong><small>Pai Presente</small></span>
+            </a>
+            <p>A companhia diária de quem escolheu estar perto. Feito no Brasil, para pais presentes.</p>
+          </div>
+          <nav aria-label="Navegação do rodapé">
+            <h4>Navegação</h4>
+            <ul>
+              <li><a href="#app">O app</a></li>
+              <li><a href="#ritual">O ritual</a></li>
+              <li><a href="#muda">O que muda</a></li>
+              <li><a href="#comunidade">Comunidade</a></li>
+              <li><a href="#vagas">Vagas</a></li>
+            </ul>
+          </nav>
+          <nav aria-label="Institucional">
+            <h4>Institucional</h4>
+            <ul>
+              <li><a href="https://app.paternar.com.br/">Entrar no app</a></li>
+              <li><a href="/sobre">Sobre</a></li>
+              <li><a href="/dicas">Dicas para pais</a></li>
+              <li><a href="/privacidade">Política de privacidade</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="baixo">
+          <span>© 2026 Entrelaços · Pai Presente. Todos os direitos reservados.</span>
+          <span>Dados protegidos e tratados conforme a LGPD.</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

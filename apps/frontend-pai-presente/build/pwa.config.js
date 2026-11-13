@@ -49,7 +49,7 @@ export const PWA_WORKBOX = Object.freeze({
    * SPA: com o fallback, o pai com o app instalado abriria `/privacidade` e
    * cairia no login.
    */
-  navigateFallbackDenylist: [/\/v1\//, /^\/(sobre|privacidade|dicas)(\.html)?$/, /^\/dicas\//, /^\/(ads|robots)\.txt$/, /^\/sitemap\.xml$/],
+  navigateFallbackDenylist: [/\/v1\//, /^\/(sobre|privacidade|dicas|landing)(\.html)?$/, /^\/landing\//, /^\/dicas\//, /^\/(ads|robots)\.txt$/, /^\/sitemap\.xml$/],
   cleanupOutdatedCaches: true,
   runtimeCaching: [
     {

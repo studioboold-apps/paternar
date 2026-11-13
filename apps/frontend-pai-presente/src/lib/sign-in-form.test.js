@@ -10,6 +10,7 @@ import { join } from 'node:path';
 
 import {
   describeCredentialProblems,
+  initialSignInMode,
   PASSWORD_MIN_LENGTH,
   SIGN_IN_MODES,
   toCredentials,
@@ -116,5 +117,16 @@ describe('toCredentials', () => {
   test('o nome vem aparado, e some quando so tinha espaco', () => {
     expect(toCredentials({ email: EMAIL, password: LONG, fullName: '  Ana  ' }).fullName).toBe('Ana');
     expect(toCredentials({ email: EMAIL, password: LONG, fullName: '   ' }).fullName).toBe('');
+  });
+});
+
+describe('a vitrine abre o app direto no cadastro', () => {
+  test('?cadastro abre a aba de criar conta', () => {
+    expect(initialSignInMode('?cadastro=1')).toBe(SIGN_IN_MODES.REGISTER);
+  });
+
+  test('sem o parametro, abre na aba de entrar', () => {
+    expect(initialSignInMode('')).toBe(SIGN_IN_MODES.SIGN_IN);
+    expect(initialSignInMode('?outra=1')).toBe(SIGN_IN_MODES.SIGN_IN);
   });
 });
