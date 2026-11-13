@@ -1,5 +1,33 @@
 # Publicar o Pai Presente
 
+> **13/11/2026 — vitrine no domínio principal, app em `app.`.** `paternar.com.br`
+> passa a mostrar a landing page (`apps/frontend-pai-presente/public/landing.html`)
+> e o app mora em `https://app.paternar.com.br`. Os dois saem do **mesmo** serviço
+> `web`; quem separa é o `Host` (`server/landing.js`), ligado por `LANDING_HOSTS`
+> + `APP_URL` na `web`. No domínio principal **continuam**: `/v1` (o webhook da
+> Hotmart em `https://paternar.com.br/v1/payments/webhooks/hotmart` não muda),
+> `/ads.txt` e a metatag do AdSense, `/sobre`, `/privacidade`, `/dicas/...`,
+> `robots.txt`, `sitemap.xml` e `/health`. Qualquer outra rota recebe **302** para
+> o mesmo caminho em `app.` (`/juntinhos` → `app.paternar.com.br/juntinhos`), e
+> `/sw.js` no domínio principal entrega um service worker que aposenta o do app
+> antigo (limpa o cache e recarrega). O `entrelacos.up.railway.app` segue servindo
+> o app.
+>
+> Quem liga é o deploy (`scripts/railway-garantir-servicos.mjs`): cria o
+> `app.paternar.com.br` na `web`, cria o DNS no Cloudflare se houver
+> `CLOUDFLARE_API_TOKEN`, grava `APP_URL` e acrescenta a origem em `WEB_ORIGINS`
+> da `api`. `LANDING_HOSTS` só é gravada quando o certificado do `app.` está
+> válido, então a vitrine liga sozinha num deploy depois que o DNS propagar.
+> Para desligar: apague `LANDING_HOSTS` da `web` e faça redeploy.
+>
+> À mão, fora do repositório: (1) no Cloudflare, `CNAME app` → alvo que o Railway
+> mostrar, em **DNS only**, e o `TXT _railway-verify.app` (o deploy faz isso com o
+> token); (2) no Google Cloud, em *Credentials* → o Client ID OAuth → *Authorized
+> JavaScript origins*, acrescentar `https://app.paternar.com.br` (sem isso o botão
+> do Google falha no app). A sessão é por domínio: quem estava logado em
+> `paternar.com.br` entra de novo uma vez em `app.`, e quem instalou o app na tela
+> inicial precisa reinstalar a partir de `app.paternar.com.br`.
+
 > **06/11/2026 — domínio próprio.** O app atende em `https://paternar.com.br`
 > (Registro.br, DNS no Cloudflare: CNAME `@` → alvo do Railway, TXT
 > `_railway-verify`, e `www` redirecionado para a raiz por Redirect Rule). O

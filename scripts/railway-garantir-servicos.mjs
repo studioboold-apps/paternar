@@ -15,6 +15,10 @@
 //   6. grava na `web` o ADSENSE_CLIENT_ID da conta (publico: sai no HTML de todo
 //      site com anuncio). Ele so publica a metatag e o /ads.txt; quem liga os
 //      anuncios e' ADS_ENABLED, que este script nao toca.
+//   7. garante o app.paternar.com.br na `web` (e o DNS dele, como no item 4) e,
+//      so quando o certificado dele estiver valido, liga a vitrine no dominio
+//      principal (LANDING_HOSTS + APP_URL). Antes disso o dominio principal segue
+//      servindo o app: ninguem e' desviado para um endereco que ainda nao abre;
 //
 // As variaveis sao gravadas com `skipDeploys`: quem publica e' o `railway up`
 // dos passos seguintes, que ja leva o valor novo.
@@ -34,11 +38,16 @@ const PORT = 8080;
 const API_PORT = Number(process.env.API_PORT || 3000);
 const PUBLIC_DOMAIN = 'paternar.com.br';
 const PANEL_DOMAIN = `painel.${PUBLIC_DOMAIN}`;
+/** O app dos pais, desde que o dominio principal virou vitrine (13/11/2026). */
+const APP_DOMAIN = `app.${PUBLIC_DOMAIN}`;
+const APP_URL = `https://${APP_DOMAIN}`;
+const LANDING_HOSTS = `${PUBLIC_DOMAIN},www.${PUBLIC_DOMAIN}`;
 const WEB = 'web';
 /** ID de editor da conta AdSense (08/11/2026) — o mesmo de `.railway/railway.ts`. */
 const ADSENSE_CLIENT_ID = 'ca-pub-3420826522507538';
 const FIXED_ORIGINS = [
   `https://${PUBLIC_DOMAIN}`,
+  APP_URL,
   `https://${PANEL_DOMAIN}`,
   'https://entrelacos.up.railway.app',
 ];
@@ -145,23 +154,23 @@ async function preparePanel(ids, services) {
   }
 
   try {
-    await syncPanelDns(ids, panel.id);
+    await syncDomainDns(ids, panel.id, PANEL_DOMAIN);
   } catch (err) {
     console.log(`::warning::DNS do ${PANEL_DOMAIN} nao conferido: ${err.message}`);
   }
   return railwayDomain;
 }
 
-// Registros que o Railway pede para o dominio proprio do painel. Sao publicos
-// (qualquer um ve o CNAME de um dominio), entao vao para o log.
-async function panelDnsRecords(ids, serviceId) {
+// Registros que o Railway pede para um dominio proprio (painel ou app). Sao
+// publicos (qualquer um ve o CNAME de um dominio), entao vao para o log.
+async function domainDnsRecords(ids, serviceId, wantedDomain) {
   const data = await gql(
     `query ($p: String!, $e: String!, $s: String!) {
        domains(projectId: $p, environmentId: $e, serviceId: $s) {
          customDomains { domain status { dnsRecords { fqdn recordType requiredValue } } } } }`,
     { p: ids.projectId, e: ids.environmentId, s: serviceId },
   );
-  const domain = data.domains.customDomains.find((d) => d.domain === PANEL_DOMAIN);
+  const domain = data.domains.customDomains.find((d) => d.domain === wantedDomain);
   const records = (domain?.status?.dnsRecords || [])
     .map((r) => ({ name: r.fqdn, type: String(r.recordType).replace(/^DNS_RECORD_TYPE_/, ''), content: r.requiredValue }))
     .filter((r) => r.name && r.content && ['CNAME', 'TXT', 'A', 'AAAA'].includes(r.type));
@@ -176,12 +185,12 @@ async function panelDnsRecords(ids, serviceId) {
            customDomains { domain status { verified verificationDnsHost verificationToken certificateStatus } } } }`,
       { p: ids.projectId, e: ids.environmentId, s: serviceId },
     );
-    const st = v.domains.customDomains.find((d) => d.domain === PANEL_DOMAIN)?.status || {};
-    console.log(`-> ${PANEL_DOMAIN}: verificado=${st.verified} certificado=${st.certificateStatus}`);
+    const st = v.domains.customDomains.find((d) => d.domain === wantedDomain)?.status || {};
+    console.log(`-> ${wantedDomain}: verificado=${st.verified} certificado=${st.certificateStatus}`);
     const txt = verificationRecord(st.verificationDnsHost, st.verificationToken);
     if (txt && !records.some((r) => r.type === 'TXT' && r.name === txt.name)) records.push(txt);
   } catch (err) {
-    console.log(`::warning::status de verificacao do ${PANEL_DOMAIN} indisponivel: ${err.message}`);
+    console.log(`::warning::status de verificacao do ${wantedDomain} indisponivel: ${err.message}`);
   }
   return records;
 }
@@ -207,10 +216,10 @@ async function cloudflare(path, init = {}) {
 
 // Sem CLOUDFLARE_API_TOKEN so mostra o que falta; com ele, cria ou corrige os
 // registros na zona (CNAME em "DNS only": o certificado e' do Railway).
-async function syncPanelDns(ids, serviceId) {
-  const records = await panelDnsRecords(ids, serviceId);
+async function syncDomainDns(ids, serviceId, domain) {
+  const records = await domainDnsRecords(ids, serviceId, domain);
   if (!records.length) {
-    console.log(`-> o Railway ainda nao listou registros DNS para ${PANEL_DOMAIN}`);
+    console.log(`-> o Railway ainda nao listou registros DNS para ${domain}`);
     return;
   }
   if (!process.env.CLOUDFLARE_API_TOKEN) {
@@ -265,6 +274,71 @@ async function main() {
   }
 
   await ensureAdsenseAccount(ids, services);
+  await ensureAppDomainAndLanding(ids, services);
+}
+
+/** `CERTIFICATE_STATUS_TYPE_VALID` na API do Railway. */
+export function isCertificateValid(status) {
+  return Boolean(status?.verified) && /VALID$/.test(String(status?.certificateStatus ?? ''));
+}
+
+/**
+ * A vitrine so liga com o `app.` respondendo em HTTPS: ligar antes desviaria
+ * todo pai de `paternar.com.br` para um endereco sem certificado. Nunca
+ * desliga sozinha: voltar atras e' apagar `LANDING_HOSTS` da `web` no painel.
+ * Falhar aqui nao derruba o deploy.
+ */
+async function ensureAppDomainAndLanding(ids, services) {
+  const web = services.find((s) => s.name === WEB);
+  if (!web) return;
+  try {
+    const domains = await gql(
+      `query ($p: String!, $e: String!, $s: String!) {
+         domains(projectId: $p, environmentId: $e, serviceId: $s) {
+           customDomains { domain status { verified certificateStatus } } } }`,
+      { p: ids.projectId, e: ids.environmentId, s: web.id },
+    );
+    let app = domains.domains.customDomains.find((d) => d.domain === APP_DOMAIN);
+    if (!app) {
+      try {
+        await gql(
+          `mutation ($input: CustomDomainCreateInput!) { customDomainCreate(input: $input) { id } }`,
+          { input: { projectId: ids.projectId, environmentId: ids.environmentId, serviceId: web.id, domain: APP_DOMAIN, targetPort: PORT } },
+        );
+        console.log(`-> dominio ${APP_DOMAIN} criado no Railway (servico web)`);
+      } catch (err) {
+        console.log(`::warning::${APP_DOMAIN} nao foi criado (${err.message}). A vitrine fica desligada.`);
+        return;
+      }
+    }
+
+    try {
+      await syncDomainDns(ids, web.id, APP_DOMAIN);
+    } catch (err) {
+      console.log(`::warning::DNS do ${APP_DOMAIN} nao conferido: ${err.message}`);
+    }
+
+    const vars = await gql(
+      `query ($p: String!, $e: String!, $s: String!) { variables(projectId: $p, environmentId: $e, serviceId: $s) }`,
+      { p: ids.projectId, e: ids.environmentId, s: web.id },
+    );
+    if ((vars.variables.APP_URL ?? '') !== APP_URL) {
+      await upsert(ids, web.id, 'APP_URL', APP_URL);
+      console.log(`-> APP_URL da web: ${APP_URL}`);
+    }
+    if ((vars.variables.LANDING_HOSTS ?? '').trim()) {
+      console.log(`-> vitrine ligada em: ${vars.variables.LANDING_HOSTS}`);
+      return;
+    }
+    if (!isCertificateValid(app?.status)) {
+      console.log(`::warning::vitrine ainda desligada: ${APP_DOMAIN} sem certificado valido. Ela liga sozinha num deploy depois que o DNS propagar.`);
+      return;
+    }
+    await upsert(ids, web.id, 'LANDING_HOSTS', LANDING_HOSTS);
+    console.log(`-> vitrine LIGADA em ${LANDING_HOSTS}; o app segue em ${APP_URL}`);
+  } catch (err) {
+    console.log(`::warning::vitrine/app nao preparados: ${err.message}`);
+  }
 }
 
 /** Falhar aqui nao derruba o deploy: sem o id, so a verificacao do AdSense espera. */

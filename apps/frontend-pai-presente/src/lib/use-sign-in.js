@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { loadScript } from './load-script';
 import { findLocale, getLocale } from './locale';
-import { describeCredentialProblems, SIGN_IN_MODES, toCredentials } from './sign-in-form';
+import { describeCredentialProblems, initialSignInMode, SIGN_IN_MODES, toCredentials } from './sign-in-form';
 
 /** Identificador de cliente e publico por definicao — nao e segredo. */
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
@@ -60,7 +60,9 @@ export function useSignIn() {
   const googleButtonRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [mode, setMode] = useState(SIGN_IN_MODES.SIGN_IN);
+  const [mode, setMode] = useState(() =>
+    initialSignInMode(typeof window === 'undefined' ? '' : window.location.search),
+  );
   const [form, setForm] = useState(EMPTY_FORM);
   const [problems, setProblems] = useState(Object.freeze({}));
 
