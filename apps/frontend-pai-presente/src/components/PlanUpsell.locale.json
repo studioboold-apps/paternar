@@ -1,0 +1,41 @@
+{
+  "cta": "Conhecer o plano Premium",
+  "resetsAt": "Suas conversas voltam em {date}.",
+  "remaining": "{count} conversas restantes nesta semana",
+  "free": {
+    "chat_limit": {
+      "title": "Você aproveitou bem a semana!",
+      "body": "No plano gratuito são algumas conversas por semana com a IA. Com o Premium, você conversa quando precisar."
+    },
+    "chat_media": {
+      "title": "Fotos e áudio são do Premium",
+      "body": "Mandar foto ou falar em vez de digitar fica liberado para quem assina. Por enquanto, é só escrever sua pergunta."
+    },
+    "children": {
+      "title": "Mais de um filho é no Premium",
+      "body": "No plano gratuito cabe um filho. Assinando, você acompanha todos eles no mesmo lugar."
+    },
+    "full_report": {
+      "title": "Tem mais aqui para você",
+      "body": "Este é o resumo. A análise completa, com pontos fortes, o que melhorar e a meta do mês, fica no Premium."
+    }
+  },
+  "subscriber": {
+    "chat_limit": {
+      "title": "Vamos dar uma pausa curta",
+      "body": "Você usou bastante a IA neste mês, e por uns dias as conversas seguem no ritmo do plano básico. Obrigado por estar tão presente."
+    },
+    "chat_media": {
+      "title": "Fotos e áudio em pausa por alguns dias",
+      "body": "Você usou bastante a IA neste mês. Para seguir conversando sem interrupção, por uns dias as perguntas vão só por texto."
+    },
+    "children": {
+      "title": "Não deu para cadastrar agora",
+      "body": "Tente de novo em instantes."
+    },
+    "full_report": {
+      "title": "Resumo do mês",
+      "body": "A análise completa volta em breve."
+    }
+  }
+}

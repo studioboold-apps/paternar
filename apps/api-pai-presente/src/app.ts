@@ -8,6 +8,8 @@ import type { Database } from './database/client';
 import type { NotificationModule } from '@adatechnology/notification-module';
 import { buildActivityRoutes } from './modules/Activity/activity.controller';
 import { buildAiModule } from './modules/Ai/ai.module';
+import type { PlanGate } from './modules/PlanLimits/plan-limits.gate';
+import { buildPlanStatusRoutes } from './modules/PlanLimits/plan-limits.module';
 import type { LlmProviderName } from './modules/Ai/ai.constant';
 import { createActivityRepository } from './modules/Activity/activity.repository';
 import { createActivityUseCases } from './modules/Activity/activity.use-case';
@@ -82,6 +84,8 @@ export type BuildApplicationRoutesParams = {
     readonly transcription: { readonly apiKey: string; readonly model: string };
   };
   readonly notifications?: NotificationModule | undefined;
+  /** Limites do plano. Ausente (testes antigos, scripts), nada e' limitado. */
+  readonly planGate?: PlanGate | undefined;
 };
 
 export function buildApplicationRoutes({
@@ -89,6 +93,7 @@ export function buildApplicationRoutes({
   llm,
   media,
   notifications,
+  planGate,
 }: BuildApplicationRoutesParams): readonly RouteDefinition[] {
   const childRepository = createChildRepository(database);
   /**
@@ -138,7 +143,9 @@ export function buildApplicationRoutes({
         childFileExport: childFileUseCases,
       }),
     ),
-    ...buildChildRoutes(createChildUseCases({ repository: childRepository, childFiles: childFileUseCases })),
+    ...buildChildRoutes(createChildUseCases({ repository: childRepository, childFiles: childFileUseCases }), {
+      planGate,
+    }),
     ...buildActivityRoutes(
       createActivityUseCases({
         repository: activityRepository,
@@ -167,7 +174,9 @@ export function buildApplicationRoutes({
       chatMessages: chatMessageRepository,
       users: userRepository,
       recordUsage: createDatabaseAiUsageRecorder(database),
+      planGate,
       ...llm,
     }),
+    ...(planGate ? buildPlanStatusRoutes(planGate) : []),
   ];
 }

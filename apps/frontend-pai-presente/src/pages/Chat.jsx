@@ -6,6 +6,7 @@ import ChatComposer from '@/components/ChatComposer';
 import ExpandableMarkdown from '@/components/ExpandableMarkdown';
 import ChildQuickAccess from '@/components/ChildQuickAccess';
 import BrandLoader from '@/components/BrandLoader';
+import PlanUpsell from '@/components/PlanUpsell';
 import { BRAND_LOGO } from '@/lib/brand';
 import { useTranslation } from '@/lib/i18n';
 import { MESSAGE_ROLES, SUGGESTED_QUESTION_KEYS, useChat } from './Chat.hook';
@@ -26,6 +27,8 @@ export default function Chat() {
     sendQuestion,
     photo,
     voice,
+    planBlock,
+    chatRemaining,
   } = useChat();
 
   return (
@@ -146,6 +149,13 @@ export default function Chat() {
         )}
       </div>
 
+      {planBlock ? (
+        <PlanUpsell {...planBlock} className="mx-4 mb-2" />
+      ) : chatRemaining !== null ? (
+        <p className="px-4 pb-1 text-center text-xs text-zinc-500">
+          {t('planUpsell.remaining', { count: chatRemaining })}
+        </p>
+      ) : null}
       <ChatComposer
         question={question}
         sendFailure={sendFailure}

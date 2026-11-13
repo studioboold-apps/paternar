@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { planBlockOf } from '@/lib/use-plan';
 
 import { api } from '@/api/client';
 import { describeApiFailure } from '@/lib/api-error-message';
@@ -90,7 +91,11 @@ export function usePerfil() {
    * clicava em Salvar de novo achando que o toque nao tinha pegado.
    */
   const profileFailure = updateProfileMutation.isError ? describeApiFailure(updateProfileMutation.error) : null;
-  const childFailure = createChildMutation.isError
+  /** Filho alem do que o plano libera: convite para assinar, nao aviso de erro. */
+  const childPlanBlock = createChildMutation.isError ? planBlockOf(createChildMutation.error) : null;
+  const childFailure = childPlanBlock
+    ? null
+    : createChildMutation.isError
     ? describeApiFailure(createChildMutation.error)
     : updateChildMutation.isError
       ? describeApiFailure(updateChildMutation.error)
@@ -204,6 +209,7 @@ export function usePerfil() {
     canSaveChild: Boolean(childForm.name && childForm.age && childForm.gender),
     profileFailure,
     childFailure,
+    childPlanBlock,
     deleteFailure,
     setShowEditProfile,
     setChildToDelete,

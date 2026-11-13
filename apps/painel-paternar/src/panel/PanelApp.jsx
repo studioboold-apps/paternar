@@ -9,7 +9,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Bell, CreditCard, Flag, LayoutDashboard, LogOut, ShieldCheck, Sparkles, Star, Store, Users } from 'lucide-react';
+import { Bell, CreditCard, Flag, Gauge, LayoutDashboard, LogOut, ShieldCheck, Sparkles, Star, Store, Users } from 'lucide-react';
 
 import AdaFooter from '@/components/AdaFooter';
 import { BrandSymbol, BrandWordmark } from '@/components/PanelBrand';
@@ -22,6 +22,7 @@ import PanelAdvertisers from './PanelAdvertisers';
 import PanelAiUsage from './PanelAiUsage';
 import PanelAppUsers from './PanelAppUsers';
 import PanelBilling from './PanelBilling';
+import PanelPlanLimits from './PanelPlanLimits';
 import PanelLogin from './PanelLogin';
 import PanelNotifications from './PanelNotifications';
 import PanelOverview from './PanelOverview';
@@ -45,6 +46,7 @@ const SECTIONS = [
   { section: 'denuncias', key: 'reports', icon: Flag, Component: PanelReports },
   { section: 'ia', key: 'ai', icon: Sparkles, Component: PanelAiUsage },
   { section: 'assinaturas', key: 'billing', icon: CreditCard, Component: PanelBilling },
+  { section: 'limites', key: 'planLimits', icon: Gauge, Component: PanelPlanLimits },
   { section: 'anunciantes', key: 'advertisers', icon: Store, Component: PanelAdvertisers },
   { section: 'recomendacoes', key: 'recommendations', icon: Star, Component: PanelRecommendations },
   { section: 'notificacoes', key: 'notifications', icon: Bell, Component: PanelNotifications },

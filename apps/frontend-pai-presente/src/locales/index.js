@@ -8,6 +8,7 @@ import activityCard from '@/components/ActivityCard.locale.json';
 import insightCard from '@/components/InsightCard.locale.json';
 import notificationBanner from '@/components/NotificationPermissionBanner.locale.json';
 import planSection from '@/components/PerfilPlanSection.locale.json';
+import planUpsell from '@/components/PlanUpsell.locale.json';
 import signIn from '@/components/SignIn.locale.json';
 import boletim from '@/pages/Boletim.locale.json';
 import chat from '@/pages/Chat.locale.json';
@@ -25,6 +26,7 @@ import activityCardEN from '@/components/ActivityCard.locale.en.json';
 import insightCardEN from '@/components/InsightCard.locale.en.json';
 import notificationBannerEN from '@/components/NotificationPermissionBanner.locale.en.json';
 import planSectionEN from '@/components/PerfilPlanSection.locale.en.json';
+import planUpsellEN from '@/components/PlanUpsell.locale.en.json';
 import signInEN from '@/components/SignIn.locale.en.json';
 import boletimEN from '@/pages/Boletim.locale.en.json';
 import chatEN from '@/pages/Chat.locale.en.json';
@@ -42,6 +44,7 @@ import activityCardES from '@/components/ActivityCard.locale.es.json';
 import insightCardES from '@/components/InsightCard.locale.es.json';
 import notificationBannerES from '@/components/NotificationPermissionBanner.locale.es.json';
 import planSectionES from '@/components/PerfilPlanSection.locale.es.json';
+import planUpsellES from '@/components/PlanUpsell.locale.es.json';
 import signInES from '@/components/SignIn.locale.es.json';
 import boletimES from '@/pages/Boletim.locale.es.json';
 import chatES from '@/pages/Chat.locale.es.json';
@@ -86,6 +89,7 @@ export const LOCALE_MESSAGES = Object.freeze({
   onboarding: onboarding,
   perfil: perfil,
   planSection: planSection,
+  planUpsell: planUpsell,
   profile: profile,
   signIn: signIn,
 });
@@ -106,6 +110,7 @@ const EN_MESSAGES = Object.freeze({
   onboarding: onboardingEN,
   perfil: perfilEN,
   planSection: planSectionEN,
+  planUpsell: planUpsellEN,
   profile: profileEN,
   signIn: signInEN,
 });
@@ -126,6 +131,7 @@ const ES_MESSAGES = Object.freeze({
   onboarding: onboardingES,
   perfil: perfilES,
   planSection: planSectionES,
+  planUpsell: planUpsellES,
   profile: profileES,
   signIn: signInES,
 });

@@ -1,0 +1,41 @@
+{
+  "cta": "See the Premium plan",
+  "resetsAt": "Your conversations come back on {date}.",
+  "remaining": "{count} conversations left this week",
+  "free": {
+    "chat_limit": {
+      "title": "You made the most of this week!",
+      "body": "The free plan includes a few AI conversations per week. With Premium, you can talk whenever you need."
+    },
+    "chat_media": {
+      "title": "Photos and voice are Premium",
+      "body": "Sending a photo or speaking instead of typing is for subscribers. For now, just type your question."
+    },
+    "children": {
+      "title": "More than one child is Premium",
+      "body": "The free plan covers one child. Subscribe to follow all of them in one place."
+    },
+    "full_report": {
+      "title": "There is more here for you",
+      "body": "This is the summary. The full analysis, with strengths, what to improve and the monthly goal, is in Premium."
+    }
+  },
+  "subscriber": {
+    "chat_limit": {
+      "title": "Let's take a short break",
+      "body": "You used the AI a lot this month, so for a few days conversations follow the basic plan pace. Thank you for being so present."
+    },
+    "chat_media": {
+      "title": "Photos and voice paused for a few days",
+      "body": "You used the AI a lot this month. To keep talking without interruption, for a few days questions go by text only."
+    },
+    "children": {
+      "title": "Could not add right now",
+      "body": "Please try again in a moment."
+    },
+    "full_report": {
+      "title": "Monthly summary",
+      "body": "The full analysis will be back soon."
+    }
+  }
+}

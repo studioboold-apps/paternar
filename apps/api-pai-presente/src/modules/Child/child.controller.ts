@@ -14,12 +14,16 @@ import {
 import type { RouteDefinition } from '../shared/http/route.types';
 import { uuidSchema } from '../shared/shared.schema';
 import { createChildBodySchema, updateChildBodySchema } from './child.schema';
+import type { PlanGate } from '../PlanLimits/plan-limits.gate';
 import type { ChildUseCases } from './child.use-case';
 
 const CHILDREN_PATH = '/v1/children';
 const CHILD_PATH = '/v1/children/:childId';
 
-export function buildChildRoutes(useCases: ChildUseCases): readonly RouteDefinition[] {
+export function buildChildRoutes(
+  useCases: ChildUseCases,
+  options: { readonly planGate?: Pick<PlanGate, 'assertCanAddChild'> | undefined } = {},
+): readonly RouteDefinition[] {
   return [
     {
       method: HTTP_METHODS.GET,
@@ -40,6 +44,7 @@ export function buildChildRoutes(useCases: ChildUseCases): readonly RouteDefinit
       path: CHILDREN_PATH,
       summary: 'Cadastra um filho.',
       handle: async ({ request, authenticatedUser }) => {
+        await options.planGate?.assertCanAddChild(authenticatedUser.userId);
         const values = await parseJsonBody(request, createChildBodySchema);
         const child = await useCases.create({ userId: authenticatedUser.userId, values });
         return respondWithData(child, HTTP_STATUS.CREATED);

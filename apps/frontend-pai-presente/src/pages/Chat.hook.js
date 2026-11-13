@@ -20,6 +20,7 @@ import {
 import { toConversationId, toScreenMessages } from '@/lib/chat-history';
 import { describeApiFailure } from '@/lib/api-error-message';
 import { useTranslation } from '@/lib/i18n';
+import { chatRemaining, planBlockOf, PLAN_LOCKS, PLAN_STATUS_QUERY_KEY, usePlanStatus } from '@/lib/use-plan';
 
 const CHAT_HISTORY_QUERY_KEY = 'chat-messages';
 
@@ -52,6 +53,10 @@ export function useChat() {
   const photoInputRef = useRef(null);
   const recordingRef = useRef(null);
   const recordingTimerRef = useRef(null);
+  /** Foto ou microfone tocados sem estar no plano: o convite aparece no lugar. */
+  const [mediaBlocked, setMediaBlocked] = useState(false);
+  const plan = usePlanStatus();
+  const remaining = chatRemaining(plan);
 
   const historyQuery = useQuery({
     queryKey: [CHAT_HISTORY_QUERY_KEY, conversationId],
@@ -103,6 +108,7 @@ export function useChat() {
      */
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: [CHAT_HISTORY_QUERY_KEY, conversationId] });
+      queryClient.invalidateQueries({ queryKey: PLAN_STATUS_QUERY_KEY });
       inputRef.current?.focus();
     },
   });
@@ -129,7 +135,19 @@ export function useChat() {
    * assistente com texto fixo, o motivo escrito pela API se perdia — e o app
    * punha palavra na boca de quem nunca respondeu.
    */
-  const sendFailure = sendMutation.isError ? describeApiFailure(sendMutation.error) : null;
+  const sendBlock = sendMutation.isError ? planBlockOf(sendMutation.error) : null;
+  const sendFailure = sendMutation.isError && !sendBlock ? describeApiFailure(sendMutation.error) : null;
+
+  /**
+   * O convite para assinar. A semana acabou antes de enviar: o app ja sabe e
+   * nem grava a pergunta. A API recusou mesmo assim (outra aba gastou a
+   * ultima): vale a recusa dela.
+   */
+  const chatExhausted = remaining === 0;
+  const planBlock =
+    sendBlock ??
+    (chatExhausted ? { lock: PLAN_LOCKS.CHAT_LIMIT, level: plan.level, resetsAt: plan.chat.resets_at } : null) ??
+    (mediaBlocked ? { lock: PLAN_LOCKS.CHAT_MEDIA, level: plan.level, resetsAt: null } : null);
 
   /** O ditado nao envia sozinho: o texto volta para a caixa e o pai confere. */
   const transcribeMutation = useMutation({
@@ -138,7 +156,10 @@ export function useChat() {
       setQuestion((current) => appendTranscript(current, text));
       inputRef.current?.focus();
     },
-    onError: (error) => setAttachmentFailure(describeApiFailure(error).message),
+    onError: (error) => {
+      if (planBlockOf(error)) setMediaBlocked(true);
+      else setAttachmentFailure(describeApiFailure(error).message);
+    },
   });
 
   /**
@@ -160,7 +181,7 @@ export function useChat() {
 
   /** @param {string} text */
   function sendQuestion(text) {
-    if ((!text.trim() && !image) || sendMutation.isPending) return;
+    if ((!text.trim() && !image) || sendMutation.isPending || chatExhausted) return;
 
     setQuestion('');
     setImage(null);
@@ -169,6 +190,10 @@ export function useChat() {
   }
 
   function openPhotoPicker() {
+    if (!plan.media) {
+      setMediaBlocked(true);
+      return;
+    }
     photoInputRef.current?.click();
   }
 
@@ -204,6 +229,10 @@ export function useChat() {
       await stopRecording();
       return;
     }
+    if (!plan.media) {
+      setMediaBlocked(true);
+      return;
+    }
     setAttachmentFailure(null);
     try {
       recordingRef.current = await startVoiceRecording();
@@ -229,7 +258,9 @@ export function useChat() {
     sendFailure,
     attachmentFailure,
     isSending: sendMutation.isPending,
-    canSend: (question.trim().length > 0 || image !== null) && !sendMutation.isPending,
+    canSend: (question.trim().length > 0 || image !== null) && !sendMutation.isPending && !chatExhausted,
+    planBlock,
+    chatRemaining: remaining,
     messagesEndRef,
     inputRef,
     handleQuestionChange,

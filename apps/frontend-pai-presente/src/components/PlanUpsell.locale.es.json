@@ -1,0 +1,41 @@
+{
+  "cta": "Conocer el plan Premium",
+  "resetsAt": "Tus conversaciones vuelven el {date}.",
+  "remaining": "{count} conversaciones restantes esta semana",
+  "free": {
+    "chat_limit": {
+      "title": "¡Aprovechaste bien la semana!",
+      "body": "El plan gratuito incluye algunas conversaciones por semana con la IA. Con Premium, conversas cuando lo necesites."
+    },
+    "chat_media": {
+      "title": "Fotos y audio son Premium",
+      "body": "Enviar una foto o hablar en lugar de escribir es para quien se suscribe. Por ahora, solo escribe tu pregunta."
+    },
+    "children": {
+      "title": "Más de un hijo es Premium",
+      "body": "El plan gratuito incluye un hijo. Suscribiéndote, acompañas a todos en un mismo lugar."
+    },
+    "full_report": {
+      "title": "Hay más aquí para ti",
+      "body": "Este es el resumen. El análisis completo, con fortalezas, qué mejorar y la meta del mes, está en Premium."
+    }
+  },
+  "subscriber": {
+    "chat_limit": {
+      "title": "Hagamos una pausa corta",
+      "body": "Usaste mucho la IA este mes, y por unos días las conversaciones siguen el ritmo del plan básico. Gracias por estar tan presente."
+    },
+    "chat_media": {
+      "title": "Fotos y audio en pausa por unos días",
+      "body": "Usaste mucho la IA este mes. Para seguir conversando sin interrupción, por unos días las preguntas van solo por texto."
+    },
+    "children": {
+      "title": "No se pudo agregar ahora",
+      "body": "Inténtalo de nuevo en un momento."
+    },
+    "full_report": {
+      "title": "Resumen del mes",
+      "body": "El análisis completo vuelve pronto."
+    }
+  }
+}

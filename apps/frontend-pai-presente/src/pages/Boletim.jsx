@@ -10,6 +10,8 @@ import { Award, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import BoletimCharts from '@/components/BoletimCharts';
 import BoletimQuickAccess from '@/components/BoletimQuickAccess';
 import BoletimQuickStats from '@/components/BoletimQuickStats';
+import PlanUpsell from '@/components/PlanUpsell';
+import { PLAN_LOCKS } from '@/lib/use-plan';
 import BoletimReportCard from '@/components/BoletimReportCard';
 import BoletimShare from '@/components/BoletimShare';
 import { Button } from '@/components/ui/button';
@@ -105,6 +107,7 @@ export default function Boletim() {
       </div>
 
       {report && <BoletimReportCard report={report} />}
+      {report?.bloqueado ? <PlanUpsell lock={PLAN_LOCKS.FULL_REPORT} /> : null}
       {report && <BoletimShare report={report} monthLabel={monthLabel} />}
 
       {!report && isEmptyMonth && (

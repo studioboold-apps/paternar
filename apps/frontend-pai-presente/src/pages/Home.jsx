@@ -11,6 +11,8 @@ import { Link } from 'react-router-dom';
 
 import AdSlot from '@/components/AdSlot';
 import AiBadge from '@/components/AiBadge';
+import PlanUpsell from '@/components/PlanUpsell';
+import { PLAN_LOCKS } from '@/lib/use-plan';
 import InsightCard from '@/components/InsightCard';
 import PlacesToGo from '@/components/PlacesToGo';
 import ChildQuickAccess from '@/components/ChildQuickAccess';
@@ -33,6 +35,7 @@ export default function Home() {
     ratings,
     rateFailure,
     insightsFailure,
+    insightsLocked,
     isLoadingInsights,
     hasChildren,
     firstName,
@@ -180,6 +183,7 @@ export default function Home() {
                 delay={index * 0.1}
               />
             ))}
+            {insightsLocked ? <PlanUpsell lock={PLAN_LOCKS.FULL_REPORT} /> : null}
           </div>
         )}
       </div>

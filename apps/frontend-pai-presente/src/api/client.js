@@ -22,6 +22,7 @@ const PATHS = Object.freeze({
   paymentPlans: '/v1/payments/plans',
   paymentMe: '/v1/payments/me',
   paymentClaim: '/v1/payments/me/claim',
+  planStatus: '/v1/plan/status',
 });
 
 /** O teto de `perPage` da API; pedir mais devolve 100 do mesmo jeito. */
@@ -224,6 +225,8 @@ const Subscription = Object.freeze({
   /** Compra feita fora do app: o pai informa o codigo da transacao que veio no e-mail da Hotmart. */
   claim: (transactionId) =>
     request(HTTP_METHODS.POST, PATHS.paymentClaim, { body: { provider: 'hotmart', transactionId } }),
+  /** O que o plano libera agora e quanto ja foi usado (limites do gratuito e teto de IA). */
+  usage: () => request(HTTP_METHODS.GET, PATHS.planStatus),
 });
 
 const auth = Object.freeze({

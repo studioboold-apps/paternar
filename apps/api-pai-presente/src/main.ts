@@ -11,6 +11,7 @@ import { createDatabaseClient } from './database/client';
 import { buildApplicationRoutes } from './app';
 import { buildAuthModule } from './modules/Auth/auth.module';
 import { buildBillingModule } from './modules/Billing/billing.module';
+import { buildPlanGate } from './modules/PlanLimits/plan-limits.module';
 import { BILLING_FEATURES } from './modules/Billing/billing.plans';
 import { createCorsPolicy } from './modules/shared/http/cors';
 import {
@@ -90,11 +91,35 @@ if (!environment.HOTMART_HOTTOK) {
   logger.warn('pagamentos: HOTMART_HOTTOK vazio; o webhook da Hotmart responde 503');
 }
 
+const billing = buildBillingModule({
+  database,
+  config: {
+    hotmart: {
+      hottok: environment.HOTMART_HOTTOK,
+      checkoutUrls: {
+        monthly: environment.HOTMART_CHECKOUT_URL_MONTHLY,
+        yearly: environment.HOTMART_CHECKOUT_URL_YEARLY,
+      },
+    },
+    fakeSecret: environment.PAYMENTS_FAKE_SECRET,
+    isProduction,
+  },
+  authenticatedUserResolver: auth.authenticatedUserResolver,
+  logger: logger.withScope('billing'),
+});
+
+/** Limites do gratuito e teto de IA: atras de uma chave no painel, desligada por padrao. */
+const planGate = buildPlanGate({
+  database,
+  isSubscriber: (userId) => billing.payments.useCases.hasFeature({ customerRef: userId }, BILLING_FEATURES.AI_UNLIMITED),
+});
+
 const router = createRouter({
   routes: [
     ...buildApplicationRoutes({
       database,
       notifications: notificationModule,
+      planGate,
       llm: {
         providerName: environment.LLM_PROVIDER,
         apiKey: environment.LLM_API_KEY,
@@ -119,22 +144,7 @@ const router = createRouter({
 });
 const cors = createCorsPolicy(environment.WEB_ORIGINS);
 
-const billing = buildBillingModule({
-  database,
-  config: {
-    hotmart: {
-      hottok: environment.HOTMART_HOTTOK,
-      checkoutUrls: {
-        monthly: environment.HOTMART_CHECKOUT_URL_MONTHLY,
-        yearly: environment.HOTMART_CHECKOUT_URL_YEARLY,
-      },
-    },
-    fakeSecret: environment.PAYMENTS_FAKE_SECRET,
-    isProduction,
-  },
-  authenticatedUserResolver: auth.authenticatedUserResolver,
-  logger: logger.withScope('billing'),
-});
+
 
 const sdk = buildSdkModules({ database, logger: logger.withScope('recommendation') });
 const recommendationFeed = buildRecommendationFeedRouter({

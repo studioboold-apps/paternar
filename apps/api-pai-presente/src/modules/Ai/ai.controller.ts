@@ -26,6 +26,7 @@ import {
 } from './ai.schema';
 import { AudioInvalidError, AudioTooLargeError } from './ai.error';
 import type { AiUseCases } from './ai.use-case';
+import { trimInsights, trimReport, type PlanGate } from '../PlanLimits/plan-limits.gate';
 
 const BYTES_PER_MEGABYTE = 1024 * 1024;
 /** A moldura do multipart soma bytes ao corpo; a folga evita recusar audio no limite. */
@@ -57,6 +58,10 @@ async function readAudio(request: Request): Promise<Uint8Array> {
 export type BuildAiRoutesParams = {
   readonly useCases: AiUseCases;
   readonly rateLimiter: RateLimiter;
+  /** Limites do plano. Ausente, nada e' limitado. */
+  readonly planGate?: Pick<PlanGate, 'assertCanChat' | 'assertCanUseAudio' | 'hasFullReports'> | undefined;
+  /** Conta da transcricao: o provedor nao devolve uso, entao a conta sai do tamanho do audio. */
+  readonly recordTranscription?: ((params: { readonly userId: string; readonly bytes: number }) => void) | undefined;
 };
 
 /**
@@ -64,7 +69,12 @@ export type BuildAiRoutesParams = {
  * ser lido: conta invadida sem teto gasta sozinha (security.md §3). A chave e o
  * usuario autenticado, nunca o IP — um predio inteiro sai do mesmo IP.
  */
-export function buildAiRoutes({ useCases, rateLimiter }: BuildAiRoutesParams): readonly RouteDefinition[] {
+export function buildAiRoutes({
+  useCases,
+  rateLimiter,
+  planGate,
+  recordTranscription,
+}: BuildAiRoutesParams): readonly RouteDefinition[] {
   return [
     {
       method: HTTP_METHODS.POST,
@@ -77,7 +87,8 @@ export function buildAiRoutes({ useCases, rateLimiter }: BuildAiRoutesParams): r
           userId: authenticatedUser.userId,
           values,
         });
-        return respondWithData({ insights });
+        const full = (await planGate?.hasFullReports(authenticatedUser.userId)) ?? true;
+        return respondWithData(trimInsights(insights, full));
       },
     },
     {
@@ -102,7 +113,8 @@ export function buildAiRoutes({ useCases, rateLimiter }: BuildAiRoutesParams): r
         rateLimiter.consume(authenticatedUser.userId);
         const values = await parseJsonBody(request, generateReportBodySchema);
         const report = await useCases.generateReport({ userId: authenticatedUser.userId, values });
-        return respondWithData(report);
+        const full = (await planGate?.hasFullReports(authenticatedUser.userId)) ?? true;
+        return respondWithData(trimReport(report, full));
       },
     },
     {
@@ -112,6 +124,7 @@ export function buildAiRoutes({ useCases, rateLimiter }: BuildAiRoutesParams): r
       handle: async ({ request, authenticatedUser }) => {
         rateLimiter.consume(authenticatedUser.userId);
         const values = await parseJsonBody(request, chatBodySchema);
+        await planGate?.assertCanChat({ userId: authenticatedUser.userId, hasImages: values.images.length > 0 });
         const answer = await useCases.chat({ userId: authenticatedUser.userId, values });
         return respondWithData(answer);
       },
@@ -122,8 +135,10 @@ export function buildAiRoutes({ useCases, rateLimiter }: BuildAiRoutesParams): r
       summary: 'Transcreve o audio gravado pelo pai; o audio nao e guardado.',
       handle: async ({ request, authenticatedUser }) => {
         rateLimiter.consume(authenticatedUser.userId);
+        await planGate?.assertCanUseAudio(authenticatedUser.userId);
         const audio = await readAudio(request);
         const transcription = await useCases.transcribe({ audio });
+        recordTranscription?.({ userId: authenticatedUser.userId, bytes: audio.byteLength });
         return respondWithData(transcription);
       },
     },

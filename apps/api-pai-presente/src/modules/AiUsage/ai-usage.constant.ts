@@ -25,6 +25,12 @@ export const MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
   'claude-sonnet-5-5': { input: 2, output: 10, cacheRead: 0.2, cacheWrite: 2.5 },
   'claude-opus-5-5': { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5 },
   'gpt-4o-mini': { input: 0.15, output: 0.6, cacheRead: 0.075, cacheWrite: 0.15 },
+  /**
+   * Transcricao (Groq): `input` e' por SEGUNDO de audio, nao por milhao de
+   * tokens. US$ 0,04 a hora = 11,11 micro-dolar por segundo.
+   */
+  'whisper-large-v3-turbo': { input: 11.11, output: 0, cacheRead: 0, cacheWrite: 0 },
+  'whisper-large-v3': { input: 30.83, output: 0, cacheRead: 0, cacheWrite: 0 },
 };
 
 /** Busca na web da Anthropic: US$ 10 a cada mil buscas. */

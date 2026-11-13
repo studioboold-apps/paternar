@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { usePlanStatus } from '@/lib/use-plan';
 
 import { api } from '@/api/client';
 import { describeApiFailure } from '@/lib/api-error-message';
@@ -81,6 +82,7 @@ export function useComunidade() {
    * a lista vazia — que e' exatamente o que ele veria se nao houvesse insight
    * nenhum. Duas situacoes diferentes, uma tela so.
    */
+  const plan = usePlanStatus();
   const insightsFailure = insightsQuery.isError ? describeApiFailure(insightsQuery.error) : null;
 
   const rateMutation = useMutation({
@@ -134,6 +136,8 @@ export function useComunidade() {
     insights,
     ratings,
     insightsFailure,
+    /** Plano gratuito: veio so' o primeiro insight; o convite fica embaixo dele. */
+    insightsLocked: !plan.full_reports && (insightsQuery.data ?? []).length > 0,
     isLoadingInsights: insightsQuery.isFetching,
     hasChildren: children.length > 0,
     handleTabChange,

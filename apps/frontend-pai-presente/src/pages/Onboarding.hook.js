@@ -7,6 +7,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { planBlockOf } from '@/lib/use-plan';
 
 import { api } from '@/api/client';
 import { describeApiFailure } from '@/lib/api-error-message';
@@ -87,7 +88,13 @@ export function useOnboarding() {
       await api.auth.updateMe({ ...toProfileUpdate(userData), onboarding_completed: true });
 
       for (const child of children) {
-        await api.entities.Child.create(child);
+        try {
+          await api.entities.Child.create(child);
+        } catch (error) {
+          // Plano gratuito com limite de filhos: o cadastro termina com os que couberam.
+          if (planBlockOf(error)) break;
+          throw error;
+        }
       }
 
       /**
