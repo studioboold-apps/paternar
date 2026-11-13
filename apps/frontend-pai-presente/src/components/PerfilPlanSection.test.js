@@ -24,7 +24,7 @@ describe('PerfilPlanSection', () => {
 
   it('icones decorativos declaram aria-hidden', () => {
     const icons = SOURCE.match(/<(Check|Crown|ExternalLink)\b[^>]*>/g) ?? [];
-    expect(icons.length).toBe(3);
+    expect(icons.length).toBe(4);
     for (const icon of icons) expect(icon).toContain('aria-hidden="true"');
   });
 

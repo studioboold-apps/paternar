@@ -155,6 +155,42 @@ describe.skipIf(!IS_ENABLED)('pagamentos pela lib (e2e em processo)', () => {
     expect(password.body?.['data']).toMatchObject({ planCode: 'gratuito', hasAccess: false });
   });
 
+  test('quem comprou fora do app resgata pelo codigo da compra; chutar codigo esbarra no limite', async () => {
+    const at = new Date().toISOString();
+    await webhook({
+      eventId: `e4-${RUN_ID}`,
+      type: 'payment_approved',
+      occurredAt: at,
+      subscriptionId: `s4-${RUN_ID}`,
+      transactionId: `HP${RUN_ID}`,
+      email: `outro-${RUN_ID}@email.dev`,
+      offerCode: 'mensal',
+    });
+
+    const claimed = await call('POST', '/payments/me/claim', {
+      user: PASSWORD_PARENT_ID,
+      body: { provider: 'fake', transactionId: `HP${RUN_ID}` },
+    });
+    expect(claimed.status).toBe(200);
+    expect(claimed.body?.['data']).toMatchObject({ planCode: 'premium_mensal', hasAccess: true });
+
+    const stolen = await call('POST', '/payments/me/claim', {
+      user: GOOGLE_PARENT_ID,
+      body: { provider: 'fake', transactionId: `HP${RUN_ID}` },
+    });
+    expect(stolen.status).toBe(404);
+
+    const statuses: number[] = [];
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const guess = await call('POST', '/payments/me/claim', {
+        user: GOOGLE_PARENT_ID,
+        body: { provider: 'fake', transactionId: `HP000${attempt}` },
+      });
+      statuses.push(guess.status);
+    }
+    expect(statuses.at(-1)).toBe(429);
+  });
+
   test('o painel le assinantes e eventos pelo mesmo modulo, com o pai ao lado', async () => {
     const panel = createPanelBillingRepository(database, billing.payments);
 
@@ -163,7 +199,7 @@ describe.skipIf(!IS_ENABLED)('pagamentos pela lib (e2e em processo)', () => {
     const events = await panel.listEvents({ page: 1, perPage: 50 });
 
     expect(overview.byStatus['active']).toBeGreaterThanOrEqual(3);
-    expect(overview.unlinked).toBeGreaterThanOrEqual(1);
+    expect(overview.byStatus['active']).toBeGreaterThanOrEqual(4);
     expect(subscribers.rows).toHaveLength(1);
     expect(subscribers.rows[0]).toMatchObject({ planCode: 'premium_mensal', user: { id: PARENT_ID, name: 'Pai Pagante' } });
     expect(events.rows.some((row) => row.userId === PARENT_ID && row.amountCents === 1990)).toBe(true);

@@ -14,5 +14,20 @@
     "sem_anuncios": "No ads"
   },
   "subscribe": "Subscribe",
-  "checkoutHint": "Payment opens on Hotmart. When you're done, come back to the app: your plan updates on its own."
+  "checkoutHint": "Payment opens on Hotmart. When you're done, come back to the app: your plan updates on its own.",
+  "claim": {
+    "open": "Bought it and your plan didn't show up?",
+    "label": "Purchase code",
+    "hint": "It's in the Hotmart confirmation email and starts with HP.",
+    "placeholder": "HP1234567890",
+    "submit": "Unlock my plan",
+    "submitting": "Checking…",
+    "failure": {
+      "notFound": "We couldn't find a purchase with this code. Check the Hotmart email.",
+      "tooMany": "Too many attempts. Try again in an hour.",
+      "invalid": "The code has only letters and numbers, like HP1234567890.",
+      "generic": "We couldn't check it right now. Try again in a moment."
+    }
+  },
+  "manage": "Cancel or change your card on Hotmart"
 }

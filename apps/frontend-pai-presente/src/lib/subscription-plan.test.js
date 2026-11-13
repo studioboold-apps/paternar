@@ -35,3 +35,28 @@ describe('plano do pai', () => {
     expect(knownFeatures(['ia_ilimitada', 'novo'], (feature) => feature === 'ia_ilimitada')).toEqual(['ia_ilimitada']);
   });
 });
+
+describe('resgate pelo codigo da compra', () => {
+  test('codigo digitado com espaco e minuscula vira o da Hotmart', async () => {
+    const { normalizeTransactionCode } = await import('@/lib/subscription-plan');
+    expect(normalizeTransactionCode(' hp 1234 5678 ')).toBe('HP12345678');
+  });
+
+  test('cada recusa da API tem sua frase; o resto e falha generica', async () => {
+    const { claimFailureKey } = await import('@/lib/subscription-plan');
+    expect(claimFailureKey({ status: 404 })).toBe('notFound');
+    expect(claimFailureKey({ status: 429 })).toBe('tooMany');
+    expect(claimFailureKey({ status: 400 })).toBe('invalid');
+    expect(claimFailureKey({ status: 500 })).toBe('generic');
+  });
+});
+
+describe('gerenciar assinatura', () => {
+  test('link da Hotmart so para assinatura viva', async () => {
+    const { manageUrlOf } = await import('@/lib/subscription-plan');
+    expect(manageUrlOf({ has_access: true, status: 'active', provider: 'hotmart' })).toBe('https://consumer.hotmart.com/');
+    expect(manageUrlOf({ has_access: true, status: 'canceled', provider: 'hotmart' })).toBeNull();
+    expect(manageUrlOf({ has_access: false, status: 'refunded', provider: 'hotmart' })).toBeNull();
+    expect(manageUrlOf({ has_access: true, status: 'active', provider: 'fake' })).toBeNull();
+  });
+});

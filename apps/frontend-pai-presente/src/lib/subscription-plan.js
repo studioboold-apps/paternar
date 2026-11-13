@@ -37,3 +37,27 @@ export function accessEndsAt(entitlement) {
 export function knownFeatures(features, isKnown) {
   return (features ?? []).filter((feature) => isKnown(feature));
 }
+
+/** Codigo como a Hotmart mostra (HP1234...): espaco e minuscula nao mudam a compra. */
+export function normalizeTransactionCode(value) {
+  return String(value ?? '').replace(/\s+/g, '').toUpperCase();
+}
+
+const CLAIM_FAILURE_BY_STATUS = Object.freeze({ 404: 'notFound', 429: 'tooMany', 400: 'invalid' });
+
+/** A chave de traducao da falha do resgate. Qualquer outra coisa e' falha generica. */
+export function claimFailureKey(error) {
+  return CLAIM_FAILURE_BY_STATUS[error?.status] ?? 'generic';
+}
+
+/**
+ * Onde o pai cancela ou troca o cartao. A Hotmart nao deixa cancelar pela API
+ * sem credencial de produtor, entao o app leva para a area do comprador dela.
+ */
+const MANAGE_URL_BY_PROVIDER = Object.freeze({ hotmart: 'https://consumer.hotmart.com/' });
+
+/** So para quem tem assinatura viva: cancelada ou reembolsada nao tem o que gerenciar. */
+export function manageUrlOf(entitlement) {
+  if (!entitlement?.has_access || entitlement.status === 'canceled') return null;
+  return MANAGE_URL_BY_PROVIDER[entitlement.provider] ?? null;
+}

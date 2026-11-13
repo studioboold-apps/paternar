@@ -10,13 +10,14 @@
 import React from 'react';
 import { Check, Crown, ExternalLink } from 'lucide-react';
 
+import PerfilPlanClaim from '@/components/PerfilPlanClaim';
 import { usePerfilPlan } from '@/components/PerfilPlanSection.hook';
 import { hasTranslation, useTranslation } from '@/lib/i18n';
 import { checkoutUrlOf, knownFeatures } from '@/lib/subscription-plan';
 
 export default function PerfilPlanSection() {
   const { t, locale } = useTranslation();
-  const { isLoading, hasFailed, entitlement, endsAt, offers } = usePerfilPlan();
+  const { isLoading, hasFailed, entitlement, endsAt, manageUrl, offers } = usePerfilPlan();
   const isKnownFeature = (feature) => hasTranslation(`planSection.features.${feature}`);
 
   if (isLoading || hasFailed || !entitlement) return null;
@@ -44,6 +45,17 @@ export default function PerfilPlanSection() {
             {t('planSection.accessUntil', { date: new Date(endsAt).toLocaleDateString(locale) })}
           </p>
         ) : null}
+        {manageUrl ? (
+          <a
+            href={manageUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center gap-1 text-sm text-zinc-400 underline underline-offset-2"
+          >
+            {t('planSection.manage')}
+            <ExternalLink aria-hidden="true" className="w-3.5 h-3.5" />
+          </a>
+        ) : null}
 
         {offers.map((plan) => (
           <div key={plan.code} className="mt-4 rounded-xl border border-zinc-800 p-4">
@@ -69,6 +81,7 @@ export default function PerfilPlanSection() {
           </div>
         ))}
         {offers.length > 0 ? <p className="text-xs text-zinc-500 mt-3">{t('planSection.checkoutHint')}</p> : null}
+        {entitlement.has_access ? null : <PerfilPlanClaim />}
       </div>
     </section>
   );

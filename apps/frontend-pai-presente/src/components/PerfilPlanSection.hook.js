@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
-import { accessEndsAt, plansToOffer } from '@/lib/subscription-plan';
+import { accessEndsAt, manageUrlOf, plansToOffer } from '@/lib/subscription-plan';
 import { useMySubscription } from '@/lib/use-subscription';
 
 /**
@@ -28,6 +28,7 @@ export function usePerfilPlan() {
     hasFailed: Boolean(mine.error || plans.error),
     entitlement,
     endsAt: accessEndsAt(entitlement),
+    manageUrl: manageUrlOf(entitlement),
     offers: plansToOffer(plans.data, entitlement),
   };
 }

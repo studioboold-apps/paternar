@@ -21,6 +21,7 @@ const PATHS = Object.freeze({
   chatMessages: '/v1/chat/messages',
   paymentPlans: '/v1/payments/plans',
   paymentMe: '/v1/payments/me',
+  paymentClaim: '/v1/payments/me/claim',
 });
 
 /** O teto de `perPage` da API; pedir mais devolve 100 do mesmo jeito. */
@@ -220,6 +221,9 @@ const ChatMessage = Object.freeze({
 const Subscription = Object.freeze({
   plans: () => request(HTTP_METHODS.GET, PATHS.paymentPlans),
   mine: () => request(HTTP_METHODS.GET, PATHS.paymentMe),
+  /** Compra feita fora do app: o pai informa o codigo da transacao que veio no e-mail da Hotmart. */
+  claim: (transactionId) =>
+    request(HTTP_METHODS.POST, PATHS.paymentClaim, { body: { provider: 'hotmart', transactionId } }),
 });
 
 const auth = Object.freeze({
