@@ -13,7 +13,8 @@ import type { InsightRatingRepository } from '../InsightRating/types/insight-rat
 import { createRateLimiter } from '../shared/http/rate-limit';
 import type { RouteDefinition } from '../shared/http/route.types';
 import { AI_RATE_LIMIT, type LlmProviderName } from './ai.constant';
-import { buildAiRoutes } from './ai.controller';
+import { buildAiRoutes, type BuildAiRoutesParams } from './ai.controller';
+import { transcriptionUsage } from './ai.audio-usage';
 import { createAiUseCases } from './ai.use-case';
 import { createLlmProvider } from './providers/provider.factory';
 import { createTranscriber } from './providers/transcription.provider';
@@ -43,6 +44,7 @@ export type BuildAiModuleParams = {
   readonly transcription: { readonly apiKey: string; readonly model: string };
   /** Conta de uso: recebe os tokens de cada chamada. Ausente, nada e' gravado. */
   readonly recordUsage?: LlmUsageSink;
+  readonly planGate?: BuildAiRoutesParams['planGate'];
 };
 
 /**
@@ -97,6 +99,7 @@ export function buildAiModule({
   modelFast = '',
   transcription,
   recordUsage,
+  planGate,
 }: BuildAiModuleParams): readonly RouteDefinition[] {
   const useCases = createAiUseCases({
     provider: createLlmProvider({ providerName, apiKey, model, modelFast, onUsage: recordUsage }),
@@ -111,5 +114,15 @@ export function buildAiModule({
 
   // Um limitador por MODULO, nao por rota: as quatro rotas gastam da mesma
   // conta, entao o teto tambem e o mesmo.
-  return buildAiRoutes({ useCases, rateLimiter: createRateLimiter(AI_RATE_LIMIT) });
+  return buildAiRoutes({
+    useCases,
+    rateLimiter: createRateLimiter(AI_RATE_LIMIT),
+    planGate,
+    ...(recordUsage
+      ? {
+          recordTranscription: ({ userId, bytes }) =>
+            recordUsage(transcriptionUsage({ userId, bytes, model: transcription.model })),
+        }
+      : {}),
+  });
 }

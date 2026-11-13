@@ -44,6 +44,8 @@ export const PANEL_SCOPES = {
   NOTIFICATIONS_ADMIN: 'notifications:admin',
   /** Enviar o teste de um modelo para um pai escolhido. So admin: fala com o pai em nome da marca. */
   NOTIFICATIONS_SEND_ANY: 'notifications:send-any',
+  /** Ligar os limites dos planos e mudar o teto de gasto com IA. So admin: mexe em dinheiro. */
+  PLANS_ADMIN: 'plans:admin',
 } as const;
 
 const EDITOR_SCOPES = [
@@ -62,6 +64,7 @@ export const SCOPES_BY_ROLE: Readonly<Record<PanelRole, readonly string[]>> = {
     PANEL_SCOPES.CUSTOMERS_ADMIN,
     PANEL_SCOPES.APP_USERS_BLOCK,
     PANEL_SCOPES.NOTIFICATIONS_SEND_ANY,
+    PANEL_SCOPES.PLANS_ADMIN,
   ],
   [PANEL_ROLES.EDITOR]: EDITOR_SCOPES,
   [PANEL_ROLES.VIEWER]: [PANEL_SCOPES.READ, PANEL_SCOPES.CUSTOMERS_READ],

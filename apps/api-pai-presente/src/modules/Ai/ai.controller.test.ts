@@ -23,7 +23,8 @@ import {
   INSIGHTS_PATH,
   REPORT_PATH,
 } from './ai.constant';
-import { buildAiRoutes } from './ai.controller';
+import { buildAiRoutes, type BuildAiRoutesParams } from './ai.controller';
+import { PlanChatLimitReachedError, PlanFeatureLockedError } from '../PlanLimits/plan-limits.error';
 import { createLlmProvider } from './providers/provider.factory';
 import { OFF_TOPIC_REPLY } from './ai.topic-guard';
 import { createAiUseCases } from './ai.use-case';
@@ -80,6 +81,7 @@ type HarnessParams = {
   readonly history?: readonly LlmTurn[];
   readonly transcriber?: SpeechTranscriber;
   readonly policy?: RateLimitPolicy;
+  readonly planGate?: BuildAiRoutesParams['planGate'];
 };
 
 function createHarness({
@@ -90,6 +92,7 @@ function createHarness({
   history = [],
   transcriber = createTranscriber({ apiKey: '', model: '' }),
   policy = AI_RATE_LIMIT,
+  planGate,
 }: HarnessParams): TestClient {
   const useCases = createAiUseCases({
     provider,
@@ -100,7 +103,7 @@ function createHarness({
     transcriber,
   });
   return createTestClient({
-    routes: buildAiRoutes({ useCases, rateLimiter: createRateLimiter(policy) }),
+    routes: buildAiRoutes({ useCases, rateLimiter: createRateLimiter(policy), planGate }),
   });
 }
 
@@ -601,5 +604,51 @@ describe('a IA responde no idioma do app', () => {
     await client.send({ method: HTTP_METHODS.POST, path: CHAT_PATH, body: { message: 'Hi', locale: 'en' } });
 
     expect(provider.systemPrompts[0]).toContain('sem traduzir');
+  });
+});
+
+describe('limites do plano (chave ligada)', () => {
+  const freePlan = (overrides: { readonly chatLimitReached?: boolean } = {}): BuildAiRoutesParams['planGate'] => ({
+    async assertCanChat({ hasImages }) {
+      if (hasImages) throw new PlanFeatureLockedError({ lock: 'chat_media', level: 'free' });
+      if (overrides.chatLimitReached) {
+        throw new PlanChatLimitReachedError({ limit: 10, resetsAt: new Date('2026-11-20T00:00:00Z') });
+      }
+    },
+    async assertCanUseAudio() {
+      throw new PlanFeatureLockedError({ lock: 'chat_media', level: 'free' });
+    },
+    hasFullReports: async () => false,
+  });
+
+  test('passou do limite: 402 com o codigo do plano, e a IA paga nao e chamada', async () => {
+    const provider = createFakeProvider(undefined);
+    const client = createHarness({ provider, planGate: freePlan({ chatLimitReached: true }) });
+
+    const response = await client.send({ method: HTTP_METHODS.POST, path: CHAT_PATH, body: { message: 'Como lidar com birra?' } });
+
+    expect(response.status).toBe(402);
+    expect(readErrorCode(response)).toBe(ERROR_CODES.plan.CHAT_LIMIT_REACHED);
+    expect(provider.prompts).toHaveLength(0);
+  });
+
+  test('o Boletim do gratuito vem com a nota e a mensagem, e o resto trancado', async () => {
+    const provider = createFakeProvider(buildReportPayload());
+    const client = createHarness({ provider, planGate: freePlan() });
+
+    const response = await client.send({ method: HTTP_METHODS.POST, path: REPORT_PATH, body: { month: MONTH } });
+
+    expect(response.status).toBe(200);
+    const report = readDataRecord(response);
+    expect(report.motivational_message ?? report.motivationalMessage).toBe('Continue.');
+    expect(report.strengths).toEqual([]);
+    expect(report.locked).toBe(true);
+  });
+
+  test('o audio do gratuito e recusado antes de ler o arquivo', async () => {
+    const client = createHarness({ provider: createFakeProvider(undefined), planGate: freePlan() });
+    const response = await client.send({ method: HTTP_METHODS.POST, path: CHAT_TRANSCRIPTION_PATH, body: {} });
+    expect(response.status).toBe(402);
+    expect(readErrorCode(response)).toBe(ERROR_CODES.plan.FEATURE_LOCKED);
   });
 });

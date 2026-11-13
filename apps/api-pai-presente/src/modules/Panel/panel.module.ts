@@ -37,6 +37,8 @@ import type { PaymentModule } from '@adatechnology/payment-module';
 
 import { createPanelBillingRepository } from './panel-billing.repository';
 import { buildPanelBillingRoutes } from './panel-billing.routes';
+import { buildPanelPlanLimitsRoutes } from './panel-plan-limits.routes';
+import { createPlanLimitsRepository } from '../PlanLimits/plan-limits.repository';
 import { createPanelEngagementRepository } from './panel-engagement.repository';
 import { createPanelHistoryRepository } from './panel-history.repository';
 import { buildPanelInsightRoutes } from './panel-insights.routes';
@@ -193,6 +195,7 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
 
   const { customers, recommendations } = params;
 
+  const payments = params.payments;
   const routes: ModuleRouteTable = [
     ...createUserRoutes({ module: users }),
     ...createCustomerRoutes({ module: customers }),
@@ -210,6 +213,10 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
       : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),
     ...(params.payments ? buildPanelBillingRoutes(createPanelBillingRepository(params.database, params.payments)) : []),
+    ...buildPanelPlanLimitsRoutes({
+      repository: createPlanLimitsRepository(params.database),
+      ...(payments ? { revenue30d: async () => (await payments.useCases.overview()).revenue30d } : {}),
+    }),
     ...buildPanelInsightRoutes({
       history: createPanelHistoryRepository(params.database),
       engagement: createPanelEngagementRepository(params.database),
