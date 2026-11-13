@@ -33,6 +33,8 @@ import {
   type PanelRole,
 } from './panel.constant';
 import { createPanelAiUsageRepository } from './panel-ai-usage.repository';
+import type { PaymentModule } from '@adatechnology/payment-module';
+
 import { createPanelBillingRepository } from './panel-billing.repository';
 import { buildPanelBillingRoutes } from './panel-billing.routes';
 import { createPanelEngagementRepository } from './panel-engagement.repository';
@@ -50,6 +52,8 @@ export type BuildPanelModuleParams = {
   readonly customers: CustomerModule;
   readonly recommendations: RecommendationModule;
   readonly notifications?: NotificationModule | undefined;
+  /** O mesmo do app: o painel le assinantes e eventos por ele. Ausente, a aba de assinaturas nao tem rota. */
+  readonly payments?: Pick<PaymentModule, 'useCases'> | undefined;
   readonly jwtSecret: string;
   readonly firstAdmin?: {
     readonly email: string;
@@ -205,7 +209,7 @@ export async function buildPanelModule(params: BuildPanelModuleParams): Promise<
         })
       : []),
     ...buildPanelRoutes(createPanelRepository(params.database)),
-    ...buildPanelBillingRoutes(createPanelBillingRepository(params.database)),
+    ...(params.payments ? buildPanelBillingRoutes(createPanelBillingRepository(params.database, params.payments)) : []),
     ...buildPanelInsightRoutes({
       history: createPanelHistoryRepository(params.database),
       engagement: createPanelEngagementRepository(params.database),

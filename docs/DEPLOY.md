@@ -118,11 +118,10 @@ Nenhum valor mora neste arquivo nem no repositório (`security.md` §4).
 | `PANEL_ADMIN_EMAIL` | não | e-mail do primeiro admin do painel, criado no boot se ainda não existir; aceita vários separados por vírgula (todos admin, mesma senha inicial) |
 | `PANEL_ADMIN_PASSWORD` | não | senha desse primeiro admin, mínimo 8 caracteres; troque depois do primeiro acesso |
 | `PANEL_ADMIN_RESET` | não | padrão `1`: a cada boot, `PANEL_ADMIN_PASSWORD` vira a senha dos e-mails de `PANEL_ADMIN_EMAIL`. Use `0` para a senha passar a ser só a trocada no painel |
-| `HOTMART_HOTTOK` | não | o "hottok" da conta Hotmart (Ferramentas > Webhook). Sem ele, `POST /v1/billing/webhooks/hotmart` responde 503 e nenhuma assinatura é ativada; o resto do app segue igual |
+| `HOTMART_HOTTOK` | não | o "hottok" da conta Hotmart (Ferramentas > Webhook). Sem ele, `POST /v1/payments/webhooks/hotmart` responde 503 e nenhuma assinatura é ativada; o resto do app segue igual |
 | `HOTMART_CHECKOUT_URL_MONTHLY` | não | link de checkout da oferta mensal, copiado da Hotmart (`https://pay.hotmart.com/XXXX?off=yyyy`). Vazio esconde o botão de assinar desse plano |
 | `HOTMART_CHECKOUT_URL_YEARLY` | não | o mesmo, para a oferta anual |
-| `PAYMENTS_PROVIDER` | não | padrão `hotmart`. `fake` só vale fora de produção |
-| `PAYMENTS_FAKE_SECRET` | não | nunca em produção: lá o provedor falso não é montado |
+| `PAYMENTS_FAKE_SECRET` | não | só fora de produção: liga o provedor falso (`POST /v1/payments/webhooks/fake`). Em produção ele nunca é montado |
 
 As três entram de uma vez, sem o segredo passar pelo terminal:
 `make painel-railway EMAIL=voce@exemplo.com` (ou `GERAR=1` para gerar a senha num arquivo só seu).
@@ -384,24 +383,31 @@ voltou não é backup, é esperança.
 
 ## Pagamentos e assinaturas (Hotmart)
 
-O SDK de pagamentos mora em `apps/api-pai-presente/src/sdk/payments` e não conhece
-o app: cada provedor traduz o webhook dele para os eventos do SDK. Hoje há a
-Hotmart e um provedor falso para teste.
+Pagamentos vêm da lib: `@adatechnology/payment-module` (banco no schema `payment`,
+webhook, plano do pai, rotas), `@adatechnology/payment-contracts` e o plugin
+`@adatechnology/hotmart-payment-provider`. A migration do schema `payment` roda
+junto com as dos outros pacotes no `make migrate`. Outro provedor é outro plugin,
+sem mexer no app além de colocá-lo na lista em `modules/Billing/billing.module.ts`.
+
+Rotas: `POST /v1/payments/webhooks/:provider` (pública, quem autentica é o
+provedor), `GET /v1/payments/plans` e `GET /v1/payments/me` (pai logado).
 
 Para ligar na Hotmart:
 
 1. Na Hotmart, em **Ferramentas > Webhook (API e notificações)**, cadastre a URL
-   `https://<api>/v1/billing/webhooks/hotmart`, versão **2.0.0**, com os eventos de
+   `https://<api>/v1/payments/webhooks/hotmart`, versão **2.0.0**, com os eventos de
    compra (aprovada, completa, cancelada, atrasada, reembolsada, chargeback,
    expirada, boleto impresso), cancelamento de assinatura e troca de plano.
 2. Copie o **hottok** da conta para `HOTMART_HOTTOK` na API.
 3. Copie o link de checkout de cada oferta para `HOTMART_CHECKOUT_URL_MONTHLY` e
-   `HOTMART_CHECKOUT_URL_YEARLY`. O app acrescenta `xcod=<id do pai>` e o e-mail,
-   e é pelo `xcod` que o webhook acha quem pagou (o e-mail é o plano B).
+   `HOTMART_CHECKOUT_URL_YEARLY`. O código da oferta (`off`) é lido do próprio
+   link. O app acrescenta `xcod=<id do pai>`, e é pelo `xcod` que o webhook acha
+   quem pagou. O e-mail é o plano B e só vale para quem entrou com Google ou
+   Apple: o cadastro por senha não confirma o e-mail.
 4. Use o botão de teste da Hotmart para mandar um evento e confira em
    **Assinaturas** no painel.
 
 Os planos (nomes e o que cada um libera) ficam em
 `apps/api-pai-presente/src/modules/Billing/billing.plans.ts`. Nenhuma rota exige
-plano ainda: para exigir, a rota chama `billing.useCases.requireFeature(...)`,
+plano ainda: para exigir, a rota chama `billing.payments.useCases.requireFeature(...)`,
 que responde 402 quando o plano do pai não libera o recurso.

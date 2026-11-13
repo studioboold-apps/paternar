@@ -16,6 +16,7 @@ import {
   RECOMMENDATION_MIGRATIONS_TABLE,
   recommendationMigrationsFolder,
 } from '@adatechnology/recommendation-module';
+import { PAYMENT_MIGRATIONS_TABLE, paymentMigrationsFolder } from '@adatechnology/payment-module';
 import { USER_MIGRATIONS_TABLE, userMigrationsFolder } from '@adatechnology/user-module';
 
 /**
@@ -47,6 +48,7 @@ export function listSdkMigrations(directory: string = SDK_MIGRATIONS_DIRECTORY):
       fallback: notificationMigrationsFolder,
       table: NOTIFICATION_MIGRATIONS_TABLE,
     },
+    { name: 'payment-module', fallback: paymentMigrationsFolder, table: PAYMENT_MIGRATIONS_TABLE },
   ];
 
   return modules.map((module) => {

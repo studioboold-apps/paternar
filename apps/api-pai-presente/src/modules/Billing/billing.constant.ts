@@ -4,15 +4,13 @@
  * Licenca: proprietaria.
  */
 
-import { API_VERSION_PREFIX } from '../shared/http/http.constant';
+/**
+ * As rotas vem prontas do `@adatechnology/payment-module`, montadas em `/v1`:
+ * - `POST /v1/payments/webhooks/:provider` (publica; quem autentica e' o provedor);
+ * - `GET /v1/payments/plans` e `GET /v1/payments/me` (pai logado).
+ */
+export const PAYMENTS_ROUTE_PREFIX = '/payments';
 
-export const BILLING_PLANS_PATH = `${API_VERSION_PREFIX}/billing/plans`;
-export const BILLING_MINE_PATH = `${API_VERSION_PREFIX}/me/subscription`;
-/** Publica (o provedor nao tem sessao de pai); quem autentica e' o provedor, pelo segredo dele. */
-export const BILLING_WEBHOOK_PATH = `${API_VERSION_PREFIX}/billing/webhooks/:provider`;
-
-/** Corpo de webhook maior que isto nao e' da Hotmart: recusa antes de ler. */
-export const BILLING_WEBHOOK_MAX_BYTES = 256 * 1024;
-
-export const PAYMENT_PROVIDER_NAMES = ['hotmart', 'fake'] as const;
-export type PaymentProviderName = (typeof PAYMENT_PROVIDER_NAMES)[number];
+/** Oferta do provedor falso (so fora de producao). */
+export const FAKE_OFFER_CODES = { MONTHLY: 'mensal', YEARLY: 'anual' } as const;
+export const FAKE_CHECKOUT_BASE_URL = 'https://pagamento.invalid/checkout';

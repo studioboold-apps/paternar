@@ -7,7 +7,7 @@
 import { ROUTE_SCOPE, type ModuleRoute } from '@adatechnology/module-http';
 import { z } from 'zod';
 
-import { SUBSCRIPTION_STATUS_VALUES } from '../../sdk/payments';
+import { SUBSCRIPTION_STATUS_VALUES } from '@adatechnology/payment-contracts';
 import type { PanelBillingRepository } from './panel-billing.repository';
 import { PANEL_SCOPES } from './panel.constant';
 

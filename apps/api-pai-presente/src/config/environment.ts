@@ -7,7 +7,6 @@
 import { z } from 'zod';
 
 import { LLM_PROVIDERS } from '../modules/Ai/ai.constant';
-import { PAYMENT_PROVIDER_NAMES } from '../modules/Billing/billing.constant';
 import { BACKUP_DESTINATIONS } from '../modules/Backup/backup.constant';
 import { DEFAULT_PRESIGN_TTL_SECONDS, MEDIA_DESTINATIONS } from '../modules/Media/media.constant';
 
@@ -169,8 +168,6 @@ const notificationShape = {
 } as const;
 
 const billingShape = {
-  /** Provedor do checkout que o app oferece. Em producao e' sempre a Hotmart. */
-  PAYMENTS_PROVIDER: z.enum(PAYMENT_PROVIDER_NAMES).default('hotmart'),
   /**
    * "Hottok" da conta Hotmart (Ferramentas > Webhook). Vazio e' estado valido:
    * o webhook responde 503 e o resto do app sobe, como a chave da IA.
@@ -179,7 +176,10 @@ const billingShape = {
   /** Links de checkout das ofertas, copiados da Hotmart (`https://pay.hotmart.com/XXX?off=yyy`). */
   HOTMART_CHECKOUT_URL_MONTHLY: z.string().default(''),
   HOTMART_CHECKOUT_URL_YEARLY: z.string().default(''),
-  /** Segredo do provedor falso, so fora de producao. Vazio desliga. */
+  /**
+   * Segredo do provedor falso (`@adatechnology/payment-module/testing`), so fora
+   * de producao. Vazio desliga. Com ele, os planos pagos ganham uma oferta falsa.
+   */
   PAYMENTS_FAKE_SECRET: z.string().default(''),
 } as const;
 

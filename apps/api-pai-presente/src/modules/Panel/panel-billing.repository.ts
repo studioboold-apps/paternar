@@ -9,6 +9,8 @@
 
 import { sql } from 'drizzle-orm';
 
+import type { PaymentModule } from '@adatechnology/payment-module';
+
 import type { Database } from '../../database/client';
 
 export type PanelBillingOverview = {
@@ -48,33 +50,15 @@ const num = (value: unknown): number => Number(value ?? 0);
 const iso = (value: unknown): string | null =>
   value === null || value === undefined ? null : new Date(value as string | Date).toISOString();
 
-export function createPanelBillingRepository(database: Database) {
+export function createPanelBillingRepository(database: Database, payments: Pick<PaymentModule, 'useCases'>) {
   return {
     async overview(): Promise<PanelBillingOverview> {
-      const [byStatus, byPlan, revenue, unlinked] = await Promise.all([
-        database.execute(sql`select status, count(*)::int as count from subscriptions group by status`),
-        database.execute(sql`
-          select plan_code, count(*)::int as count from subscriptions
-           where status in ('active', 'past_due') or (status = 'canceled' and period_ends_at > now())
-           group by plan_code order by count desc
-        `),
-        database.execute(sql`
-          select currency, coalesce(sum(amount_cents), 0)::bigint as cents, count(*)::int as payments
-            from payment_events
-           where type = 'payment_approved' and currency is not null and occurred_at >= now() - interval '30 days'
-           group by currency
-        `),
-        database.execute(sql`select count(*)::int as count from subscriptions where user_id is null`),
-      ]);
+      const overview = await payments.useCases.overview();
       return {
-        byStatus: Object.fromEntries(rowsOf(byStatus).map((row) => [String(row['status']), num(row['count'])])),
-        byPlan: rowsOf(byPlan).map((row) => ({ planCode: String(row['plan_code']), count: num(row['count']) })),
-        revenue30d: rowsOf(revenue).map((row) => ({
-          currency: String(row['currency']),
-          cents: num(row['cents']),
-          payments: num(row['payments']),
-        })),
-        unlinked: num(rowsOf(unlinked)[0]?.['count']),
+        byStatus: overview.byStatus,
+        byPlan: overview.withAccessByPlan,
+        revenue30d: overview.revenue30d,
+        unlinked: overview.unlinked,
       };
     },
 
@@ -88,19 +72,19 @@ export function createPanelBillingRepository(database: Database) {
       const statusFilter = params.status ? sql`and s.status = ${params.status}` : sql``;
       const like = params.search ? `%${params.search.toLowerCase()}%` : undefined;
       const searchFilter = like
-        ? sql`and (lower(coalesce(s.customer_email, '')) like ${like} or lower(coalesce(u.email, '')) like ${like} or lower(coalesce(u.full_name, '')) like ${like})`
+        ? sql`and (lower(coalesce(s.customer_email, '')) like ${like} or lower(coalesce(s.customer_name, '')) like ${like} or lower(coalesce(u.email, '')) like ${like} or lower(coalesce(u.full_name, '')) like ${like})`
         : sql``;
       const [rows, total] = await Promise.all([
         database.execute(sql`
           select s.id, s.provider, s.plan_code, s.status, s.period_ends_at, s.last_event_at, s.customer_email,
                  u.id as user_id, u.full_name, u.email as user_email
-            from subscriptions s left join users u on u.id = s.user_id
+            from payment.subscriptions s left join users u on u.id::text = s.customer_ref
            where true ${statusFilter} ${searchFilter}
            order by s.last_event_at desc
            limit ${params.perPage} offset ${offset}
         `),
         database.execute(sql`
-          select count(*)::int as count from subscriptions s left join users u on u.id = s.user_id
+          select count(*)::int as count from payment.subscriptions s left join users u on u.id::text = s.customer_ref
            where true ${statusFilter} ${searchFilter}
         `),
       ]);
@@ -128,10 +112,10 @@ export function createPanelBillingRepository(database: Database) {
       const offset = (params.page - 1) * params.perPage;
       const [rows, total] = await Promise.all([
         database.execute(sql`
-          select id, provider, type, provider_event_type, occurred_at, customer_email, amount_cents, currency, user_id
-            from payment_events order by occurred_at desc limit ${params.perPage} offset ${offset}
+          select id, provider, type, provider_event_type, occurred_at, customer_email, amount_cents, currency, customer_ref as user_id
+            from payment.payment_events order by occurred_at desc limit ${params.perPage} offset ${offset}
         `),
-        database.execute(sql`select count(*)::int as count from payment_events`),
+        database.execute(sql`select count(*)::int as count from payment.payment_events`),
       ]);
       return {
         rows: rowsOf(rows).map((row) => ({
