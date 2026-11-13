@@ -28,8 +28,7 @@ let origin = '';
 
 /**
  * O teste fala com o IP de loopback, mas diz ao servidor qual dominio pediu.
- * IP e nao `localhost`: no CI `localhost` pode resolver para `::1`, e o repasse
- * para a API falsa ficou pendurado ate o limite do teste (13/11/2026).
+ * IP e nao `localhost`, para nao depender de como o CI resolve o nome.
  * `Connection: close` e o corpo sempre lido evitam reaproveitar conexao presa.
  */
 async function get(path, host, init = {}) {
@@ -59,7 +58,15 @@ beforeAll(() => {
   api = Bun.serve({
     port: 0,
     hostname: '127.0.0.1',
-    fetch: (request) => Response.json({ path: new URL(request.url).pathname, method: request.method }),
+    /**
+     * Le o corpo antes de responder, como a API de verdade faz. Corpo de POST
+     * deixado sem ler prende a conexao reaproveitada, e o proximo repasse
+     * (`GET /v1/me`) ficava pendurado ate o limite do teste no Bun 1.3.
+     */
+    fetch: async (request) => {
+      await request.text();
+      return Response.json({ path: new URL(request.url).pathname, method: request.method });
+    },
   });
 
   web = createWebServer({
