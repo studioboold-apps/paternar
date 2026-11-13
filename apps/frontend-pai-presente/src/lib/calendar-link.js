@@ -22,28 +22,55 @@ function escapeIcsText(text) {
     .replace(/\n/g, '\\n');
 }
 
+/**
+ * Data e hora que o pai digita sao de Brasilia — a API agenda o lembrete no
+ * mesmo fuso (`activity.use-case.ts`). Sem fixar o fuso aqui, um celular em
+ * outro fuso (ou com o relogio em UTC) gravava a atividade horas fora do lugar
+ * no .ics e no Outlook.
+ */
+const APP_TIMEZONE = 'America/Sao_Paulo';
+const APP_TIMEZONE_OFFSET = '-03:00';
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+
+const pad = (value) => String(value).padStart(2, '0');
+
+/** `YYYYMMDD` do dia seguinte, sem passar pelo fuso do aparelho. */
+function nextDay(date) {
+  const following = new Date(Date.parse(`${date}T00:00:00Z`) + ONE_DAY_MS);
+  return `${following.getUTCFullYear()}-${pad(following.getUTCMonth() + 1)}-${pad(following.getUTCDate())}`;
+}
+
+/** Relogio de parede (sem fuso) `YYYYMMDDTHHMMSS` de um instante em UTC deslocado. */
+function wallClockCompact(date) {
+  return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}00`;
+}
+
 function resolveDates({ date, time }) {
-  if (!date) return null;
-  const cleanDate = date.replace(/-/g, '');
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
 
   if (time && /^\d{2}:\d{2}$/.test(time)) {
-    const [hh, mm] = time.split(':');
-    const startStr = `${cleanDate}T${hh}${mm}00`;
-    const nextHh = String((Number(hh) + 1) % 24).padStart(2, '0');
-    const endStr = `${cleanDate}T${nextHh}${mm}00`;
+    // O fim e somado no relogio, nao na string da hora: "23:30" terminava as
+    // "00:30" do MESMO dia, antes de comecar, e a agenda recusava o evento.
+    const wallStart = new Date(`${date}T${time}:00Z`);
+    const wallEnd = new Date(wallStart.getTime() + ONE_HOUR_MS);
+    const start = new Date(`${date}T${time}:00${APP_TIMEZONE_OFFSET}`);
     return {
       isAllDay: false,
-      datesParam: `${startStr}/${endStr}`,
-      startIso: `${date}T${time}:00`,
-      endIso: `${date}T${nextHh}:${mm}:00`,
+      datesParam: `${wallClockCompact(wallStart)}/${wallClockCompact(wallEnd)}`,
+      start,
+      end: new Date(start.getTime() + ONE_HOUR_MS),
     };
   }
 
+  // Dia inteiro: o fim e exclusivo (dia seguinte). Com inicio e fim no mesmo
+  // dia, o Google Agenda abria o formulario sem a data.
+  const endDate = nextDay(date);
   return {
     isAllDay: true,
-    datesParam: `${cleanDate}/${cleanDate}`,
-    startIso: `${date}T09:00:00`,
-    endIso: `${date}T10:00:00`,
+    datesParam: `${date.replace(/-/g, '')}/${endDate.replace(/-/g, '')}`,
+    startDate: date,
+    endDate,
   };
 }
 
@@ -61,6 +88,7 @@ export function buildGoogleCalendarUrl({ title, description, date, time }) {
     dates: resolved.datesParam,
   });
 
+  if (!resolved.isAllDay) params.set('ctz', APP_TIMEZONE);
   if (description) {
     params.set('details', description);
   }
@@ -76,16 +104,20 @@ export function buildOutlookCalendarUrl({ title, description, date, time }) {
   const resolved = resolveDates({ date, time });
   if (!resolved) return '';
 
-  const start = new Date(resolved.startIso);
-  const end = new Date(resolved.endIso);
-
   const params = new URLSearchParams({
     path: '/calendar/action/compose',
     rru: 'addevent',
     subject: title,
-    startdt: start.toISOString(),
-    enddt: end.toISOString(),
   });
+
+  if (resolved.isAllDay) {
+    params.set('startdt', resolved.startDate);
+    params.set('enddt', resolved.endDate);
+    params.set('allday', 'true');
+  } else {
+    params.set('startdt', resolved.start.toISOString());
+    params.set('enddt', resolved.end.toISOString());
+  }
 
   if (description) {
     params.set('body', description);
@@ -102,8 +134,6 @@ export function buildIcsContent({ title, description, date, time }, now = new Da
   const resolved = resolveDates({ date, time });
   if (!resolved) return '';
 
-  const start = new Date(resolved.startIso);
-  const end = new Date(resolved.endIso);
   const uid = `${now.getTime()}-${Math.random().toString(36).substring(2, 9)}@paternar.com.br`;
 
   const lines = [
@@ -115,8 +145,12 @@ export function buildIcsContent({ title, description, date, time }, now = new Da
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `DTSTAMP:${formatUtcCompact(now)}`,
-    `DTSTART:${formatUtcCompact(start)}`,
-    `DTEND:${formatUtcCompact(end)}`,
+    ...(resolved.isAllDay
+      ? [
+          `DTSTART;VALUE=DATE:${resolved.startDate.replace(/-/g, '')}`,
+          `DTEND;VALUE=DATE:${resolved.endDate.replace(/-/g, '')}`,
+        ]
+      : [`DTSTART:${formatUtcCompact(resolved.start)}`, `DTEND:${formatUtcCompact(resolved.end)}`]),
     `SUMMARY:${escapeIcsText(title)}`,
   ];
 

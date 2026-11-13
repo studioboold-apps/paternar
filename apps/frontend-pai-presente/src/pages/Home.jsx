@@ -14,6 +14,7 @@ import AiBadge from '@/components/AiBadge';
 import PlanUpsell from '@/components/PlanUpsell';
 import { PLAN_LOCKS } from '@/lib/use-plan';
 import InsightCard from '@/components/InsightCard';
+import NotificationInbox from '@/components/NotificationInbox';
 import PlacesToGo from '@/components/PlacesToGo';
 import ChildQuickAccess from '@/components/ChildQuickAccess';
 import BrandLoader from '@/components/BrandLoader';
@@ -63,7 +64,11 @@ export default function Home() {
               <span className="text-blue-600 font-medium">{t('common.brandName')}</span>
               <span className="text-zinc-500 text-xs uppercase tracking-wider">{t('common.brandTagline')}</span>
             </div>
-            <ChildQuickAccess />
+            {/* O sininho fica ao lado do atalho dos filhos, no canto que o design reservou para acesso rapido. */}
+            <div className="ml-auto flex items-center gap-2">
+              <NotificationInbox />
+              <ChildQuickAccess className="ml-0" />
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-zinc-100">
             {greetingBefore}

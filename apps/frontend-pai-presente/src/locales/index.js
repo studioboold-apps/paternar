@@ -7,6 +7,7 @@
 import activityCard from '@/components/ActivityCard.locale.json';
 import insightCard from '@/components/InsightCard.locale.json';
 import notificationBanner from '@/components/NotificationPermissionBanner.locale.json';
+import notificationInbox from '@/components/NotificationInbox.locale.json';
 import planSection from '@/components/PerfilPlanSection.locale.json';
 import planUpsell from '@/components/PlanUpsell.locale.json';
 import signIn from '@/components/SignIn.locale.json';
@@ -25,6 +26,7 @@ import profile from './profile.locale.json';
 import activityCardEN from '@/components/ActivityCard.locale.en.json';
 import insightCardEN from '@/components/InsightCard.locale.en.json';
 import notificationBannerEN from '@/components/NotificationPermissionBanner.locale.en.json';
+import notificationInboxEN from '@/components/NotificationInbox.locale.en.json';
 import planSectionEN from '@/components/PerfilPlanSection.locale.en.json';
 import planUpsellEN from '@/components/PlanUpsell.locale.en.json';
 import signInEN from '@/components/SignIn.locale.en.json';
@@ -43,6 +45,7 @@ import profileEN from './profile.locale.en.json';
 import activityCardES from '@/components/ActivityCard.locale.es.json';
 import insightCardES from '@/components/InsightCard.locale.es.json';
 import notificationBannerES from '@/components/NotificationPermissionBanner.locale.es.json';
+import notificationInboxES from '@/components/NotificationInbox.locale.es.json';
 import planSectionES from '@/components/PerfilPlanSection.locale.es.json';
 import planUpsellES from '@/components/PlanUpsell.locale.es.json';
 import signInES from '@/components/SignIn.locale.es.json';
@@ -86,6 +89,7 @@ export const LOCALE_MESSAGES = Object.freeze({
   insights: insights,
   juntinhos: juntinhos,
   notificationBanner: notificationBanner,
+  notificationInbox: notificationInbox,
   onboarding: onboarding,
   perfil: perfil,
   planSection: planSection,
@@ -107,6 +111,7 @@ const EN_MESSAGES = Object.freeze({
   insights: insightsEN,
   juntinhos: juntinhosEN,
   notificationBanner: notificationBannerEN,
+  notificationInbox: notificationInboxEN,
   onboarding: onboardingEN,
   perfil: perfilEN,
   planSection: planSectionEN,
@@ -128,6 +133,7 @@ const ES_MESSAGES = Object.freeze({
   insights: insightsES,
   juntinhos: juntinhosES,
   notificationBanner: notificationBannerES,
+  notificationInbox: notificationInboxES,
   onboarding: onboardingES,
   perfil: perfilES,
   planSection: planSectionES,
