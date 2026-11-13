@@ -17,7 +17,7 @@
         "@adatechnology/hotmart-payment-provider": "0.1.0",
         "@adatechnology/module-http": "0.1.1",
         "@adatechnology/notification-contracts": "0.4.0",
-        "@adatechnology/notification-module": "0.4.0",
+        "@adatechnology/notification-module": "0.4.2",
         "@adatechnology/payment-contracts": "0.2.0",
         "@adatechnology/payment-module": "0.2.0",
         "@adatechnology/push-provider": "0.2.0",
@@ -185,7 +185,7 @@
 
     "@adatechnology/notification-contracts": ["@adatechnology/notification-contracts@0.4.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-du4sk9SXsG+nSnPNqDG3cs4lteYH5STvSg3TCc1fhnVJZsmZ2kMb58tn8iWQ141t0KAYbNz2QAxsLroM4lraww=="],
 
-    "@adatechnology/notification-module": ["@adatechnology/notification-module@0.4.0", "", { "dependencies": { "@adatechnology/module-http": "0.1.1", "@adatechnology/notification-contracts": "0.4.0", "zod": "^3.24.1" }, "peerDependencies": { "drizzle-orm": ">=0.36.0 <2" } }, "sha512-YE2+7PqMKz2WPRkLzjQ4nqgPxiaztsPNzQZ6rbHsSYH6+KEMhqlTW30BTM2odEF3Gyk1cMxo8ruO66DIeIKOWw=="],
+    "@adatechnology/notification-module": ["@adatechnology/notification-module@0.4.2", "", { "dependencies": { "@adatechnology/module-http": "0.1.1", "@adatechnology/notification-contracts": "0.5.0", "zod": "^3.24.1" }, "peerDependencies": { "drizzle-orm": ">=0.36.0 <2" } }, "sha512-FMz7lrPOl6op9rvjYeO3e+lv0pmPCCnO2uof8/8S6+y5ppaDokdX8JqXVPgH7kiHynt2KCvS332kRN6lJN56KA=="],
 
     "@adatechnology/notification-ui": ["@adatechnology/notification-ui@0.6.1", "", { "dependencies": { "@adatechnology/conversations-ui": "0.14.0", "@adatechnology/notification-client": "0.4.0", "@adatechnology/notification-contracts": "0.5.0", "clsx": "^2.1.1", "lucide-react": "^1.21.0" }, "peerDependencies": { "@tanstack/react-query": "^5", "react": "^18 || ^19", "react-dom": "^18 || ^19" } }, "sha512-Ls0n1XdArfah9hyaz5E9AxcyPJd/tqok6du3nVHHF2/Y2NhCI4DANYZbUIDH0bC7+rT37QmXqBibh6yqldVhTg=="],
 
@@ -1832,6 +1832,8 @@
     "@adatechnology/notification-client/@adatechnology/notification-contracts": ["@adatechnology/notification-contracts@0.5.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-LdT1MByhB2oz9LFWVr2YOa9YPvDdA0WMC0wxK10bCOsJf7TbAaYSsNFDmZEgfoJEQZzrME8OZlPNddwKLNPWTA=="],
 
     "@adatechnology/notification-contracts/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+
+    "@adatechnology/notification-module/@adatechnology/notification-contracts": ["@adatechnology/notification-contracts@0.5.0", "", { "dependencies": { "zod": "^3.24.1" } }, "sha512-LdT1MByhB2oz9LFWVr2YOa9YPvDdA0WMC0wxK10bCOsJf7TbAaYSsNFDmZEgfoJEQZzrME8OZlPNddwKLNPWTA=="],
 
     "@adatechnology/notification-module/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 

@@ -20,7 +20,7 @@
     "@adatechnology/hotmart-payment-provider": "0.1.0",
     "@adatechnology/module-http": "0.1.1",
     "@adatechnology/notification-contracts": "0.4.0",
-    "@adatechnology/notification-module": "0.4.0",
+    "@adatechnology/notification-module": "0.4.2",
     "@adatechnology/payment-contracts": "0.2.0",
     "@adatechnology/payment-module": "0.2.0",
     "@adatechnology/push-provider": "0.2.0",
