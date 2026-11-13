@@ -1,0 +1,18 @@
+{
+  "title": "Tu plan",
+  "status": {
+    "active": "Activa",
+    "past_due": "Pago atrasado",
+    "canceled": "Cancelada",
+    "pending": "Esperando el pago",
+    "refunded": "Reembolsada"
+  },
+  "accessUntil": "Acceso hasta el {date}",
+  "features": {
+    "ia_ilimitada": "Chat con la IA sin límite",
+    "boletim_completo": "Boletín completo de tus hijos",
+    "sem_anuncios": "Sin anuncios"
+  },
+  "subscribe": "Suscribirse",
+  "checkoutHint": "El pago se abre en Hotmart. Cuando termines, vuelve a la app: el plan se actualiza solo."
+}

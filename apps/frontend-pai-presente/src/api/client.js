@@ -19,6 +19,8 @@ const PATHS = Object.freeze({
   posts: '/v1/community/posts',
   comments: '/v1/community/comments',
   chatMessages: '/v1/chat/messages',
+  paymentPlans: '/v1/payments/plans',
+  paymentMe: '/v1/payments/me',
 });
 
 /** O teto de `perPage` da API; pedir mais devolve 100 do mesmo jeito. */
@@ -211,6 +213,15 @@ const ChatMessage = Object.freeze({
   create: (values) => request(HTTP_METHODS.POST, PATHS.chatMessages, { body: values }),
 });
 
+/**
+ * Planos e assinatura (`@adatechnology/payment-module`). O pagamento acontece no
+ * checkout do provedor; aqui so' se le o plano e o link ja marcado com o pai.
+ */
+const Subscription = Object.freeze({
+  plans: () => request(HTTP_METHODS.GET, PATHS.paymentPlans),
+  mine: () => request(HTTP_METHODS.GET, PATHS.paymentMe),
+});
+
 const auth = Object.freeze({
   me: () => request(HTTP_METHODS.GET, PATHS.me),
   updateMe: (values) =>
@@ -247,5 +258,6 @@ export const api = Object.freeze({
     CommunityComment,
     CommunityReport,
     ChatMessage,
+    Subscription,
   }),
 });

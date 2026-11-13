@@ -1,0 +1,18 @@
+{
+  "title": "Your plan",
+  "status": {
+    "active": "Active",
+    "past_due": "Payment overdue",
+    "canceled": "Canceled",
+    "pending": "Awaiting payment",
+    "refunded": "Refunded"
+  },
+  "accessUntil": "Access until {date}",
+  "features": {
+    "ia_ilimitada": "Unlimited AI chat",
+    "boletim_completo": "Full report for your children",
+    "sem_anuncios": "No ads"
+  },
+  "subscribe": "Subscribe",
+  "checkoutHint": "Payment opens on Hotmart. When you're done, come back to the app: your plan updates on its own."
+}
