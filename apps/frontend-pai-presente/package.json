@@ -13,7 +13,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-
+    "@adatechnology/notification-client": "0.4.0",
+    "@adatechnology/notification-ui": "0.6.1",
     "@adatechnology/recommendations-ui": "0.2.0",
     "@fontsource-variable/nunito": "^5.3.0",
     "@hello-pangea/dnd": "^17.0.0",

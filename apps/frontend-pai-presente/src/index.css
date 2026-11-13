@@ -88,3 +88,15 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+/* Sininho e caixa de entrada (SDK de notificacoes) nas cores da marca. Os
+   tokens vao explicitos: sem eles o SDK segue o modo escuro do celular e pinta
+   a lista de escuro no meio do app claro. */
+.paternar-inbox {
+  --adn-surface: #ffffff;
+  --adn-text: #2f2f51;
+  --adn-muted: #76758f;
+  --adn-accent: #d06f00;
+  --adn-border: #e9e5db;
+  --adn-canvas: #f6f5f0;
+  --adn-radius-md: 0.75rem;
+}

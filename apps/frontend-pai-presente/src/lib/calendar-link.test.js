@@ -61,7 +61,35 @@ describe('calendar-link utilities', () => {
       date: '2026-11-21',
     });
 
-    expect(url).toContain('dates=20261121%2F20261121');
+    // Fim exclusivo: o Google Agenda nao aceita inicio e fim no mesmo dia.
+    expect(url).toContain('dates=20261121%2F20261122');
+    expect(url).not.toContain('ctz=');
+  });
+
+  it('fixa o fuso de Brasilia na atividade com horario', () => {
+    expect(buildGoogleCalendarUrl(sample)).toContain('ctz=America%2FSao_Paulo');
+    const outlook = new URL(buildOutlookCalendarUrl(sample));
+    expect(outlook.searchParams.get('startdt')).toBe('2026-11-20T17:30:00.000Z');
+    expect(outlook.searchParams.get('enddt')).toBe('2026-11-20T18:30:00.000Z');
+  });
+
+  it('atividade as 23h termina no dia seguinte, nao antes de comecar', () => {
+    const late = { title: 'Ver estrelas', date: '2026-12-31', time: '23:30' };
+    expect(buildGoogleCalendarUrl(late)).toContain('dates=20261231T233000%2F20270101T003000');
+    const ics = buildIcsContent(late, new Date('2026-11-12T12:00:00.000Z'));
+    expect(ics).toContain('DTSTART:20270101T023000Z');
+    expect(ics).toContain('DTEND:20270101T033000Z');
+  });
+
+  it('dia inteiro vira evento de dia inteiro no .ics e no Outlook', () => {
+    const allDay = { title: 'Dia no parque', date: '2026-11-30' };
+    const ics = buildIcsContent(allDay, new Date('2026-11-12T12:00:00.000Z'));
+    expect(ics).toContain('DTSTART;VALUE=DATE:20261130');
+    expect(ics).toContain('DTEND;VALUE=DATE:20261201');
+    const outlook = new URL(buildOutlookCalendarUrl(allDay));
+    expect(outlook.searchParams.get('allday')).toBe('true');
+    expect(outlook.searchParams.get('startdt')).toBe('2026-11-30');
+    expect(outlook.searchParams.get('enddt')).toBe('2026-12-01');
   });
 
   it('devolve string vazia quando faltar data ou titulo', () => {
