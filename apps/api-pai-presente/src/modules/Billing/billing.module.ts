@@ -11,6 +11,7 @@
  * graca com um POST.
  */
 
+import type { ModuleRoute } from '@adatechnology/module-http';
 import { createModuleFetchRouter, type ModuleFetchRouter } from '@adatechnology/module-http/fetch';
 import { createHotmartPaymentProvider } from '@adatechnology/hotmart-payment-provider';
 import type { PaymentProviderPort } from '@adatechnology/payment-contracts';
@@ -21,8 +22,9 @@ import type { Database } from '../../database/client';
 import { createAppAuthResolver } from '../Recommendation/recommendation.module';
 import type { AuthenticatedUserResolver } from '../shared/auth/authenticated-user.interface';
 import { API_VERSION_PREFIX } from '../shared/http/http.constant';
+import { createRateLimiter, type RateLimiter } from '../shared/http/rate-limit';
 import type { Logger } from '../shared/logger/logger';
-import { FAKE_OFFER_CODES, PAYMENTS_ROUTE_PREFIX } from './billing.constant';
+import { CLAIM_OPERATION_ID, CLAIM_RATE_LIMIT, FAKE_OFFER_CODES, PAYMENTS_ROUTE_PREFIX } from './billing.constant';
 import { createBillingCustomerResolver } from './billing.customers';
 import { buildPlanCatalog, FALLBACK_PAID_PLAN_CODE } from './billing.plans';
 
@@ -84,7 +86,8 @@ export function buildBillingModule(params: {
     async identify(context) {
       const userId = context.auth?.userId;
       const email = userId ? await customers.findEmailByRef?.({ ref: userId }) : undefined;
-      return email ? { email } : {};
+      // Confirmado: serve para o checkout E para amarrar compra feita antes da conta.
+      return email ? { email, verifiedEmail: email } : {};
     },
   });
 
@@ -93,7 +96,22 @@ export function buildBillingModule(params: {
     router: createModuleFetchRouter({
       authResolver: createAppAuthResolver(params.authenticatedUserResolver),
       basePath: API_VERSION_PREFIX,
-      routes,
+      routes: withClaimRateLimit(routes, createRateLimiter(CLAIM_RATE_LIMIT)),
     }),
   };
+}
+
+/** Resgate pelo codigo conta tentativas por pai (429 ao passar do limite). */
+export function withClaimRateLimit(routes: readonly ModuleRoute[], limiter: RateLimiter): ModuleRoute[] {
+  return routes.map((route) =>
+    route.operationId === CLAIM_OPERATION_ID
+      ? {
+          ...route,
+          async handler(context) {
+            limiter.consume(context.auth?.userId ?? 'anonimo');
+            return route.handler(context);
+          },
+        }
+      : route,
+  );
 }

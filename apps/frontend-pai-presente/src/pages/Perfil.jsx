@@ -16,6 +16,7 @@ import FamilyValuesSection from '@/components/FamilyValuesSection';
 import LanguagePicker from '@/components/LanguagePicker';
 import PerfilChildrenSection from '@/components/PerfilChildrenSection';
 import PerfilNotificationSection from '@/components/PerfilNotificationSection';
+import PerfilPlanSection from '@/components/PerfilPlanSection';
 import ProfileEditDialog from '@/components/ProfileEditDialog';
 import { Button } from '@/components/ui/button';
 import { BRAND_LOGO, BRAND_SOCIAL_LINKS } from '@/lib/brand';
@@ -143,6 +144,8 @@ export default function Perfil() {
           </div>
         </div>
       </div>
+
+      <PerfilPlanSection />
 
       <PerfilChildrenSection perfil={perfil} />
 

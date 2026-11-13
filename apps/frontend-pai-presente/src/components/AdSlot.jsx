@@ -9,6 +9,7 @@ import React, { useEffect, useRef } from 'react';
 import { advertisingConfig, buildAdsenseScriptUrl } from '@/lib/advertising';
 import { useTranslation } from '@/lib/i18n';
 import { loadScript } from '@/lib/load-script';
+import { SUBSCRIPTION_FEATURES, useHasFeature } from '@/lib/use-subscription';
 
 /**
  * Um bloco de anuncio discreto, rotulado como publicidade (exigencia do Google
@@ -17,11 +18,16 @@ import { loadScript } from '@/lib/load-script';
  * O `push` acontece uma vez por `<ins>`: repetir no mesmo elemento e' erro do
  * `adsbygoogle.js` ("All ins elements already have ads"). Script que nao
  * carrega (bloqueador de anuncio) nao e' erro do pai: o bloco so fica vazio.
+ *
+ * Assinante com "sem anuncios" nao ve o bloco, e o script do Google nem e'
+ * carregado para ele. Enquanto o plano nao chega, nada e' desenhado.
  */
 export default function AdSlot({ className = '' }) {
   const { t } = useTranslation();
   const slotRef = useRef(null);
-  const { enabled, clientId, slotId, testMode } = advertisingConfig;
+  const hidesAds = useHasFeature(SUBSCRIPTION_FEATURES.NO_ADS);
+  const { clientId, slotId, testMode } = advertisingConfig;
+  const enabled = advertisingConfig.enabled && hidesAds === false;
 
   useEffect(() => {
     if (!enabled) return;

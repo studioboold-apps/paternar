@@ -11,6 +11,7 @@ import { createDatabaseClient } from './database/client';
 import { buildApplicationRoutes } from './app';
 import { buildAuthModule } from './modules/Auth/auth.module';
 import { buildBillingModule } from './modules/Billing/billing.module';
+import { BILLING_FEATURES } from './modules/Billing/billing.plans';
 import { createCorsPolicy } from './modules/shared/http/cors';
 import {
   HEALTH_PATH,
@@ -118,12 +119,6 @@ const router = createRouter({
 });
 const cors = createCorsPolicy(environment.WEB_ORIGINS);
 
-const sdk = buildSdkModules({ database, logger: logger.withScope('recommendation') });
-const recommendationFeed = buildRecommendationFeedRouter({
-  recommendations: sdk.recommendations,
-  authenticatedUserResolver: auth.authenticatedUserResolver,
-});
-
 const billing = buildBillingModule({
   database,
   config: {
@@ -139,6 +134,14 @@ const billing = buildBillingModule({
   },
   authenticatedUserResolver: auth.authenticatedUserResolver,
   logger: logger.withScope('billing'),
+});
+
+const sdk = buildSdkModules({ database, logger: logger.withScope('recommendation') });
+const recommendationFeed = buildRecommendationFeedRouter({
+  recommendations: sdk.recommendations,
+  authenticatedUserResolver: auth.authenticatedUserResolver,
+  hidesSponsored: (userId) =>
+    billing.payments.useCases.hasFeature({ customerRef: userId }, BILLING_FEATURES.NO_ADS),
 });
 
 const notificationRouter = buildNotificationRouter({

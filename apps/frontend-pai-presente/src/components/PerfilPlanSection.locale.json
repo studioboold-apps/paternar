@@ -1,0 +1,33 @@
+{
+  "title": "Seu plano",
+  "status": {
+    "active": "Ativa",
+    "past_due": "Pagamento atrasado",
+    "canceled": "Cancelada",
+    "pending": "Aguardando pagamento",
+    "refunded": "Reembolsada"
+  },
+  "accessUntil": "Acesso liberado até {date}",
+  "features": {
+    "ia_ilimitada": "Conversa com a IA sem limite",
+    "boletim_completo": "Boletim completo dos filhos",
+    "sem_anuncios": "Sem anúncios"
+  },
+  "subscribe": "Assinar",
+  "checkoutHint": "O pagamento abre na Hotmart. Quando terminar, volte para o app: o plano atualiza sozinho.",
+  "claim": {
+    "open": "Comprou e o plano não apareceu?",
+    "label": "Código da compra",
+    "hint": "Está no e-mail de confirmação da Hotmart e começa com HP.",
+    "placeholder": "HP1234567890",
+    "submit": "Liberar meu plano",
+    "submitting": "Conferindo…",
+    "failure": {
+      "notFound": "Não achamos uma compra com esse código. Confira o e-mail da Hotmart.",
+      "tooMany": "Muitas tentativas. Tente de novo daqui a uma hora.",
+      "invalid": "O código tem só letras e números, como HP1234567890.",
+      "generic": "Não deu para conferir agora. Tente de novo em instantes."
+    }
+  },
+  "manage": "Cancelar ou trocar o cartão na Hotmart"
+}
