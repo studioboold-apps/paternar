@@ -26,7 +26,7 @@ RUN bun build ./src/main.ts ./src/database/migrate.ts ./src/backup/run-backup.ts
 # migrations de cada um. `cp -L` porque o `node_modules` do Bun e' feito de
 # links: copiar o link levaria para a imagem um caminho que nao existe nela.
 RUN mkdir -p sdk-migrations \
- && for module in user-module customer-module recommendation-module notification-module; do \
+ && for module in user-module customer-module recommendation-module notification-module payment-module; do \
       cp -rL "node_modules/@adatechnology/$module/dist/migrations" "sdk-migrations/$module"; \
     done
 

@@ -167,6 +167,22 @@ const notificationShape = {
   VAPID_SUBJECT: z.string().default('mailto:admin@entrelacos.com.br'),
 } as const;
 
+const billingShape = {
+  /**
+   * "Hottok" da conta Hotmart (Ferramentas > Webhook). Vazio e' estado valido:
+   * o webhook responde 503 e o resto do app sobe, como a chave da IA.
+   */
+  HOTMART_HOTTOK: z.string().default(''),
+  /** Links de checkout das ofertas, copiados da Hotmart (`https://pay.hotmart.com/XXX?off=yyy`). */
+  HOTMART_CHECKOUT_URL_MONTHLY: z.string().default(''),
+  HOTMART_CHECKOUT_URL_YEARLY: z.string().default(''),
+  /**
+   * Segredo do provedor falso (`@adatechnology/payment-module/testing`), so fora
+   * de producao. Vazio desliga. Com ele, os planos pagos ganham uma oferta falsa.
+   */
+  PAYMENTS_FAKE_SECRET: z.string().default(''),
+} as const;
+
 const databaseEnvironmentSchema = z.object({ ...runtimeShape, ...databaseShape });
 const backupEnvironmentSchema = z.object({
   ...runtimeShape,
@@ -188,6 +204,7 @@ const environmentSchema = z.object({
   ...mediaShape,
   ...panelShape,
   ...notificationShape,
+  ...billingShape,
 });
 
 export type DatabaseEnvironment = z.infer<typeof databaseEnvironmentSchema>;

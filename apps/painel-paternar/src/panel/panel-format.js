@@ -22,6 +22,16 @@ export function formatUsd(microUsd) {
   return `US$ ${usd.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: digits })}`;
 }
 
+/** Dinheiro do pagamento: centavos e moeda ISO (BRL, USD). */
+export function formatMoney(cents, currency = 'BRL') {
+  const value = Number(cents ?? 0) / 100;
+  try {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency });
+  } catch {
+    return `${currency} ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  }
+}
+
 export function formatDate(value) {
   if (!value) return '—';
   return new Date(value).toLocaleDateString('pt-BR', { timeZone: TIME_ZONE });

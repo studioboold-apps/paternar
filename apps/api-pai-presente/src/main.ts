@@ -10,6 +10,7 @@ import { readEnvironment } from './config/environment';
 import { createDatabaseClient } from './database/client';
 import { buildApplicationRoutes } from './app';
 import { buildAuthModule } from './modules/Auth/auth.module';
+import { buildBillingModule } from './modules/Billing/billing.module';
 import { createCorsPolicy } from './modules/shared/http/cors';
 import {
   HEALTH_PATH,
@@ -84,28 +85,34 @@ const dispatchTimer = setInterval(async () => {
 }, DISPATCH_INTERVAL_MS);
 dispatchTimer.unref?.();
 
+if (!environment.HOTMART_HOTTOK) {
+  logger.warn('pagamentos: HOTMART_HOTTOK vazio; o webhook da Hotmart responde 503');
+}
+
 const router = createRouter({
-  routes: buildApplicationRoutes({
-    database,
-    notifications: notificationModule,
-    llm: {
-      providerName: environment.LLM_PROVIDER,
-      apiKey: environment.LLM_API_KEY,
-      model: environment.LLM_MODEL,
-      modelFast: environment.LLM_MODEL_FAST,
-      transcription: {
-        apiKey: environment.TRANSCRIPTION_GROQ_API_KEY,
-        model: environment.TRANSCRIPTION_MODEL,
+  routes: [
+    ...buildApplicationRoutes({
+      database,
+      notifications: notificationModule,
+      llm: {
+        providerName: environment.LLM_PROVIDER,
+        apiKey: environment.LLM_API_KEY,
+        model: environment.LLM_MODEL,
+        modelFast: environment.LLM_MODEL_FAST,
+        transcription: {
+          apiKey: environment.TRANSCRIPTION_GROQ_API_KEY,
+          model: environment.TRANSCRIPTION_MODEL,
+        },
       },
-    },
-    media: {
-      destination: environment.MEDIA_DESTINATION,
-      directory: environment.MEDIA_DIRECTORY,
-      bucket: environment.MEDIA_S3_BUCKET,
-      endpoint: environment.MEDIA_S3_ENDPOINT,
-      encryptionKey: environment.MEDIA_ENCRYPTION_KEY,
-    },
-  }),
+      media: {
+        destination: environment.MEDIA_DESTINATION,
+        directory: environment.MEDIA_DIRECTORY,
+        bucket: environment.MEDIA_S3_BUCKET,
+        endpoint: environment.MEDIA_S3_ENDPOINT,
+        encryptionKey: environment.MEDIA_ENCRYPTION_KEY,
+      },
+    }),
+  ],
   publicRoutes: auth.publicRoutes,
   authenticatedUserResolver: auth.authenticatedUserResolver,
 });
@@ -115,6 +122,23 @@ const sdk = buildSdkModules({ database, logger: logger.withScope('recommendation
 const recommendationFeed = buildRecommendationFeedRouter({
   recommendations: sdk.recommendations,
   authenticatedUserResolver: auth.authenticatedUserResolver,
+});
+
+const billing = buildBillingModule({
+  database,
+  config: {
+    hotmart: {
+      hottok: environment.HOTMART_HOTTOK,
+      checkoutUrls: {
+        monthly: environment.HOTMART_CHECKOUT_URL_MONTHLY,
+        yearly: environment.HOTMART_CHECKOUT_URL_YEARLY,
+      },
+    },
+    fakeSecret: environment.PAYMENTS_FAKE_SECRET,
+    isProduction,
+  },
+  authenticatedUserResolver: auth.authenticatedUserResolver,
+  logger: logger.withScope('billing'),
 });
 
 const notificationRouter = buildNotificationRouter({
@@ -135,6 +159,7 @@ const panel =
         customers: sdk.customers,
         recommendations: sdk.recommendations,
         notifications: notificationModule,
+        payments: billing.payments,
         jwtSecret: environment.PANEL_JWT_SECRET,
         firstAdmin: {
           email: environment.PANEL_ADMIN_EMAIL,
@@ -167,6 +192,7 @@ const server = Bun.serve({
     }
     if (panel?.router.match(request)) return cors.decorate(request, await panel.router.handle(request));
     if (recommendationFeed.match(request)) return cors.decorate(request, await recommendationFeed.handle(request));
+    if (billing.router.match(request)) return cors.decorate(request, await billing.router.handle(request));
     if (notificationRouter.match(request)) return cors.decorate(request, await notificationRouter.handle(request));
     return cors.decorate(request, await router.handle(request));
   },

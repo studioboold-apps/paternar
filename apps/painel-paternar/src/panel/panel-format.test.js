@@ -6,7 +6,7 @@
 
 import { describe, expect, test } from 'bun:test';
 
-import { formatPercent, formatRelative, formatUsd } from './panel-format';
+import { formatMoney, formatPercent, formatRelative, formatUsd } from './panel-format';
 
 describe('formatos do painel', () => {
   test('custo em milionesimos de dolar vira dolar legivel', () => {
@@ -26,5 +26,10 @@ describe('formatos do painel', () => {
     expect(formatRelative(null, now)).toBe('nunca');
     expect(formatRelative('2026-11-08T11:30:00Z', now)).toBe('há 30 min');
     expect(formatRelative('2026-11-05T12:00:00Z', now)).toBe('há 3 dias');
+  });
+
+  test('dinheiro do pagamento vem em centavos', () => {
+    expect(formatMoney(1990, 'BRL').replace(/\s/g, ' ')).toBe('R$ 19,90');
+    expect(formatMoney(0)).toContain('0,00');
   });
 });
