@@ -88,14 +88,48 @@ export function withTrackRateLimit(routes: readonly ModuleRoute[], limiter: Rate
   );
 }
 
+const FEED_OPERATION_ID = 'getRecommendationFeed';
+
+type FeedBody = { readonly data?: { readonly entries?: readonly { readonly sponsored?: boolean }[] } };
+
+/**
+ * Assinante com o recurso "sem anuncios" nao ve recomendacao patrocinada. O
+ * corte e' aqui, no servidor: escondido so na tela, o patrocinado ainda contaria
+ * impressao para o anunciante sem ninguem ter visto.
+ */
+export function withoutSponsoredFor(
+  routes: readonly ModuleRoute[],
+  hidesSponsored: (userId: string) => Promise<boolean>,
+): ModuleRoute[] {
+  return routes.map((route) =>
+    route.operationId === FEED_OPERATION_ID
+      ? {
+          ...route,
+          async handler(context) {
+            const result = await route.handler(context);
+            const userId = context.auth?.userId;
+            if (result.kind !== 'json' || !userId || !(await hidesSponsored(userId))) return result;
+            const body = result.body as FeedBody;
+            if (!body.data?.entries) return result;
+            const entries = body.data.entries.filter((entry) => entry.sponsored !== true);
+            return { ...result, body: { ...body, data: { ...body.data, entries } } };
+          },
+        }
+      : route,
+  );
+}
+
 export function buildRecommendationFeedRouter(params: {
   readonly recommendations: RecommendationModule;
   readonly authenticatedUserResolver: AuthenticatedUserResolver;
+  /** Sem ele, todo pai ve o patrocinado. */
+  readonly hidesSponsored?: ((userId: string) => Promise<boolean>) | undefined;
 }): ModuleFetchRouter {
-  const routes = createRecommendationRoutes({
+  const created = createRecommendationRoutes({
     module: params.recommendations,
     features: { feed: true, admin: false },
   });
+  const routes = params.hidesSponsored ? withoutSponsoredFor(created, params.hidesSponsored) : created;
   return createModuleFetchRouter({
     routes: withTrackRateLimit(routes, createRateLimiter(RECOMMENDATION_EVENTS_RATE_LIMIT)),
     basePath: API_VERSION_PREFIX,

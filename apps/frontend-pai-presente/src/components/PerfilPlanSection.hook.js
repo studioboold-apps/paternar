@@ -8,17 +8,14 @@ import { useQuery } from '@tanstack/react-query';
 
 import { api } from '@/api/client';
 import { accessEndsAt, plansToOffer } from '@/lib/subscription-plan';
+import { useMySubscription } from '@/lib/use-subscription';
 
 /**
  * A secao de plano decide aqui (`web.md` §4). O plano atual e' relido quando o
  * pai volta para a aba: e' assim que ele ve a compra feita no checkout.
  */
 export function usePerfilPlan() {
-  const mine = useQuery({
-    queryKey: ['subscription', 'mine'],
-    queryFn: () => api.entities.Subscription.mine(),
-    refetchOnWindowFocus: true,
-  });
+  const mine = useMySubscription();
   const plans = useQuery({
     queryKey: ['subscription', 'plans'],
     queryFn: () => api.entities.Subscription.plans(),
