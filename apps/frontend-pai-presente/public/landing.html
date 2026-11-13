@@ -341,7 +341,10 @@
       .rodape ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
       .rodape a { text-decoration: none; }
       .rodape a:hover { color: var(--branco); text-decoration: underline; }
-      .rodape .baixo { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.85rem; display: grid; gap: 0.25rem; }
+      .rodape .baixo { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.85rem; display: grid; gap: 0.35rem; justify-items: center; text-align: center; }
+      .rodape .baixo img { width: 1.5rem; height: 1.5rem; border-radius: 0.35rem; margin-bottom: 0.25rem; }
+      .rodape .copyright a, .rodape .copyright strong { color: var(--creme); font-weight: 700; }
+      .rodape .copyright a { text-decoration: underline; text-underline-offset: 2px; }
       .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
     </style>
   </head>
@@ -711,7 +714,11 @@
           </nav>
         </div>
         <div class="baixo">
-          <span>© 2026 Entrelaços · Pai Presente. Todos os direitos reservados.</span>
+          <img src="/landing/marca.svg" alt="" width="24" height="24" />
+          <span class="copyright">
+            © 2026 <a href="https://adatechnology.com.br" target="_blank" rel="noreferrer">Ada Technology</a>
+            &amp; <strong>Studio Boold</strong> · Todos os direitos reservados
+          </span>
           <span>Dados protegidos e tratados conforme a LGPD.</span>
         </div>
       </div>

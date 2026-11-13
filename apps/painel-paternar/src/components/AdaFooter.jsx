@@ -4,14 +4,19 @@
  * Licenca: proprietaria.
  */
 
+import { BrandSymbol } from '@/components/PanelBrand';
 import { PANEL_TEXT } from '@/panel/panel-text';
 
-/** Rodape de copyright da Ada Technology, a empresa que faz o Paternar. */
+/**
+ * Rodape de copyright da Ada Technology com o Studio Boold, com o simbolo da
+ * marca em cima — o mesmo da vitrine e do app.
+ */
 export default function AdaFooter({ className = '' }) {
   const year = new Date().getFullYear();
 
   return (
     <footer className={`px-4 py-6 text-center text-xs text-zinc-400 ${className}`}>
+      <BrandSymbol className="mx-auto mb-2 h-6 w-6" />
       © {year}{' '}
       <a
         href="https://adatechnology.com.br"
