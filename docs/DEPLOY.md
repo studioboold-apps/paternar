@@ -1,5 +1,12 @@
 # Publicar o Pai Presente
 
+> **13/11/2026 (noite) — a vitrine ganhou serviço próprio, `vitrine`.** O plano
+> do Railway aceita **um domínio próprio por serviço**: ao pôr o `app.` na `web`,
+> o `paternar.com.br` saiu dela e o navegador recebeu o certificado do
+> `*.up.railway.app`. Agora a `web` tem o `app.paternar.com.br` e o serviço
+> `vitrine` (mesma imagem da web, com `LANDING_HOSTS`) tem o `paternar.com.br`.
+> O deploy cria o serviço, o domínio e o DNS no Cloudflare sozinho.
+>
 > **13/11/2026 — vitrine no domínio principal, app em `app.`.** `paternar.com.br`
 > passa a mostrar a landing page (`apps/frontend-pai-presente/public/landing.html`)
 > e o app mora em `https://app.paternar.com.br`. Os dois saem do **mesmo** serviço
