@@ -274,7 +274,7 @@ export default defineRailway(() => {
      */
     networking: {
       serviceDomains: { [WEB_DOMAIN]: { port: WEB_PORT } },
-      customDomains: { [PUBLIC_DOMAIN]: { port: WEB_PORT }, [APP_DOMAIN]: { port: WEB_PORT } },
+      customDomains: { [APP_DOMAIN]: { port: WEB_PORT } },
     },
     deploy: { region: REGION, restartPolicyType: 'ON_FAILURE' },
     env: {
@@ -318,13 +318,7 @@ export default defineRailway(() => {
        */
       ADSENSE_CLIENT_ID: 'ca-pub-3420826522507538',
       ADSENSE_SLOT_ID: '',
-      /**
-       * Vitrine no dominio principal; o resto vai para `APP_URL`. O
-       * `.up.railway.app` NAO entra: ele segue servindo o app, para quem ja
-       * salvou aquele endereco. O deploy so grava `LANDING_HOSTS` depois que o
-       * certificado do `app.` estiver valido (`railway-garantir-servicos.mjs`).
-       */
-      LANDING_HOSTS: `${PUBLIC_DOMAIN},www.${PUBLIC_DOMAIN}`,
+      /** O endereco do app; a vitrine fica no servico `vitrine`, abaixo. */
       APP_URL: `https://${APP_DOMAIN}`,
     },
   });
@@ -346,5 +340,28 @@ export default defineRailway(() => {
     },
   });
 
-  return project('pai-presente', { resources: [database, media, api, web, painel] });
+  /**
+   * 13/11/2026: o plano aceita UM dominio proprio por servico. Com o `app.` na
+   * `web`, o `paternar.com.br` ganhou servico proprio: a vitrine, com a MESMA
+   * imagem da web — `server/landing.js` decide pelo `Host`. O `/v1` (webhook da
+   * Hotmart) segue no dominio principal, repassado pela rede privada.
+   */
+  const vitrine = service('vitrine', {
+    source: empty(),
+    build: { builder: 'DOCKERFILE', dockerfilePath: 'apps/frontend-pai-presente/Dockerfile' },
+    healthcheck: '/health',
+    networking: { customDomains: { [PUBLIC_DOMAIN]: { port: WEB_PORT } } },
+    deploy: { region: REGION, restartPolicyType: 'ON_FAILURE' },
+    env: {
+      API_ORIGIN: 'http://${{api.RAILWAY_PRIVATE_DOMAIN}}:' + String(API_PORT),
+      WEB_PORT: String(WEB_PORT),
+      PORT: String(WEB_PORT),
+      APP_ENV: 'production',
+      LANDING_HOSTS: `${PUBLIC_DOMAIN},www.${PUBLIC_DOMAIN}`,
+      APP_URL: `https://${APP_DOMAIN}`,
+      ADSENSE_CLIENT_ID: 'ca-pub-3420826522507538',
+    },
+  });
+
+  return project('pai-presente', { resources: [database, media, api, web, painel, vitrine] });
 });

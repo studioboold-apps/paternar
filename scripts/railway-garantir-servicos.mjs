@@ -15,10 +15,9 @@
 //   6. grava na `web` o ADSENSE_CLIENT_ID da conta (publico: sai no HTML de todo
 //      site com anuncio). Ele so publica a metatag e o /ads.txt; quem liga os
 //      anuncios e' ADS_ENABLED, que este script nao toca.
-//   7. garante o app.paternar.com.br na `web` (e o DNS dele, como no item 4) e,
-//      so quando o certificado dele estiver valido, liga a vitrine no dominio
-//      principal (LANDING_HOSTS + APP_URL). Antes disso o dominio principal segue
-//      servindo o app: ninguem e' desviado para um endereco que ainda nao abre;
+//   7. garante o app.paternar.com.br na `web` (e o DNS dele, como no item 4);
+//   8. cria o servico `vitrine` (mesma imagem da web, com LANDING_HOSTS) e poe
+//      nele o paternar.com.br: o plano aceita UM dominio proprio por servico.
 //
 // As variaveis sao gravadas com `skipDeploys`: quem publica e' o `railway up`
 // dos passos seguintes, que ja leva o valor novo.
@@ -42,6 +41,8 @@ const PANEL_DOMAIN = `painel.${PUBLIC_DOMAIN}`;
 const APP_DOMAIN = `app.${PUBLIC_DOMAIN}`;
 const APP_URL = `https://${APP_DOMAIN}`;
 const LANDING_HOSTS = `${PUBLIC_DOMAIN},www.${PUBLIC_DOMAIN}`;
+/** A vitrine (landing) num servico proprio: o plano aceita um dominio proprio por servico. */
+const LANDING_SERVICE = 'vitrine';
 const WEB = 'web';
 /** ID de editor da conta AdSense (08/11/2026) — o mesmo de `.railway/railway.ts`. */
 const ADSENSE_CLIENT_ID = 'ca-pub-3420826522507538';
@@ -274,7 +275,15 @@ async function main() {
   }
 
   await ensureAdsenseAccount(ids, services);
-  await ensureAppDomainAndLanding(ids, services);
+  await ensureAppDomain(ids, services);
+
+  try {
+    await prepareLanding(ids, services);
+    output('vitrine', '1');
+  } catch (err) {
+    console.log(`::error::vitrine nao preparada: ${err.message}`);
+    output('vitrine', '0');
+  }
 }
 
 /** `CERTIFICATE_STATUS_TYPE_VALID` na API do Railway. */
@@ -283,41 +292,41 @@ export function isCertificateValid(status) {
 }
 
 /**
- * A vitrine so liga com o `app.` respondendo em HTTPS: ligar antes desviaria
- * todo pai de `paternar.com.br` para um endereco sem certificado. Nunca
- * desliga sozinha: voltar atras e' apagar `LANDING_HOSTS` da `web` no painel.
- * Falhar aqui nao derruba o deploy.
+ * Garante um dominio proprio num servico e o DNS dele no Cloudflare. Devolve
+ * `false` se o Railway recusar (limite do plano), sem derrubar o deploy.
  */
-async function ensureAppDomainAndLanding(ids, services) {
+async function ensureCustomDomain(ids, serviceId, domain) {
+  const domains = await gql(
+    `query ($p: String!, $e: String!, $s: String!) {
+       domains(projectId: $p, environmentId: $e, serviceId: $s) { customDomains { domain } } }`,
+    { p: ids.projectId, e: ids.environmentId, s: serviceId },
+  );
+  if (!domains.domains.customDomains.some((d) => d.domain === domain)) {
+    try {
+      await gql(
+        `mutation ($input: CustomDomainCreateInput!) { customDomainCreate(input: $input) { id } }`,
+        { input: { projectId: ids.projectId, environmentId: ids.environmentId, serviceId, domain, targetPort: PORT } },
+      );
+      console.log(`-> dominio ${domain} criado no Railway`);
+    } catch (err) {
+      console.log(`::warning::${domain} nao foi criado (${err.message})`);
+      return false;
+    }
+  }
+  try {
+    await syncDomainDns(ids, serviceId, domain);
+  } catch (err) {
+    console.log(`::warning::DNS do ${domain} nao conferido: ${err.message}`);
+  }
+  return true;
+}
+
+/** O `app.` mora na `web`, que serve o app; a `web` so precisa saber o endereco dele. */
+async function ensureAppDomain(ids, services) {
   const web = services.find((s) => s.name === WEB);
   if (!web) return;
   try {
-    const domains = await gql(
-      `query ($p: String!, $e: String!, $s: String!) {
-         domains(projectId: $p, environmentId: $e, serviceId: $s) {
-           customDomains { domain status { verified certificateStatus } } } }`,
-      { p: ids.projectId, e: ids.environmentId, s: web.id },
-    );
-    let app = domains.domains.customDomains.find((d) => d.domain === APP_DOMAIN);
-    if (!app) {
-      try {
-        await gql(
-          `mutation ($input: CustomDomainCreateInput!) { customDomainCreate(input: $input) { id } }`,
-          { input: { projectId: ids.projectId, environmentId: ids.environmentId, serviceId: web.id, domain: APP_DOMAIN, targetPort: PORT } },
-        );
-        console.log(`-> dominio ${APP_DOMAIN} criado no Railway (servico web)`);
-      } catch (err) {
-        console.log(`::warning::${APP_DOMAIN} nao foi criado (${err.message}). A vitrine fica desligada.`);
-        return;
-      }
-    }
-
-    try {
-      await syncDomainDns(ids, web.id, APP_DOMAIN);
-    } catch (err) {
-      console.log(`::warning::DNS do ${APP_DOMAIN} nao conferido: ${err.message}`);
-    }
-
+    await ensureCustomDomain(ids, web.id, APP_DOMAIN);
     const vars = await gql(
       `query ($p: String!, $e: String!, $s: String!) { variables(projectId: $p, environmentId: $e, serviceId: $s) }`,
       { p: ids.projectId, e: ids.environmentId, s: web.id },
@@ -326,43 +335,58 @@ async function ensureAppDomainAndLanding(ids, services) {
       await upsert(ids, web.id, 'APP_URL', APP_URL);
       console.log(`-> APP_URL da web: ${APP_URL}`);
     }
-    if ((vars.variables.LANDING_HOSTS ?? '').trim()) {
-      console.log(`-> vitrine ligada em: ${vars.variables.LANDING_HOSTS}`);
-      return;
-    }
-    if (!isCertificateValid(app?.status)) {
-      console.log(`::warning::vitrine ainda desligada: ${APP_DOMAIN} sem certificado valido. Ela liga sozinha num deploy depois que o DNS propagar.`);
-      return;
-    }
-    await upsert(ids, web.id, 'LANDING_HOSTS', LANDING_HOSTS);
-    console.log(`-> vitrine LIGADA em ${LANDING_HOSTS}; o app segue em ${APP_URL}`);
   } catch (err) {
-    console.log(`::warning::vitrine/app nao preparados: ${err.message}`);
+    console.log(`::warning::app.${PUBLIC_DOMAIN} nao preparado: ${err.message}`);
   }
 }
 
-/** Falhar aqui nao derruba o deploy: sem o id, so a verificacao do AdSense espera. */
-async function ensureAdsenseAccount(ids, services) {
-  const web = services.find((s) => s.name === WEB);
-  if (!web) {
-    console.log(`::warning::servico '${WEB}' nao encontrado; ADSENSE_CLIENT_ID nao gravado`);
-    return;
-  }
-  try {
-    const vars = await gql(
-      `query ($p: String!, $e: String!, $s: String!) { variables(projectId: $p, environmentId: $e, serviceId: $s) }`,
-      { p: ids.projectId, e: ids.environmentId, s: web.id },
+/**
+ * 13/11/2026: o plano do Railway aceita UM dominio proprio por servico. Com o
+ * `app.` na `web`, o `paternar.com.br` saiu dela e o navegador passou a receber
+ * o certificado do `*.up.railway.app`. A vitrine ganha entao um servico proprio,
+ * `vitrine`, com a MESMA imagem da web (`server/landing.js` decide pelo Host),
+ * como o painel ja tem. Nele ficam `/`, `/v1` (webhook da Hotmart, pela rede
+ * privada), `/ads.txt` e as paginas publicas; o resto vai para o `app.`.
+ */
+async function prepareLanding(ids, services) {
+  let vitrine = services.find((s) => s.name === LANDING_SERVICE);
+  if (!vitrine) {
+    console.log(`-> criando o servico '${LANDING_SERVICE}'`);
+    const data = await gql(
+      `mutation ($input: ServiceCreateInput!) { serviceCreate(input: $input) { id name } }`,
+      { input: { projectId: ids.projectId, name: LANDING_SERVICE } },
     );
-    const current = (vars.variables.ADSENSE_CLIENT_ID ?? '').trim();
-    if (current === ADSENSE_CLIENT_ID) {
-      console.log('-> ADSENSE_CLIENT_ID da web ja esta certo');
-    } else {
-      await upsert(ids, web.id, 'ADSENSE_CLIENT_ID', ADSENSE_CLIENT_ID);
-      console.log(`-> ADSENSE_CLIENT_ID da web gravado (antes: ${current ? 'outro valor' : 'ausente'})`);
-    }
-    console.log(`-> ADS_ENABLED da web: ${JSON.stringify(vars.variables.ADS_ENABLED ?? '(ausente)')}`);
+    vitrine = data.serviceCreate;
+  } else {
+    console.log(`-> servico '${LANDING_SERVICE}' ja existe`);
+  }
+
+  const vars = {
+    RAILWAY_DOCKERFILE_PATH: 'apps/frontend-pai-presente/Dockerfile',
+    API_ORIGIN: `http://\${{${API}.RAILWAY_PRIVATE_DOMAIN}}:${API_PORT}`,
+    WEB_PORT: String(PORT),
+    PORT: String(PORT),
+    APP_ENV: 'production',
+    LANDING_HOSTS,
+    APP_URL,
+    ADSENSE_CLIENT_ID,
+  };
+  for (const [name, value] of Object.entries(vars)) await upsert(ids, vitrine.id, name, value);
+  console.log(`-> variaveis da vitrine: ${Object.keys(vars).join(', ')}`);
+
+  try {
+    await gql(
+      `mutation ($sid: String!, $eid: String, $input: ServiceInstanceUpdateInput!) {
+         serviceInstanceUpdate(serviceId: $sid, environmentId: $eid, input: $input) }`,
+      { sid: vitrine.id, eid: ids.environmentId, input: { healthcheckPath: '/health', restartPolicyType: 'ON_FAILURE' } },
+    );
   } catch (err) {
-    console.log(`::warning::ADSENSE_CLIENT_ID nao gravado na web: ${err.message}`);
+    console.log(`::warning::healthcheck da vitrine nao gravado: ${err.message}`);
+  }
+
+  const created = await ensureCustomDomain(ids, vitrine.id, PUBLIC_DOMAIN);
+  if (!created) {
+    console.log(`::warning::${PUBLIC_DOMAIN} nao entrou na vitrine. Se ele ainda estiver em outro servico, tire de la e rode o deploy de novo.`);
   }
 }
 

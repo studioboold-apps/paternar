@@ -112,6 +112,11 @@ jobs:
       - name: painel
         if: steps.garante.outputs.painel == '1'
         run: railway up --service painel --ci
+      # A vitrine (landing de paternar.com.br) e' um servico proprio, com a
+      # mesma imagem da web: o plano aceita um dominio proprio por servico.
+      - name: vitrine
+        if: steps.garante.outputs.vitrine == '1'
+        run: railway up --service vitrine --ci
       - name: login do painel funciona?
         if: steps.garante.outputs.painel == '1'
         run: sleep 15; timeout 60 node scripts/testar-login-painel.mjs || true
