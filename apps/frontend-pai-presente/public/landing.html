@@ -63,9 +63,9 @@
       .faixa {
         display: block;
         overflow: hidden;
-        background: var(--laranja);
-        color: var(--branco);
-        font-weight: 800;
+        background: #ffc928;
+        color: #1c1b2e;
+        font-weight: 900;
         font-size: 0.85rem;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -73,11 +73,11 @@
         text-decoration: none;
         white-space: nowrap;
       }
-      .faixa:hover { background: var(--laranja-escuro); }
+      .faixa:hover { background: #f5b800; }
       .faixa-trilho { display: flex; width: max-content; animation: faixa 28s linear infinite; }
       .faixa:hover .faixa-trilho, .faixa:focus-visible .faixa-trilho { animation-play-state: paused; }
       .faixa-trilho span { display: inline-flex; align-items: center; gap: 1.25rem; padding-right: 1.25rem; }
-      .faixa-trilho span::after { content: '★'; color: #ffe0b3; }
+      .faixa-trilho span::after { content: '★'; color: #1c1b2e; }
       @keyframes faixa { to { transform: translateX(-50%); } }
 
       /* cabecalho */
