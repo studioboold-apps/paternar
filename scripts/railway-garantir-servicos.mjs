@@ -396,3 +396,29 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1);
   });
 }
+
+
+/** Falhar aqui nao derruba o deploy: sem o id, so a verificacao do AdSense espera. */
+async function ensureAdsenseAccount(ids, services) {
+  const web = services.find((s) => s.name === WEB);
+  if (!web) {
+    console.log(`::warning::servico '${WEB}' nao encontrado; ADSENSE_CLIENT_ID nao gravado`);
+    return;
+  }
+  try {
+    const vars = await gql(
+      `query ($p: String!, $e: String!, $s: String!) { variables(projectId: $p, environmentId: $e, serviceId: $s) }`,
+      { p: ids.projectId, e: ids.environmentId, s: web.id },
+    );
+    const current = (vars.variables.ADSENSE_CLIENT_ID ?? '').trim();
+    if (current === ADSENSE_CLIENT_ID) {
+      console.log('-> ADSENSE_CLIENT_ID da web ja esta certo');
+    } else {
+      await upsert(ids, web.id, 'ADSENSE_CLIENT_ID', ADSENSE_CLIENT_ID);
+      console.log(`-> ADSENSE_CLIENT_ID da web gravado (antes: ${current ? 'outro valor' : 'ausente'})`);
+    }
+    console.log(`-> ADS_ENABLED da web: ${JSON.stringify(vars.variables.ADS_ENABLED ?? '(ausente)')}`);
+  } catch (err) {
+    console.log(`::warning::ADSENSE_CLIENT_ID nao gravado na web: ${err.message}`);
+  }
+}

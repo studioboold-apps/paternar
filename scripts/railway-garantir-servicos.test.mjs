@@ -25,3 +25,16 @@ describe('WEB_ORIGINS', () => {
     expect(missing).toEqual(['https://app.paternar.com.br']);
   });
 });
+
+// O #60 apagou o `ensureAdsenseAccount` e manteve a chamada: o deploy so quebrou
+// em producao. Toda funcao chamada com `await` no script tem de existir nele.
+describe('o script de servicos nao chama funcao inexistente', () => {
+  test('cada `await nome(` tem a sua declaracao', async () => {
+    const source = await Bun.file(new URL('./railway-garantir-servicos.mjs', import.meta.url)).text();
+    const called = new Set([...source.matchAll(/await\s+([a-zA-Z_$][\w$]*)\(/g)].map((m) => m[1]));
+    const declared = new Set([...source.matchAll(/function\s+([a-zA-Z_$][\w$]*)\s*\(/g)].map((m) => m[1]));
+    const builtins = new Set(['fetch']);
+    const missing = [...called].filter((name) => !declared.has(name) && !builtins.has(name));
+    expect(missing).toEqual([]);
+  });
+});
