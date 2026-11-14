@@ -355,9 +355,9 @@
       .rodape a { text-decoration: none; }
       .rodape a:hover { color: var(--branco); text-decoration: underline; }
       .rodape .baixo { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.85rem; display: grid; gap: 0.35rem; justify-items: center; text-align: center; }
-      .rodape .baixo .logos { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.35rem; }
-      .rodape .baixo img { width: 1.5rem; height: 1.5rem; border-radius: 0.35rem; }
-      .rodape .baixo img.ada { width: auto; height: 3rem; background: var(--branco); border-radius: 0.6rem; padding: 0.2rem; }
+      .rodape .baixo img { width: 1.5rem; height: 1.5rem; border-radius: 0.35rem; margin-bottom: 0.25rem; }
+      .rodape .copyright .ada { display: inline-flex; align-items: center; gap: 0.3rem; vertical-align: bottom; }
+      .rodape .copyright .ada img { width: auto; height: 1.15em; margin: 0; border-radius: 0; filter: brightness(1.9) saturate(1.15); }
       .rodape .copyright a, .rodape .copyright strong { color: var(--creme); font-weight: 700; }
       .rodape .copyright a { text-decoration: underline; text-underline-offset: 2px; }
 
@@ -785,14 +785,9 @@
           </nav>
         </div>
         <div class="baixo">
-          <span class="logos">
-            <a href="https://adatechnology.com.br" target="_blank" rel="noreferrer" aria-label="Ada Technology">
-              <img class="ada" src="/landing/ada-logo.png" alt="Ada Technology" width="44" height="48" />
-            </a>
-            <img src="/landing/marca.svg" alt="" width="24" height="24" />
-          </span>
+          <img src="/landing/marca.svg" alt="" width="24" height="24" />
           <span class="copyright">
-            © 2026 <a href="https://adatechnology.com.br" target="_blank" rel="noreferrer">Ada Technology</a>
+            © 2026 <a class="ada" href="https://adatechnology.com.br" target="_blank" rel="noreferrer"><img src="/landing/ada-icon.png" alt="" width="16" height="14" />Ada Technology</a>
             &amp; <strong>Studio Boold</strong> · Todos os direitos reservados
           </span>
           <span>Dados protegidos e tratados conforme a LGPD.</span>
