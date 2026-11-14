@@ -8,15 +8,21 @@ import { BrandSymbol } from '@/components/PanelBrand';
 import { PANEL_TEXT } from '@/panel/panel-text';
 
 /**
- * Rodape de copyright da Ada Technology com o Studio Boold, com o simbolo da
- * marca em cima — o mesmo da vitrine e do app.
+ * Rodape de copyright da Ada Technology com o Studio Boold. Em cima vem o logo
+ * da Ada (regra: todo copyright da Ada leva o logo) ao lado do simbolo da
+ * marca, como na vitrine e no app.
  */
 export default function AdaFooter({ className = '' }) {
   const year = new Date().getFullYear();
 
   return (
     <footer className={`px-4 py-6 text-center text-xs text-zinc-400 ${className}`}>
-      <BrandSymbol className="mx-auto mb-2 h-6 w-6" />
+      <div className="mx-auto mb-2 flex w-fit items-center gap-3">
+        <a href="https://adatechnology.com.br" target="_blank" rel="noreferrer" aria-label="Ada Technology">
+          <img src="/ada-logo.png" alt="Ada Technology" width="32" height="35" className="h-10 w-auto rounded-md bg-white p-1" />
+        </a>
+        <BrandSymbol className="h-6 w-6" />
+      </div>
       © {year}{' '}
       <a
         href="https://adatechnology.com.br"
