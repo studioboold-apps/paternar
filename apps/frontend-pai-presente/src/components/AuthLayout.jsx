@@ -12,7 +12,7 @@ import BrandWordmark from "@/components/BrandWordmark";
  */
 export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <div className="bg-brand-navy px-6 pt-14 pb-24 text-center">
         <BrandMark motion="enter" className="mx-auto h-20 w-20" />
         <h1 className="sr-only">{title}</h1>
@@ -27,7 +27,9 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           <p className="mt-6 text-center text-sm text-muted-foreground">{footer}</p>
         )}
       </div>
-      <AdaFooter className="pt-0" />
+      {/* Fica grudado embaixo da tela: no celular o formulario passa da dobra e o
+          rodape sumia la no fim da rolagem. */}
+      <AdaFooter className="sticky bottom-0 mt-auto border-t border-border bg-background/95 py-3 backdrop-blur" />
     </div>
   );
 }
