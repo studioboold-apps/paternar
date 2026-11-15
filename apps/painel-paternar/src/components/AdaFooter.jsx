@@ -21,13 +21,13 @@ export default function AdaFooter({ className = '' }) {
         href="https://adatechnology.com.br"
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 align-bottom font-semibold text-zinc-300 underline-offset-2 hover:underline"
+        className="inline-flex items-center gap-1 align-bottom font-semibold text-[#122F5B] underline underline-offset-2"
       >
         <img src="/ada-icon.png" alt="" width="16" height="14" className="h-3.5 w-auto" />
         {PANEL_TEXT.copyright.company}
       </a>
       {' & '}
-      <span className="font-semibold text-zinc-300">{PANEL_TEXT.copyright.partner}</span>
+      <span className="font-semibold text-zinc-300 underline underline-offset-2">{PANEL_TEXT.copyright.partner}</span>
       {' · '}
       {PANEL_TEXT.copyright.rights}
     </footer>
