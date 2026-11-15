@@ -106,7 +106,6 @@
       .botao { white-space: nowrap; }
       @media (max-width: 30rem) { .acoes-topo .botao-principal { display: none; } }
       .botao-app { background: var(--navy); color: var(--branco); }
-      .botao-app:hover { background: var(--navy-2); }
       .botao-app .seta-app { transition: transform 0.2s ease; }
       .botao-app:hover .seta-app { transform: translateX(3px); }
       @media (max-width: 26rem) { .acoes-topo .botao-app { display: inline-flex; } }
@@ -128,7 +127,6 @@
       .botao:hover { transform: translateY(-1px); }
       .botao:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--laranja); outline-offset: 3px; }
       .botao-principal { background: var(--laranja); color: var(--branco); }
-      .botao-principal:hover { background: var(--laranja-escuro); }
       .botao-contorno { border-color: var(--navy); color: var(--navy); background: transparent; }
       .botao-claro { background: var(--branco); color: var(--navy); }
       .botao-pequeno { min-height: 2.5rem; padding: 0.5rem 1.1rem; font-size: 0.95rem; }
@@ -389,6 +387,40 @@
         pointer-events: none;
       }
       .botao:hover { box-shadow: 0 10px 24px -12px rgba(47, 48, 82, 0.6); }
+
+      /* liquido subindo nos botoes: ao passar o mouse (ou tocar), o botao enche
+         devagar de baixo para cima. O liquido balanca de um lado para o outro e
+         tem duas ondas na superficie, correndo em sentidos opostos. */
+      .botao { position: relative; overflow: hidden; isolation: isolate; transition: transform 0.15s ease, color 0.6s ease 0.5s, border-color 0.4s ease, box-shadow 0.3s ease; }
+      .botao::before {
+        content: '';
+        position: absolute;
+        left: -20%;
+        right: -20%;
+        bottom: -6px;
+        height: calc(100% + 34px);
+        z-index: -1;
+        background:
+          linear-gradient(var(--liquido), var(--liquido)) left bottom / 100% calc(100% - 22px) no-repeat,
+          var(--onda) 0 9px / 60px 14px repeat-x,
+          var(--onda-fundo) 0 0 / 90px 14px repeat-x;
+        translate: 0 100%;
+        transform-origin: 50% 100%;
+        transition: translate 1.9s cubic-bezier(0.25, 0.6, 0.3, 1);
+        animation: onda 1.8s linear infinite, balanco 2.6s ease-in-out infinite;
+        pointer-events: none;
+      }
+      .botao:hover::before, .botao:focus-visible::before, .botao:active::before { translate: 0 0; }
+      @keyframes onda { from { background-position: left bottom, 0 9px, 0 0; } to { background-position: left bottom, 60px 9px, -90px 0; } }
+      @keyframes balanco { 0%, 100% { rotate: -6deg; } 50% { rotate: 6deg; } }
+      /* a borda fica fora do recorte do liquido: ela vira a cor dele quando ele chega la em cima */
+      .botao:hover, .botao:focus-visible, .botao:active { border-color: var(--liquido); transition: transform 0.15s ease, color 0.6s ease 0.5s, border-color 0.5s ease 1.3s, box-shadow 0.3s ease; }
+      .botao-principal { --liquido: #b35f00; --onda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='14' viewBox='0 0 60 14'%3E%3Cpath d='M0 7 Q15.0 0 30.0 7 T60 7 V14 H0Z' fill='%23b35f00' fill-opacity='1'/%3E%3C/svg%3E"); --onda-fundo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='14' viewBox='0 0 90 14'%3E%3Cpath d='M0 7 Q22.5 0 45.0 7 T90 7 V14 H0Z' fill='%23b35f00' fill-opacity='0.45'/%3E%3C/svg%3E"); }
+      .botao-app { --liquido: #f18700; --onda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='14' viewBox='0 0 60 14'%3E%3Cpath d='M0 7 Q15.0 0 30.0 7 T60 7 V14 H0Z' fill='%23f18700' fill-opacity='1'/%3E%3C/svg%3E"); --onda-fundo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='14' viewBox='0 0 90 14'%3E%3Cpath d='M0 7 Q22.5 0 45.0 7 T90 7 V14 H0Z' fill='%23f18700' fill-opacity='0.45'/%3E%3C/svg%3E"); }
+      .botao-contorno { --liquido: #2f3052; --onda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='14' viewBox='0 0 60 14'%3E%3Cpath d='M0 7 Q15.0 0 30.0 7 T60 7 V14 H0Z' fill='%232f3052' fill-opacity='1'/%3E%3C/svg%3E"); --onda-fundo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='14' viewBox='0 0 90 14'%3E%3Cpath d='M0 7 Q22.5 0 45.0 7 T90 7 V14 H0Z' fill='%232f3052' fill-opacity='0.45'/%3E%3C/svg%3E"); }
+      .botao-contorno:hover, .botao-contorno:focus-visible, .botao-contorno:active { color: var(--branco); }
+      .botao-claro { --liquido: #f18700; --onda: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='14' viewBox='0 0 60 14'%3E%3Cpath d='M0 7 Q15.0 0 30.0 7 T60 7 V14 H0Z' fill='%23f18700' fill-opacity='1'/%3E%3C/svg%3E"); --onda-fundo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='14' viewBox='0 0 90 14'%3E%3Cpath d='M0 7 Q22.5 0 45.0 7 T90 7 V14 H0Z' fill='%23f18700' fill-opacity='0.45'/%3E%3C/svg%3E"); }
+      .botao-claro:hover, .botao-claro:focus-visible, .botao-claro:active { color: var(--branco); }
       .cartao, .passos li, .muda-lista li, .preco, .duvidas details, .agente, .fundadora {
         transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
       }
@@ -413,6 +445,8 @@
         .faixa-trilho { justify-content: center; width: auto; }
         .faixa-trilho span:not(:first-child) { display: none; }
       }
+      .link-app { color: inherit; font-weight: inherit; text-decoration: underline; text-decoration-color: var(--laranja); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+      .link-app:hover { color: var(--laranja); }
       .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
     </style>
   </head>
@@ -428,7 +462,7 @@
           <span><strong>Entrelaços</strong><small>Pai Presente</small></span>
         </a>
         <nav class="menu" aria-label="Seções">
-          <a href="#app">O app</a>
+          <a href="https://app.paternar.com.br/">O app</a>
           <a href="#ritual">O ritual</a>
           <a href="#muda">O que muda</a>
           <a href="#comunidade">Comunidade</a>
@@ -445,7 +479,7 @@
       <section class="hero">
         <div class="conteiner">
           <div>
-            <span class="selo">O app está no ar</span>
+            <span class="selo">O <a class="link-app" href="https://app.paternar.com.br/">app</a> está no ar</span>
             <h1>Presença não se promete, <em>pratica-se!</em></h1>
             <p class="texto-secao">
               O Entrelaços propõe a atividade certa para a idade do seu filho, responde às suas dúvidas
@@ -455,7 +489,7 @@
               <a class="botao botao-principal" href="#vagas">Garantir minha vaga</a>
               <a class="botao botao-app" href="https://app.paternar.com.br/">Entrar no app <span class="seta-app" aria-hidden="true">→</span></a>
             </div>
-            <a class="conhecer" href="#app">Ainda não conhece? Veja o que tem no app <span aria-hidden="true">↓</span></a>
+            <a class="conhecer" href="https://app.paternar.com.br/?cadastro=1">Ainda não conhece? Crie sua conta no app <span aria-hidden="true">→</span></a>
             <ul class="atributos">
               <li>Webapp instalável</li>
               <li>Português · Inglês · Espanhol</li>
@@ -495,7 +529,7 @@
           <div class="lancamento-grade">
             <div>
               <span class="rotulo">O lançamento</span>
-              <h2 class="titulo-secao" id="titulo-lancamento">O app nasceu. E ele é feito de dias, não de promessas.</h2>
+              <h2 class="titulo-secao" id="titulo-lancamento">O <a class="link-app" href="https://app.paternar.com.br/">app</a> nasceu. E ele é feito de dias, não de promessas.</h2>
               <p class="texto-secao">
                 A primeira versão já está no ar. Não é contador de metas nem diário: é uma companhia
                 que aparece todo dia com algo concreto para você viver com seu filho.
@@ -520,7 +554,7 @@
 
       <section class="bloco" aria-labelledby="titulo-dentro">
         <div class="conteiner">
-          <span class="rotulo">Dentro do app</span>
+          <span class="rotulo">Dentro do <a class="link-app" href="https://app.paternar.com.br/">app</a></span>
           <h2 class="titulo-secao" id="titulo-dentro">Tudo o que cabe no seu dia, e nada que pese.</h2>
           <ol class="cartoes">
             <li class="cartao">
@@ -536,7 +570,7 @@
             </li>
             <li class="cartao">
               <span class="numero">02</span>
-              <h3>Comunidade exclusiva dentro do app</h3>
+              <h3>Comunidade exclusiva dentro do <a class="link-app" href="https://app.paternar.com.br/">app</a></h3>
               <p>Um lugar para compartilhar vivências e trocar experiências com outros pais.</p>
             </li>
             <li class="cartao">
@@ -569,7 +603,7 @@
               <p>Nome, idade, hobbies, preferências e os valores da família. Leva 2 minutos.</p>
             </li>
             <li>
-              <h3>Deixe o app lembrar por você</h3>
+              <h3>Deixe o <a class="link-app" href="https://app.paternar.com.br/">app</a> lembrar por você</h3>
               <p>Insights diários, atividades para o fim de semana e um mentor sempre disponível.</p>
             </li>
             <li>
@@ -596,7 +630,7 @@
             <li>
               <span class="antes">A dúvida chega às 22h e você não tem com quem falar.</span>
               <span class="seta" aria-hidden="true">→</span>
-              <span class="depois">O app responde às 22h, com o contexto do seu filho.</span>
+              <span class="depois">O <a class="link-app" href="https://app.paternar.com.br/">app</a> responde às 22h, com o contexto do seu filho.</span>
             </li>
             <li>
               <span class="antes">O fim de semana passa em branco, na tela.</span>
@@ -622,12 +656,12 @@
           <span class="rotulo">A comunidade fundadora</span>
           <h2 class="titulo-secao" id="titulo-comunidade">Paternidade não se faz sozinho.</h2>
           <p class="texto-secao">
-            O app é a ferramenta; a comunidade é o apoio. Quem entra na Turma Fundadora recebe as
+            O <a class="link-app" href="https://app.paternar.com.br/">app</a> é a ferramenta; a comunidade é o apoio. Quem entra na Turma Fundadora recebe as
             novidades antes de todo mundo.
           </p>
           <div class="comunidade-grade">
             <ul class="pilares">
-              <li><strong>Conversa</strong><p>O feed “Pais Presentes”, dentro do app.</p></li>
+              <li><strong>Conversa</strong><p>O feed “Pais Presentes”, dentro do <a class="link-app" href="https://app.paternar.com.br/">app</a>.</p></li>
               <li><strong>Orientação</strong><p>Um agente disponível a qualquer hora.</p></li>
               <li>
                 <strong>Continuidade</strong>
@@ -638,7 +672,7 @@
               <h3>Faça parte da comunidade fundadora</h3>
               <p>
                 Os 100 primeiros pais formam um grupo pequeno, com acesso prioritário e voz ativa no
-                futuro do app.
+                futuro do <a class="link-app" href="https://app.paternar.com.br/">app</a>.
               </p>
               <a class="botao botao-claro" href="#vagas">Quero entrar</a>
             </div>
@@ -666,7 +700,7 @@
                 <li>Condição de fundador travada enquanto a assinatura estiver ativa</li>
               </ul>
               <a class="botao botao-principal" href="https://app.paternar.com.br/?cadastro=1">Reserve agora sua vaga</a>
-              <p class="nota">Crie sua conta no app e escolha o plano lá dentro.</p>
+              <p class="nota">Crie sua conta no <a class="link-app" href="https://app.paternar.com.br/">app</a> e escolha o plano lá dentro.</p>
             </article>
             <article class="preco">
               <span class="etiqueta">Sem fidelidade · Cancele quando quiser</span>
@@ -679,7 +713,7 @@
                 <li>Condição de fundador travada enquanto a assinatura estiver ativa</li>
               </ul>
               <a class="botao botao-contorno" href="https://app.paternar.com.br/?cadastro=1">Reserve agora sua vaga</a>
-              <p class="nota">Crie sua conta no app e escolha o plano lá dentro.</p>
+              <p class="nota">Crie sua conta no <a class="link-app" href="https://app.paternar.com.br/">app</a> e escolha o plano lá dentro.</p>
             </article>
           </div>
         </div>
@@ -687,7 +721,7 @@
 
       <section class="frase ritual" aria-label="Frase">
         <div class="conteiner">
-          <p>Seu filho nem vai lembrar de app. <em>Ele vai se lembrar de você.</em></p>
+          <p>Seu filho nem vai lembrar de <a class="link-app" href="https://app.paternar.com.br/">app</a>. <em>Ele vai se lembrar de você.</em></p>
         </div>
       </section>
 
@@ -697,7 +731,7 @@
           <h2 class="titulo-secao" id="titulo-duvidas">Antes de você decidir.</h2>
           <div class="duvidas">
             <details>
-              <summary><span class="n">01</span>Preciso assinar para usar o app?</summary>
+              <summary><span class="n">01</span>Preciso assinar para usar o <a class="link-app" href="https://app.paternar.com.br/">app</a>?</summary>
               <p>
                 Sim. A assinatura garante a sua vaga de fundador, o acesso à comunidade e a condição
                 de fundador. As vagas são limitadas.
@@ -713,7 +747,7 @@
             <details>
               <summary><span class="n">03</span>E se eu não for o pai biológico?</summary>
               <p>
-                Padrastos, avós, tios e mães já usam. O app acompanha o tempo que você passa com a
+                Padrastos, avós, tios e mães já usam. O <a class="link-app" href="https://app.paternar.com.br/">app</a> acompanha o tempo que você passa com a
                 criança, não o sobrenome.
               </p>
             </details>
@@ -721,7 +755,7 @@
               <summary><span class="n">04</span>O tira-dúvidas é uma pessoa ou inteligência artificial?</summary>
               <p>
                 É uma inteligência artificial orientada por comunicação positiva e criação consciente,
-                disponível 24 horas. Ela não substitui terapia nem atendimento de saúde, e o app deixa
+                disponível 24 horas. Ela não substitui terapia nem atendimento de saúde, e o <a class="link-app" href="https://app.paternar.com.br/">app</a> deixa
                 isso claro.
               </p>
             </details>
@@ -767,7 +801,7 @@
           <nav aria-label="Navegação do rodapé">
             <h4>Navegação</h4>
             <ul>
-              <li><a href="#app">O app</a></li>
+              <li><a href="https://app.paternar.com.br/">O app</a></li>
               <li><a href="#ritual">O ritual</a></li>
               <li><a href="#muda">O que muda</a></li>
               <li><a href="#comunidade">Comunidade</a></li>
