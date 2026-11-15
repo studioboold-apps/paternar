@@ -29,13 +29,13 @@ export default function AdaFooter({ className }) {
         href={ADA_TECHNOLOGY_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 align-bottom font-semibold text-foreground/80 underline-offset-2 hover:underline"
+        className="inline-flex items-center gap-1 align-bottom font-semibold text-[#1A4FD6] underline underline-offset-2"
       >
         <img src={ADA_ICON_SRC} alt="" width="16" height="14" className="h-3.5 w-auto" />
         {t('common.copyright.company')}
       </a>
       {' & '}
-      <span className="font-semibold text-foreground/80">
+      <span className="font-semibold text-foreground/80 underline underline-offset-2">
         {t('common.copyright.partner')}
       </span>
       {' · '}
