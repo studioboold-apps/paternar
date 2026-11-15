@@ -29,7 +29,7 @@ export default function AdaFooter({ className }) {
         href={ADA_TECHNOLOGY_URL}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 align-bottom font-semibold text-[#1A4FD6] underline underline-offset-2"
+        className="inline-flex items-center gap-1 align-bottom font-semibold text-[#122F5B] underline underline-offset-2"
       >
         <img src={ADA_ICON_SRC} alt="" width="16" height="14" className="h-3.5 w-auto" />
         {t('common.copyright.company')}
