@@ -4,17 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2F3052" />
-    <title>Entrelaços — Pai Presente | Presença não se promete, pratica-se</title>
+    <title>Paternar — Pai Presente | Presença não se promete, pratica-se</title>
     <meta
       name="description"
-      content="Entrelaços — Pai Presente: a companhia diária de quem escolheu estar perto. Atividades na medida da idade do seu filho, um agente para tirar dúvidas a qualquer hora e um boletim mensal honesto."
+      content="Paternar — Pai Presente: a companhia diária de quem escolheu estar perto. Atividades na medida da idade do seu filho, um agente para tirar dúvidas a qualquer hora e um boletim mensal honesto."
     />
     <link rel="canonical" href="https://paternar.com.br/" />
     <link rel="icon" href="/landing/marca.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:site_name" content="Entrelaços — Pai Presente" />
+    <meta property="og:site_name" content="Paternar — Pai Presente" />
     <meta property="og:title" content="Presença não se promete, pratica-se!" />
     <meta
       property="og:description"
@@ -65,7 +65,7 @@
         overflow: hidden;
         background: #ffc928;
         color: #1c1b2e;
-        font-weight: 900;
+        font-weight: 700;
         font-size: 0.85rem;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -93,7 +93,8 @@
       .marca { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
       .marca img { width: 2.25rem; height: 2.25rem; border-radius: 0.6rem; }
       .marca span { display: flex; flex-direction: column; line-height: 1.05; }
-      .marca strong { font-size: 1.15rem; font-weight: 800; color: var(--navy); }
+      .marca img.nome-marca { width: auto; height: 2.5rem; border-radius: 0; }
+      .marca strong { font-size: 1.15rem; font-weight: 700; color: var(--navy); }
       .marca small { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #8d8c8a; }
       .menu { display: none; gap: 1.5rem; margin-left: auto; }
       .menu a { text-decoration: none; font-weight: 600; color: var(--suave); font-size: 0.95rem; }
@@ -119,7 +120,7 @@
         min-height: 3rem;
         padding: 0.75rem 1.5rem;
         border-radius: 999px;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none;
         border: 2px solid transparent;
         transition: transform 0.15s ease, background 0.15s ease;
@@ -134,13 +135,13 @@
       .rotulo {
         display: inline-block;
         font-size: 0.8rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--laranja-escuro);
         margin-bottom: 0.75rem;
       }
-      .titulo-secao { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 800; max-width: 40rem; }
+      .titulo-secao { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 700; max-width: 40rem; }
       .texto-secao { margin-top: 1rem; font-size: 1.1rem; color: var(--suave); max-width: 40rem; }
       .bloco { padding: 4.5rem 0; }
       @media (min-width: 48rem) { .bloco { padding: 6rem 0; } }
@@ -155,16 +156,19 @@
       .selo {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        background: var(--branco);
-        border: 1px solid var(--linha);
+        gap: 0.45rem;
+        background: transparent;
+        border: 1px solid rgba(47, 48, 82, 0.12);
         border-radius: 999px;
-        padding: 0.35rem 0.85rem;
-        font-weight: 700;
-        font-size: 0.9rem;
+        padding: 0.25rem 0.7rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        letter-spacing: 0.02em;
+        color: var(--suave);
       }
-      .selo::before { content: ''; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #2fa36b; box-shadow: 0 0 0 4px rgba(47, 163, 107, 0.18); }
-      .hero h1 { margin-top: 1.25rem; font-size: clamp(2.25rem, 6vw, 3.75rem); font-weight: 900; }
+      .selo .link-app { text-decoration-thickness: 1px; }
+      .selo::before { content: ''; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #2fa36b; box-shadow: 0 0 0 3px rgba(47, 163, 107, 0.15); }
+      .hero h1 { margin-top: 1.25rem; font-size: clamp(2.25rem, 6vw, 3.75rem); font-weight: 700; }
       .hero h1 em { font-style: normal; color: var(--laranja); white-space: nowrap; }
       .hero .texto-secao { font-size: 1.2rem; }
       .hero .botoes { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
@@ -172,7 +176,7 @@
       .conhecer:hover { color: var(--navy); }
       .conhecer span { display: inline-block; animation: flutuar 1.8s ease-in-out infinite; }
       .atributos { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; list-style: none; padding: 0; margin: 2rem 0 0; color: var(--suave); font-weight: 600; font-size: 0.95rem; }
-      .atributos li::before { content: '✓'; color: var(--laranja); font-weight: 900; margin-right: 0.4rem; }
+      .atributos li::before { content: '✓'; color: var(--laranja); font-weight: 700; margin-right: 0.4rem; }
       .foto { position: relative; }
       .foto picture img {
         width: 100%;
@@ -195,7 +199,7 @@
       @media (min-width: 60rem) {
         .insight { position: absolute; left: -2.5rem; bottom: -2rem; margin: 0; max-width: 21rem; }
       }
-      .insight .cabeca { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--laranja-escuro); }
+      .insight .cabeca { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--laranja-escuro); }
       .insight p { margin-top: 0.4rem; font-weight: 600; }
       .insight small { display: block; margin-top: 0.6rem; color: #8d8c8a; font-weight: 700; font-size: 0.8rem; }
 
@@ -226,12 +230,20 @@
         border-radius: 1.5rem;
         padding: 1.75rem;
       }
-      .cartao .numero { font-weight: 900; color: var(--laranja); font-size: 0.95rem; letter-spacing: 0.08em; }
+      .cartao .numero { font-weight: 700; color: var(--laranja); font-size: 0.95rem; letter-spacing: 0.08em; }
       .cartao h3 { margin-top: 0.5rem; font-size: 1.35rem; }
       .cartao p { margin-top: 0.6rem; color: var(--suave); }
       .cartao .chips li { background: var(--creme-2); color: var(--navy); }
 
       /* ritual */
+      .cena { display: grid; gap: 2rem; align-items: center; }
+      @media (min-width: 60rem) { .cena { grid-template-columns: 1.2fr 1fr; gap: 3.5rem; } }
+      .cena-foto { margin: 0; }
+      .cena-foto img { display: block; width: 100%; height: auto; border-radius: 1.75rem; object-fit: cover; box-shadow: 0 24px 48px -28px rgba(47, 48, 82, 0.45); }
+      .cena-foto.larga { margin-top: 3rem; }
+      .cena-foto.larga img { aspect-ratio: 16 / 8; object-position: center 15%; }
+      .cena-foto figcaption { margin-top: 0.75rem; font-size: 0.9rem; color: var(--suave); }
+      .escuro .cena-foto figcaption { color: rgba(247, 245, 239, 0.7); }
       .ritual { background: var(--creme-2); }
       .passos { display: grid; gap: 1.25rem; margin-top: 3rem; list-style: none; padding: 0; counter-reset: passo; }
       @media (min-width: 60rem) { .passos { grid-template-columns: repeat(3, 1fr); } }
@@ -245,7 +257,7 @@
         border-radius: 0.85rem;
         background: var(--laranja);
         color: var(--branco);
-        font-weight: 900;
+        font-weight: 700;
         font-size: 1.2rem;
       }
       .passos h3 { margin-top: 1rem; font-size: 1.25rem; }
@@ -265,7 +277,7 @@
         .muda-lista li { grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.5rem; }
       }
       .muda-lista .antes { color: var(--suave); }
-      .muda-lista .seta { color: var(--laranja); font-weight: 900; font-size: 1.25rem; }
+      .muda-lista .seta { color: var(--laranja); font-weight: 700; font-size: 1.25rem; }
       .muda-lista .depois { font-weight: 700; }
 
       /* comunidade */
@@ -297,25 +309,25 @@
         border-radius: 999px;
         padding: 0.3rem 0.85rem;
         font-size: 0.8rem;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         background: var(--creme-2);
         color: var(--navy);
       }
       .preco.destaque .etiqueta { background: var(--laranja); color: var(--branco); }
-      .preco .nome { margin-top: 1rem; font-weight: 800; color: var(--suave); }
-      .preco .valor { margin-top: 0.25rem; font-size: 2.75rem; font-weight: 900; }
+      .preco .nome { margin-top: 1rem; font-weight: 700; color: var(--suave); }
+      .preco .valor { margin-top: 0.25rem; font-size: 2.75rem; font-weight: 700; }
       .preco .valor small { font-size: 1rem; font-weight: 700; color: var(--suave); }
       .preco ul { list-style: none; padding: 0; margin: 1.25rem 0 0; display: grid; gap: 0.6rem; }
       .preco li { padding-left: 1.6rem; position: relative; color: var(--suave); }
-      .preco li::before { content: '✓'; position: absolute; left: 0; color: var(--laranja); font-weight: 900; }
+      .preco li::before { content: '✓'; position: absolute; left: 0; color: var(--laranja); font-weight: 700; }
       .preco .botao { margin-top: 1.75rem; }
       .preco .nota { margin-top: 0.85rem; font-size: 0.85rem; color: #8d8c8a; text-align: center; }
 
       /* frase */
       .frase { text-align: center; padding: 4rem 0; }
-      .frase p { font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 800; max-width: 46rem; margin: 0 auto; line-height: 1.25; }
+      .frase p { font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 700; max-width: 46rem; margin: 0 auto; line-height: 1.25; }
       .frase p em { font-style: normal; color: var(--laranja); }
 
       /* duvidas */
@@ -328,11 +340,11 @@
         gap: 1rem;
         align-items: center;
         padding: 1.2rem 0;
-        font-weight: 800;
+        font-weight: 700;
         font-size: 1.05rem;
       }
       .duvidas summary::-webkit-details-marker { display: none; }
-      .duvidas summary .n { color: var(--laranja); font-weight: 900; min-width: 1.75rem; }
+      .duvidas summary .n { color: var(--laranja); font-weight: 700; min-width: 1.75rem; }
       .duvidas summary::after { content: '+'; margin-left: auto; font-size: 1.5rem; color: var(--laranja); line-height: 1; }
       .duvidas details[open] summary::after { content: '–'; }
       .duvidas details p { padding: 0 0 1.25rem 2.75rem; color: var(--suave); }
@@ -363,7 +375,7 @@
       @keyframes subir { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
       @keyframes surgir { from { opacity: 0; transform: scale(0.94) translateY(16px); } to { opacity: 1; transform: none; } }
       @keyframes flutuar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-      @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(47, 163, 107, 0.55); } 70% { box-shadow: 0 0 0 10px rgba(47, 163, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 163, 107, 0); } }
+      @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(47, 163, 107, 0.35); } 70% { box-shadow: 0 0 0 6px rgba(47, 163, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(47, 163, 107, 0); } }
       @keyframes brilho { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(260%) skewX(-20deg); } }
       @keyframes destaque { 0%, 100% { box-shadow: 0 24px 50px -30px rgba(241, 135, 0, 0.6); } 50% { box-shadow: 0 30px 70px -26px rgba(241, 135, 0, 0.85); } }
       @keyframes degrade { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
@@ -457,9 +469,9 @@
 
     <header class="cabecalho">
       <div class="conteiner">
-        <a class="marca" href="#topo" aria-label="Entrelaços — Pai Presente, início">
+        <a class="marca" href="#topo" aria-label="Paternar — Pai Presente, início">
           <img src="/landing/marca.svg" alt="" width="36" height="36" />
-          <span><strong>Entrelaços</strong><small>Pai Presente</small></span>
+          <img class="nome-marca" src="/landing/paternar.svg" alt="Paternar — Pai Presente" width="124" height="40" />
         </a>
         <nav class="menu" aria-label="Seções">
           <a href="https://app.paternar.com.br/">O app</a>
@@ -482,7 +494,7 @@
             <span class="selo">O <a class="link-app" href="https://app.paternar.com.br/">app</a> está no ar</span>
             <h1>Presença não se promete, <em>pratica-se!</em></h1>
             <p class="texto-secao">
-              O Entrelaços propõe a atividade certa para a idade do seu filho, responde às suas dúvidas
+              O Paternar propõe a atividade certa para a idade do seu filho, responde às suas dúvidas
               e, no fim do mês, devolve um retrato honesto do pai que você foi.
             </p>
             <div class="botoes">
@@ -518,7 +530,7 @@
                 Ele não está te desafiando: está aprendendo a esperar. Um jogo de “espera 1 minuto”
                 treina isso hoje.
               </p>
-              <small>Sugerido pelo Entrelaços</small>
+              <small>Sugerido pelo Paternar</small>
             </aside>
           </div>
         </div>
@@ -595,8 +607,23 @@
 
       <section class="bloco ritual" id="ritual" aria-labelledby="titulo-ritual">
         <div class="conteiner">
-          <span class="rotulo">O ritual</span>
-          <h2 class="titulo-secao" id="titulo-ritual">A presença tem método. E o método tem 3 gestos.</h2>
+          <div class="cena">
+            <div>
+              <span class="rotulo">O ritual</span>
+              <h2 class="titulo-secao" id="titulo-ritual">A presença tem método. E o método tem 3 gestos.</h2>
+              <p class="texto-secao">
+                Pequenos momentos, todo dia. É no chão da sala, na brincadeira boba, que o vínculo se
+                constrói.
+              </p>
+            </div>
+            <figure class="cena-foto">
+              <picture>
+                <source type="image/webp" srcset="/landing/pai-e-filha.webp" />
+                <img src="/landing/pai-e-filha.jpg" width="540" height="660" loading="lazy"
+                  alt="Pai sentado no chão da sala enquanto a filha enfeita a barba dele com presilhas de borboleta" />
+              </picture>
+            </figure>
+          </div>
           <ol class="passos">
             <li>
               <h3>Conte quem é você e cadastre seus filhos</h3>
@@ -659,6 +686,14 @@
             O <a class="link-app" href="https://app.paternar.com.br/">app</a> é a ferramenta; a comunidade é o apoio. Quem entra na Turma Fundadora recebe as
             novidades antes de todo mundo.
           </p>
+          <figure class="cena-foto larga">
+            <picture>
+              <source type="image/webp" srcset="/landing/pais-conversando.webp" />
+              <img src="/landing/pais-conversando.jpg" width="1080" height="698" loading="lazy"
+                alt="Dois pais sentados no sofá conversando sobre os desafios da paternidade" />
+            </picture>
+            <figcaption>Pai conversa com pai. Sem pose, sem julgamento.</figcaption>
+          </figure>
           <div class="comunidade-grade">
             <ul class="pilares">
               <li><strong>Conversa</strong><p>O feed “Pais Presentes”, dentro do <a class="link-app" href="https://app.paternar.com.br/">app</a>.</p></li>
@@ -794,7 +829,7 @@
           <div>
             <a class="marca" href="#topo">
               <img src="/landing/marca.svg" alt="" width="36" height="36" />
-              <span><strong>Entrelaços</strong><small>Pai Presente</small></span>
+              <img class="nome-marca" src="/landing/paternar-claro.svg" alt="Paternar — Pai Presente" width="124" height="40" />
             </a>
             <p>A companhia diária de quem escolheu estar perto. Feito no Brasil, para pais presentes.</p>
           </div>
